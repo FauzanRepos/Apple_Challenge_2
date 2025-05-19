@@ -18,7 +18,11 @@ class GameViewController: UIViewController {
             // Load the SKScene from 'GameScene.sks'
             if let scene = SKScene(fileNamed: "GameScene") {
                 // Set the scale mode to scale to fit the window
-                scene.scaleMode = .aspectFill
+                if UIDevice.current.userInterfaceIdiom == .pad {
+                    scene.scaleMode = .aspectFill
+                } else {
+                    scene.scaleMode = .aspectFit
+                }
                 
                 // Present the scene
                 view.presentScene(scene)
@@ -36,8 +40,9 @@ class GameViewController: UIViewController {
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        // force landscape on phones, but allow everything on iPad
         if UIDevice.current.userInterfaceIdiom == .phone {
-            return .allButUpsideDown
+            return [.landscapeLeft, .landscapeRight]
         } else {
             return .all
         }
