@@ -27,7 +27,6 @@
 		517347C41D674416008DBF2B /* star@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 517347B71D674416008DBF2B /* star@2x.png */; };
 		517347C51D674416008DBF2B /* vortex.png in Resources */ = {isa = PBXBuildFile; fileRef = 517347B81D674416008DBF2B /* vortex.png */; };
 		517347C61D674416008DBF2B /* vortex@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 517347B91D674416008DBF2B /* vortex@2x.png */; };
-		D71CECA02DDB1CBE005815AC /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = D71CEC9F2DDB1CBA005815AC /* .gitignore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,7 +52,6 @@
 		517347B81D674416008DBF2B /* vortex.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = vortex.png; sourceTree = "<group>"; };
 		517347B91D674416008DBF2B /* vortex@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "vortex@2x.png"; sourceTree = "<group>"; };
 		D71CEC9E2DDB0914005815AC /* Marble.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Marble.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		D71CEC9F2DDB1CBA005815AC /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,7 +68,6 @@
 		517347881D67436F008DBF2B = {
 			isa = PBXGroup;
 			children = (
-				D71CEC9F2DDB1CBA005815AC /* .gitignore */,
 				517347941D67436F008DBF2B /* AppDelegate.swift */,
 				517347961D67436F008DBF2B /* GameScene.sks */,
 				5173479A1D67436F008DBF2B /* GameScene.swift */,
@@ -182,7 +179,6 @@
 				517347C31D674416008DBF2B /* star.png in Resources */,
 				517347C21D674416008DBF2B /* player@2x.png in Resources */,
 				517347C61D674416008DBF2B /* vortex@2x.png in Resources */,
-				D71CECA02DDB1CBE005815AC /* .gitignore in Resources */,
 				517347A51D67436F008DBF2B /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
