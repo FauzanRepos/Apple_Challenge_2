@@ -2,7 +2,7 @@
 //  GameScene.swift
 //  Project26
 //
-//  Created by TwoStraws on 19/08/2016.
+//  Created by SpaceMaze-ADA_Team_8 on 19/08/2016.
 //  Copyright © 2016 Paul Hudson. All rights reserved.
 //
 
