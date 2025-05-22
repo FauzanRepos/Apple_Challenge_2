@@ -11,29 +11,30 @@ import SpriteKit
 
 class GameViewController: UIViewController {
     
-    // Fauzan
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        if let view = self.view as! SKView? {
-            // Create scene with a more appropriate size
-            // Using 16:9 aspect ratio which is common for mobile games
-            let sceneWidth = view.bounds.width
-            let sceneHeight = sceneWidth * (16/9) // Maintain 16:9 aspect ratio
-            
-            let scene = GameScene(size: CGSize(width: sceneWidth, height: sceneHeight))
-            
-            // Set the scale mode to fit the entire view
-            scene.scaleMode = .aspectFill
-            
-            // Center the scene in the view
-            view.presentScene(scene)
-            let scene = GameScene(size: CGSize(width: 768, height: 1088))
-            scene.scaleMode = .aspectFit  // or .aspectFill, etc.
-            view.showsFPS = true
-            view.showsNodeCount = true
-        }
-    }
+//    // Fauzan
+//    override func viewDidLoad() {
+//        super.viewDidLoad()
+//        
+//        if let view = self.view as! SKView? {
+//            // Create scene with a more appropriate size
+//            // Using 16:9 aspect ratio which is common for mobile games
+//            let sceneWidth = view.bounds.width
+//            let sceneHeight = sceneWidth * (16/9) // Maintain 16:9 aspect ratio
+//            
+//            let scene = GameScene(size: CGSize(width: sceneWidth, height: sceneHeight))
+//            
+//            // Set the scale mode to fit the entire view
+//            scene.scaleMode = .aspectFill
+//            
+//            // Center the scene in the view
+//            view.presentScene(scene)
+//            
+////            let scene = GameScene(size: CGSize(width: 768, height: 1088))
+////            scene.scaleMode = .aspectFit  // or .aspectFill, etc.
+//            view.showsFPS = true
+//            view.showsNodeCount = true
+//        }
+//    }
 
             
     // Wesly
@@ -41,24 +42,13 @@ class GameViewController: UIViewController {
         super.viewDidLoad()
         
         if let view = self.view as! SKView? {
-//            // Load the SKScene from 'GameScene.sks'
-//            if let scene = SKScene(fileNamed: "GameScene") {
-//                // Set the scale mode to scale to fit the window
-//                if UIDevice.current.userInterfaceIdiom == .pad {
-//                    scene.scaleMode = .aspectFill
-//                } else {
-//                    scene.scaleMode = .aspectFit
-//                }
-//                
-//                // Present the scene
-//                view.presentScene(scene)
-//            }
+            let sceneWidth = view.bounds.width
+            let sceneHeight = sceneWidth * (16/9) // Maintain 16:9 aspect ratio
             
-            let scene = GameScene(size: CGSize(width: 768, height: 1088))
+//            let scene = GameScene(size: CGSize(width: 768, height: 1088))
+            let scene = GameScene(size: CGSize(width: sceneWidth, height: sceneHeight))
             scene.scaleMode = .aspectFit  // or .aspectFill, etc.
             view.presentScene(scene)
-
-
             
             view.ignoresSiblingOrder = true
             view.showsFPS = true
