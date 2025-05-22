@@ -485,7 +485,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(worldNode)
         
         // Create a properly sized background - ensure it fills the playable area
-        let background = SKSpriteNode(color: .darkGray, size: CGSize(width: playableWidth, height: playableHeight))
+        let background = SKSpriteNode(imageNamed: "background.jpg")
+        background.size = CGSize(width: 1080 + 64, height: 1984 + 64)
+        background.color = .darkGray  // This line has no visible effect unless colorBlendFactor > 0
+
         background.position = CGPoint(x: playableWidth/2, y: playableHeight/2)
         background.zPosition = -1
         worldNode.addChild(background)
