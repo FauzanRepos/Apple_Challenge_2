@@ -27,6 +27,7 @@
 		517347C41D674416008DBF2B /* star@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 517347B71D674416008DBF2B /* star@2x.png */; };
 		517347C51D674416008DBF2B /* vortex.png in Resources */ = {isa = PBXBuildFile; fileRef = 517347B81D674416008DBF2B /* vortex.png */; };
 		517347C61D674416008DBF2B /* vortex@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 517347B91D674416008DBF2B /* vortex@2x.png */; };
+		F557B1482DDE44CF00BF5244 /* level1Portrait.txt in Resources */ = {isa = PBXBuildFile; fileRef = F557B1472DDE44CF00BF5244 /* level1Portrait.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +53,7 @@
 		517347B81D674416008DBF2B /* vortex.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = vortex.png; sourceTree = "<group>"; };
 		517347B91D674416008DBF2B /* vortex@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "vortex@2x.png"; sourceTree = "<group>"; };
 		D71CEC9E2DDB0914005815AC /* Marble.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Marble.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F557B1472DDE44CF00BF5244 /* level1Portrait.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = level1Portrait.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,6 +88,7 @@
 			children = (
 				517347AD1D674416008DBF2B /* background.jpg */,
 				517347AE1D674416008DBF2B /* background@2x.jpg */,
+				F557B1472DDE44CF00BF5244 /* level1Portrait.txt */,
 				517347AF1D674416008DBF2B /* block.png */,
 				517347B01D674416008DBF2B /* block@2x.png */,
 				517347B11D674416008DBF2B /* finish.png */,
@@ -166,6 +169,7 @@
 				517347BC1D674416008DBF2B /* block.png in Resources */,
 				517347C11D674416008DBF2B /* player.png in Resources */,
 				517347BA1D674416008DBF2B /* background.jpg in Resources */,
+				F557B1482DDE44CF00BF5244 /* level1Portrait.txt in Resources */,
 				517347971D67436F008DBF2B /* GameScene.sks in Resources */,
 				517347C51D674416008DBF2B /* vortex.png in Resources */,
 				517347BD1D674416008DBF2B /* block@2x.png in Resources */,
