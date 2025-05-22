@@ -2,8 +2,8 @@
 //  GameScene.swift
 //  Project26
 //
-//  Created by SpaceMaze-ADA_Team_8 on 19/08/2016.
-//  Copyright © 2016 Paul Hudson. All rights reserved.
+//  Created by SpaceMaze-ADA_Team_8 on 20/05/2025.
+//  Copyright © 2025 Apple Team. All rights reserved.
 //
 
 import CoreMotion
@@ -364,12 +364,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Just save the position and increment score
         lastCheckpoint = position
         
-        // Visual feedback that checkpoint was activated
-        let checkpointNode = worldNode.childNode(withName: "//checkpoint") as? SKSpriteNode
-        // let checkpointNode = SKNode.childNode(withName: "checkpoint") as? SKSpriteNode
+        // Find the specific checkpoint node at this position
+        var targetCheckpoint: SKSpriteNode?
         
-        // Create a brief flash or highlight effect
-        if let checkpoint = checkpointNode {
+        // Search through all checkpoint nodes to find the one at this position
+        worldNode.enumerateChildNodes(withName: "checkpoint") { (node, _) in
+            if let checkpointNode = node as? SKSpriteNode {
+                // Check if this checkpoint is at the collision position (with small tolerance)
+                let distance = sqrt(pow(checkpointNode.position.x - position.x, 2) + pow(checkpointNode.position.y - position.y, 2))
+                if distance < 5.0 { // Small tolerance for position matching
+                    targetCheckpoint = checkpointNode
+                }
+            }
+        }
+        
+        // Create a brief flash or highlight effect on the correct checkpoint
+        if let checkpoint = targetCheckpoint {
             let originalColor = checkpoint.color
             let originalColorBlendFactor = checkpoint.colorBlendFactor
             
@@ -446,8 +456,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let sequence = SKAction.sequence([move, scale, remove])
         
         player.run(sequence) { [unowned self] in
-            self.createPlayer(
-            )  // Will use lastCheckpoint position
+            score -= 1
+            self.createPlayer()  // Will use lastCheckpoint position
             self.isGameOver = false
         }
     }
@@ -484,12 +494,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         worldNode = SKNode()
         addChild(worldNode)
         
+        let levelWidth: CGFloat = 31 * cellSize  // 1550 pixels
+        let levelHeight: CGFloat = 23 * cellSize // 1150 pixels
+        
         // Create a properly sized background - ensure it fills the playable area
         let background = SKSpriteNode(imageNamed: "background.jpg")
-        background.size = CGSize(width: 1080 + 64, height: 1984 + 64)
-        background.color = .darkGray  // This line has no visible effect unless colorBlendFactor > 0
-
-        background.position = CGPoint(x: playableWidth/2, y: playableHeight/2)
+        let backgroundWidth = max(levelWidth, playableWidth) * 1.5
+        let backgroundHeight = max(levelHeight, playableHeight) * 1.5
+        
+        // Center the background in the world coordinate system
+        background.size = CGSize(width: backgroundWidth, height: backgroundHeight)
+        background.position = CGPoint(x: backgroundWidth/2, y: backgroundHeight/2)
         background.zPosition = -1
         worldNode.addChild(background)
         
@@ -517,10 +532,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(directionIndicator)
         
         // Set up screen edge margins based on playable area
-        leftEdgeMargin = CGFloat(playableWidth) * 0.15
-        rightEdgeMargin = CGFloat(playableWidth) * 0.15
-        topEdgeMargin = CGFloat(playableHeight) * 0.15
-        bottomEdgeMargin = CGFloat(playableHeight) * 0.15
+        let marginScreen = playerType == .mapMover ? 0.15 : 0.075
+        leftEdgeMargin = CGFloat(playableWidth) * marginScreen
+        rightEdgeMargin = CGFloat(playableWidth) * marginScreen
+        topEdgeMargin = CGFloat(playableHeight) * marginScreen
+        bottomEdgeMargin = CGFloat(playableHeight) * marginScreen
         
         physicsWorld.gravity = CGVector(dx: 0, dy: 0)
         physicsWorld.contactDelegate = self

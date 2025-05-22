@@ -2,8 +2,8 @@
 //  GameViewController.swift
 //  Project26
 //
-//  Created by SpaceMaze-ADA_Team_8 on 19/08/2016.
-//  Copyright © 2016 Paul Hudson. All rights reserved.
+//  Created by SpaceMaze-ADA_Team_8 on 20/05/2025.
+//  Copyright © 2025 Apple Team. All rights reserved.
 //
 
 import UIKit
