@@ -390,7 +390,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             ])
             
             checkpoint.run(highlight)
+            checkpoint.removeFromParent()
         }
+        
         
         // Increment score as before
         score += 1
