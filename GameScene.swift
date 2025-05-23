@@ -143,7 +143,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                             worldNode.addChild(node)
                         } else if letter == "s"  {
                             // Changed: load checkpoint (previously star)
-                            let imageName = "star"
+                            let imageName = "checkpoint"
                             let texture = SKTexture(imageNamed: imageName)
                             
                             if texture.size() == .zero {
@@ -544,7 +544,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(livesLabel)
         
         // Add direction indicator (triangle)
-        let imageName = "star"
+        let imageName = "Compass"
         let texture = SKTexture(imageNamed: imageName)
         
         if texture.size() == .zero {
