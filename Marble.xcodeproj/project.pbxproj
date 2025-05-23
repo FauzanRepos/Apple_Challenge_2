@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -23,11 +23,12 @@
 		517347C01D674416008DBF2B /* level1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 517347B31D674416008DBF2B /* level1.txt */; };
 		517347C11D674416008DBF2B /* player.png in Resources */ = {isa = PBXBuildFile; fileRef = 517347B41D674416008DBF2B /* player.png */; };
 		517347C21D674416008DBF2B /* player@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 517347B51D674416008DBF2B /* player@2x.png */; };
-		517347C31D674416008DBF2B /* star.png in Resources */ = {isa = PBXBuildFile; fileRef = 517347B61D674416008DBF2B /* star.png */; };
 		517347C41D674416008DBF2B /* star@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 517347B71D674416008DBF2B /* star@2x.png */; };
 		517347C51D674416008DBF2B /* vortex.png in Resources */ = {isa = PBXBuildFile; fileRef = 517347B81D674416008DBF2B /* vortex.png */; };
 		517347C61D674416008DBF2B /* vortex@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 517347B91D674416008DBF2B /* vortex@2x.png */; };
 		F557B1482DDE44CF00BF5244 /* level1Portrait.txt in Resources */ = {isa = PBXBuildFile; fileRef = F557B1472DDE44CF00BF5244 /* level1Portrait.txt */; };
+		F557B15F2DE01E3100BF5244 /* GameViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F557B15E2DE01E3100BF5244 /* GameViewWrapper.swift */; };
+		F595A8A92DE033BF00C0C3F1 /* star.png in Resources */ = {isa = PBXBuildFile; fileRef = F595A8A82DE033BF00C0C3F1 /* star.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,13 +49,19 @@
 		517347B31D674416008DBF2B /* level1.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = level1.txt; sourceTree = "<group>"; };
 		517347B41D674416008DBF2B /* player.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = player.png; sourceTree = "<group>"; };
 		517347B51D674416008DBF2B /* player@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "player@2x.png"; sourceTree = "<group>"; };
-		517347B61D674416008DBF2B /* star.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = star.png; sourceTree = "<group>"; };
 		517347B71D674416008DBF2B /* star@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star@2x.png"; sourceTree = "<group>"; };
 		517347B81D674416008DBF2B /* vortex.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = vortex.png; sourceTree = "<group>"; };
 		517347B91D674416008DBF2B /* vortex@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "vortex@2x.png"; sourceTree = "<group>"; };
 		D71CEC9E2DDB0914005815AC /* Marble.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Marble.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F557B1472DDE44CF00BF5244 /* level1Portrait.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = level1Portrait.txt; sourceTree = "<group>"; };
+		F557B15E2DE01E3100BF5244 /* GameViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewWrapper.swift; sourceTree = "<group>"; };
+		F595A8A82DE033BF00C0C3F1 /* star.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = star.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		F557B1492DDF19D400BF5244 /* Home */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Home; sourceTree = "<group>"; };
+		F557B1542DE0046700BF5244 /* Lobby */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Lobby; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		5173478E1D67436F008DBF2B /* Frameworks */ = {
@@ -74,9 +81,12 @@
 				517347961D67436F008DBF2B /* GameScene.sks */,
 				5173479A1D67436F008DBF2B /* GameScene.swift */,
 				5173479C1D67436F008DBF2B /* GameViewController.swift */,
+				F557B15E2DE01E3100BF5244 /* GameViewWrapper.swift */,
 				5173479E1D67436F008DBF2B /* Main.storyboard */,
 				517347A11D67436F008DBF2B /* Assets.xcassets */,
 				517347A31D67436F008DBF2B /* LaunchScreen.storyboard */,
+				F557B1542DE0046700BF5244 /* Lobby */,
+				F557B1492DDF19D400BF5244 /* Home */,
 				517347A61D67436F008DBF2B /* Info.plist */,
 				517347AC1D674416008DBF2B /* Content */,
 				D71CEC9E2DDB0914005815AC /* Marble.app */,
@@ -96,7 +106,7 @@
 				517347B31D674416008DBF2B /* level1.txt */,
 				517347B41D674416008DBF2B /* player.png */,
 				517347B51D674416008DBF2B /* player@2x.png */,
-				517347B61D674416008DBF2B /* star.png */,
+				F595A8A82DE033BF00C0C3F1 /* star.png */,
 				517347B71D674416008DBF2B /* star@2x.png */,
 				517347B81D674416008DBF2B /* vortex.png */,
 				517347B91D674416008DBF2B /* vortex@2x.png */,
@@ -118,6 +128,10 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				F557B1492DDF19D400BF5244 /* Home */,
+				F557B1542DE0046700BF5244 /* Lobby */,
 			);
 			name = Marble;
 			productName = Project26;
@@ -177,9 +191,9 @@
 				517347A21D67436F008DBF2B /* Assets.xcassets in Resources */,
 				517347BB1D674416008DBF2B /* background@2x.jpg in Resources */,
 				517347BF1D674416008DBF2B /* finish@2x.png in Resources */,
+				F595A8A92DE033BF00C0C3F1 /* star.png in Resources */,
 				517347BE1D674416008DBF2B /* finish.png in Resources */,
 				517347C01D674416008DBF2B /* level1.txt in Resources */,
-				517347C31D674416008DBF2B /* star.png in Resources */,
 				517347C21D674416008DBF2B /* player@2x.png in Resources */,
 				517347C61D674416008DBF2B /* vortex@2x.png in Resources */,
 				517347A51D67436F008DBF2B /* LaunchScreen.storyboard in Resources */,
@@ -195,6 +209,7 @@
 			files = (
 				5173479B1D67436F008DBF2B /* GameScene.swift in Sources */,
 				5173479D1D67436F008DBF2B /* GameViewController.swift in Sources */,
+				F557B15F2DE01E3100BF5244 /* GameViewWrapper.swift in Sources */,
 				517347951D67436F008DBF2B /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -343,6 +358,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 2Q8C3D68K9;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
@@ -362,6 +378,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_ASSET_PATHS = "";
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;

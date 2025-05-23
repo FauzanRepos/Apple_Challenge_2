@@ -29,7 +29,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var worldNode: SKNode!  // Container for all level elements
     
     var motionManager: CMMotionManager!
-
+    
     var isGameOver = false
     var scoreLabel: SKLabelNode!
     var livesLabel: SKLabelNode!
@@ -73,48 +73,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    /* override func didMove(to view: SKView) {
-        // Get screen dimensions
-        screenWidth = view.bounds.width
-        screenHeight = view.bounds.height
-
-        // Create a world node that will contain all game elements
-        worldNode = SKNode()
-        addChild(worldNode)
-
-        // UI elements should be attached to the scene, not the world
-        scoreLabel = SKLabelNode(fontNamed: "Chalkduster")
-        scoreLabel.text = "Score: 0"
-        scoreLabel.horizontalAlignmentMode = .left
-        scoreLabel.position = CGPoint(x: 16, y: 16)
-        scoreLabel.zPosition = 100
-        addChild(scoreLabel)
-
-        livesLabel = SKLabelNode(fontNamed: "Chalkduster")
-        livesLabel.text = "Lives: 3"
-        livesLabel.horizontalAlignmentMode = .right
-        livesLabel.position = CGPoint(x: frame.width - 16, y: 16)
-        livesLabel.zPosition = 100
-        addChild(livesLabel)
-
-        // Add direction indicator (triangle)
-        directionIndicator = SKSpriteNode(imageNamed: "star") // Replace with triangle image
-        directionIndicator.name = "directionIndicator"
-        directionIndicator.position = CGPoint(x: frame.width - 50, y: 50)
-        directionIndicator.zPosition = 100
-        directionIndicator.size = CGSize(width: 32, height: 32)
-        addChild(directionIndicator)
-
-        physicsWorld.gravity = CGVector(dx: 0, dy: 0)
-        physicsWorld.contactDelegate = self
-
-        loadLevel()
-        createPlayer()
-
-        motionManager = CMMotionManager()
-        motionManager.startAccelerometerUpdates()
-    } */
-    
     func loadLevel() {
         // Track the maximum level dimensions
         var maxX: CGFloat = 0
@@ -135,22 +93,43 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                         maxX = max(maxX, position.x + cellSize/2)
                         maxY = max(maxY, position.y + cellSize/2)
                         
+                        
                         if letter == "x" {
                             // load wall
-                            let node = SKSpriteNode(imageNamed: "block")
-                            node.position = position
-                            node.size = CGSize(width: cellSize, height: cellSize)
+                            let imageName = "block"
+                            let texture = SKTexture(imageNamed: imageName)
                             
+                            if texture.size() == .zero {
+                                fatalError("🚨 Image '\(imageName)' is missing or invalid.")
+                            }
+                            
+                            let node = SKSpriteNode(
+                                texture: texture,
+                                size: CGSize(width: cellSize, height: cellSize)
+                            )
+                            node.position = position
                             node.physicsBody = SKPhysicsBody(rectangleOf: node.size)
                             node.physicsBody?.categoryBitMask = CollisionTypes.wall.rawValue
                             node.physicsBody?.isDynamic = false
+                            guard worldNode.inParentHierarchy(self) else {
+                                fatalError("⚠️ worldNode is no longer attached to scene!")
+                            }
                             worldNode.addChild(node)
                         } else if letter == "v"  {
                             // load vortex
-                            let node = SKSpriteNode(imageNamed: "vortex")
+                            let imageName = "vortex"
+                            let texture = SKTexture(imageNamed: imageName)
+                            
+                            if texture.size() == .zero {
+                                fatalError("🚨 Image '\(imageName)' is missing or invalid.")
+                            }
+                            
+                            let node = SKSpriteNode(
+                                texture: texture,
+                                size: CGSize(width: cellSize, height: cellSize)
+                            )
                             node.name = "vortex"
                             node.position = position
-                            node.size = CGSize(width: cellSize, height: cellSize)
                             node.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat.pi, duration: 1)))
                             node.physicsBody = SKPhysicsBody(circleOfRadius: node.size.width / 2)
                             node.physicsBody?.isDynamic = false
@@ -158,11 +137,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                             node.physicsBody?.categoryBitMask = CollisionTypes.vortex.rawValue
                             node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
                             node.physicsBody?.collisionBitMask = 0
+                            guard worldNode.inParentHierarchy(self) else {
+                                fatalError("⚠️ worldNode is no longer attached to scene!")
+                            }
                             worldNode.addChild(node)
                         } else if letter == "s"  {
                             // Changed: load checkpoint (previously star)
-                            let node = SKSpriteNode(imageNamed: "star")  // Keep using the star image for now
-                            node.name = "checkpoint"  // Change name to "checkpoint"
+                            let imageName = "star"
+                            let texture = SKTexture(imageNamed: imageName)
+                            
+                            if texture.size() == .zero {
+                                fatalError("🚨 Image '\(imageName)' is missing or invalid.")
+                            }
+                            
+                            let node = SKSpriteNode(
+                                texture: texture,
+                                size: CGSize(width: cellSize, height: cellSize)
+                            )  // Keep using the star image for now
+                            node.name = "checkpoint"
                             node.size = CGSize(width: cellSize, height: cellSize)
                             node.physicsBody = SKPhysicsBody(circleOfRadius: node.size.width / 2)
                             node.physicsBody?.isDynamic = false
@@ -171,6 +163,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                             node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
                             node.physicsBody?.collisionBitMask = 0
                             node.position = position
+                            guard worldNode.inParentHierarchy(self) else {
+                                fatalError("⚠️ worldNode is no longer attached to scene!")
+                            }
                             worldNode.addChild(node)
                             
                             // Add a pulsing animation to make checkpoints more visible
@@ -180,9 +175,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                             node.run(SKAction.repeatForever(pulse))
                         } else if letter == "f"  {
                             // load finish
-                            let node = SKSpriteNode(imageNamed: "finish")
+                            let imageName = "finish"
+                            let texture = SKTexture(imageNamed: imageName)
+                            
+                            if texture.size() == .zero {
+                                fatalError("🚨 Image '\(imageName)' is missing or invalid.")
+                            }
+                            
+                            let node = SKSpriteNode(
+                                texture: texture,
+                                size: CGSize(width: cellSize, height: cellSize))
                             node.name = "finish"
-                            node.size = CGSize(width: cellSize, height: cellSize)
                             node.physicsBody = SKPhysicsBody(circleOfRadius: node.size.width / 2)
                             node.physicsBody?.isDynamic = false
                             
@@ -190,6 +193,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                             node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
                             node.physicsBody?.collisionBitMask = 0
                             node.position = position
+                            guard worldNode.inParentHierarchy(self) else {
+                                fatalError("⚠️ worldNode is no longer attached to scene!")
+                            }
                             worldNode.addChild(node)
                         }
                     }
@@ -203,11 +209,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func createPlayer() {
-        player = SKSpriteNode(imageNamed: "player")
-        player.size = CGSize(width: 32, height: 32)
+        let imageName = "player"
+        let texture = SKTexture(imageNamed: imageName)
+        
+        if texture.size() == .zero {
+            fatalError("🚨 Image '\(imageName)' is missing or invalid.")
+        }
+        
+        player = SKSpriteNode(
+            texture: texture,
+            size: CGSize(width: 32, height: 32)
+        )
         player.position = lastCheckpoint  // Use last checkpoint position
         
-//        player.position = CGPoint(x: 96, y: 672+4*64)
+        //        player.position = CGPoint(x: 96, y: 672+4*64)
         player.physicsBody = SKPhysicsBody(circleOfRadius: player.size.width / 2)
         player.physicsBody?.allowsRotation = false
         player.physicsBody?.linearDamping = 0.5
@@ -215,6 +230,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         player.physicsBody?.categoryBitMask = CollisionTypes.player.rawValue
         player.physicsBody?.contactTestBitMask = CollisionTypes.checkpoint.rawValue | CollisionTypes.vortex.rawValue | CollisionTypes.finish.rawValue
         player.physicsBody?.collisionBitMask = CollisionTypes.wall.rawValue
+        guard worldNode.inParentHierarchy(self) else {
+            fatalError("⚠️ worldNode is no longer attached to scene!")
+        }
         worldNode.addChild(player)
         
         // Add a brief invulnerability effect when spawning
@@ -228,6 +246,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func updateDirectionIndicator() {
         // Find the finish node
+        guard worldNode.inParentHierarchy(self) else {
+            fatalError("⚠️ worldNode is no longer attached to scene!")
+        }
         guard let finish = worldNode.childNode(withName: "finish") else { return }
         
         // Calculate vector from player to finish in the world coordinate system
@@ -269,16 +290,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func update(_ currentTime: TimeInterval) {
         guard isGameOver == false else { return }
         
-        #if targetEnvironment(simulator)
+#if targetEnvironment(simulator)
         if let currentTouch = lastTouchPosition {
             let diff = CGPoint(x: currentTouch.x - player.position.x, y: currentTouch.y - player.position.y)
             physicsWorld.gravity = CGVector(dx: diff.x / 100, dy: diff.y / 100)
         }
-        #else
+#else
         if let accelerometerData = motionManager.accelerometerData {
             physicsWorld.gravity = CGVector(dx: accelerometerData.acceleration.x * 10, dy: accelerometerData.acceleration.y * 10)
         }
-        #endif
+#endif
         
         // Update direction indicator
         updateDirectionIndicator()
@@ -288,6 +309,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func checkAndScrollMap() {
+        guard worldNode.inParentHierarchy(self) else {
+            fatalError("⚠️ worldNode is no longer attached to scene!")
+        }
         // Get player's position in the scene coordinates
         let playerPositionInScene = worldNode.convert(player.position, to: self)
         
@@ -328,6 +352,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func scrollMap(dx: CGFloat, dy: CGFloat) {
         // Move the world node to scroll the map
+        guard worldNode.inParentHierarchy(self) else {
+            fatalError("⚠️ worldNode is no longer attached to scene!")
+        }
         worldNode.position = CGPoint(x: worldNode.position.x + dx, y: worldNode.position.y + dy)
         
         // Ensure the player stays within the visible area after scrolling
@@ -368,6 +395,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         var targetCheckpoint: SKSpriteNode?
         
         // Search through all checkpoint nodes to find the one at this position
+        guard worldNode.inParentHierarchy(self) else {
+            fatalError("⚠️ worldNode is no longer attached to scene!")
+        }
         worldNode.enumerateChildNodes(withName: "checkpoint") { (node, _) in
             if let checkpointNode = node as? SKSpriteNode {
                 // Check if this checkpoint is at the collision position (with small tolerance)
@@ -463,49 +493,37 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             self.isGameOver = false
         }
     }
-        
-//    override func didMove(to view: SKView) {
-//		let background = SKSpriteNode(imageNamed: "background@2x.jpg")
-//		background.position = CGPoint(x: 512 - 128, y: 384 + 128)
-//		background.blendMode = .replace
-//		background.zPosition = -1
-//		addChild(background)
-//
-//		scoreLabel = SKLabelNode(fontNamed: "Chalkduster")
-//		scoreLabel.text = "Score: 0"
-//		scoreLabel.horizontalAlignmentMode = .left
-//		scoreLabel.position = CGPoint(x: 16, y: 16)
-//		addChild(scoreLabel)
-//
-//		physicsWorld.gravity = CGVector(dx: 0, dy: 0)
-//		physicsWorld.contactDelegate = self
-//
-//		loadLevel()
-//		createPlayer()
-//
-//		motionManager = CMMotionManager()
-//		motionManager.startAccelerometerUpdates()
-//    }
     
     override func didMove(to view: SKView) {
-        // Calculate the actual visible area for the game
-        let playableHeight = size.height
-        let playableWidth = size.width
         
         // Create a world node that will contain all level elements
         worldNode = SKNode()
         addChild(worldNode)
         
+        // Calculate the actual visible area for the game
+        let playableHeight = size.height
+        let playableWidth = size.width
+        
         let levelWidth: CGFloat = 31 * cellSize  // 1550 pixels
         let levelHeight: CGFloat = 23 * cellSize // 1150 pixels
         
         // Create a properly sized background - ensure it fills the playable area
-        let background = SKSpriteNode(imageNamed: "background.jpg")
+        let imageNameBG = "background"
+        let textureBG = SKTexture(imageNamed: imageNameBG)
+        
+        if textureBG.size() == .zero {
+            fatalError("🚨 Image '\(imageNameBG)' is missing or invalid.")
+        }
+        
         let backgroundWidth = max(levelWidth, playableWidth) * 1.5
         let backgroundHeight = max(levelHeight, playableHeight) * 1.5
         
+        let background = SKSpriteNode(
+            texture: textureBG,
+            size: CGSize(width: backgroundWidth, height: backgroundHeight)
+        )
+        
         // Center the background in the world coordinate system
-        background.size = CGSize(width: backgroundWidth, height: backgroundHeight)
         background.position = CGPoint(x: backgroundWidth/2, y: backgroundHeight/2)
         background.zPosition = -1
         worldNode.addChild(background)
@@ -526,11 +544,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(livesLabel)
         
         // Add direction indicator (triangle)
-        directionIndicator = SKSpriteNode(imageNamed: "star")
+        let imageName = "star"
+        let texture = SKTexture(imageNamed: imageName)
+        
+        if texture.size() == .zero {
+            fatalError("🚨 Image '\(imageName)' is missing or invalid.")
+        }
+        
+        directionIndicator = SKSpriteNode(
+            texture: texture,
+            size: CGSize(width: 32, height: 32)
+        )
         directionIndicator.name = "directionIndicator"
         directionIndicator.position = CGPoint(x: playableWidth - 50, y: 50)
         directionIndicator.zPosition = 100
-        directionIndicator.size = CGSize(width: 32, height: 32)
         addChild(directionIndicator)
         
         // Set up screen edge margins based on playable area
@@ -551,7 +578,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         lastCheckpoint = initialSpawnPoint
         
         loadLevel()
-        
         createPlayer()
         
         motionManager = CMMotionManager()
@@ -575,163 +601,4 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Call super.init after initializing all properties
         super.init(coder: aDecoder)
     }
-
-//    // Map to a 2D visual representation of the game level
-//	func loadLevel() {
-//        
-//        // Find the full file path to resource representing game level stored in app bundle (directory containing resources needed for app to run)
-//        if let levelPath = Bundle.main.path(forResource: "level1Portrait", ofType: "txt") {
-//            
-//			if let levelString = try? String(contentsOfFile: levelPath) {
-//				let lines = levelString.components(separatedBy: "\n")
-//
-//                // Bottom-top reading of lines cuz (0, 0) is bottom-left in SpriteKit's coordinate system
-//				for (row, line) in lines.reversed().enumerated() {
-//
-//                    // Each char is considered a grid cell at (column, letter)
-//					for (column, letter) in line.enumerated() {
-//                        
-//                        // Compute sprite position
-//						let position = CGPoint(x: (64 * (column)) + 32, y: (64 * (row)) + 32) // Add 32 to center the sprite in its cell
-//
-//						if letter == "x" {
-//							// load wall, create a sprite node
-//							let node = SKSpriteNode(imageNamed: "block")
-//                            // Place sprite node on screen using precomputed CGPoint
-//							node.position = position
-//                            // Gives node physics properties, enable collision, shape being rectangle with size of sprite
-//							node.physicsBody = SKPhysicsBody(rectangleOf: node.size)
-//							node.physicsBody?.categoryBitMask = CollisionTypes.wall.rawValue
-//							node.physicsBody?.isDynamic = false
-//							addChild(node)
-//						} else if letter == "v"  {
-//							// load vortex, create a sprite node
-//							let node = SKSpriteNode(imageNamed: "vortex")
-//							node.name = "vortex"
-//                            // Place sprite node on screen using precomputed CGPoint
-//							node.position = position
-//							node.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat.pi, duration: 1)))
-//                            
-//                            // Gives node physics properties, enable collision, shape being circle with size of sprite
-//							node.physicsBody = SKPhysicsBody(circleOfRadius: node.size.width / 2)
-//							node.physicsBody?.isDynamic = false
-//							node.physicsBody?.categoryBitMask = CollisionTypes.vortex.rawValue
-//							node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
-//							node.physicsBody?.collisionBitMask = 0
-//							addChild(node)
-//						} else if letter == "s"  {
-//							// load checkpoint, aka star, create a sprite node
-//							let node = SKSpriteNode(imageNamed: "star")
-//							node.name = "star"
-//							node.physicsBody = SKPhysicsBody(circleOfRadius: node.size.width / 2)
-//							node.physicsBody?.isDynamic = false
-//
-//							node.physicsBody?.categoryBitMask = CollisionTypes.checkpoint.rawValue
-//							node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
-//							node.physicsBody?.collisionBitMask = 0
-//							node.position = position
-//							addChild(node)
-//						} else if letter == "f"  {
-//							// load finish, create a sprite node
-//							let node = SKSpriteNode(imageNamed: "finish")
-//							node.name = "finish"
-//							node.physicsBody = SKPhysicsBody(circleOfRadius: node.size.width / 2)
-//							node.physicsBody?.isDynamic = false
-//
-//							node.physicsBody?.categoryBitMask = CollisionTypes.finish.rawValue
-//							node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
-//							node.physicsBody?.collisionBitMask = 0
-//                            // Place sprite node on screen using precomputed CGPoint
-//                            node.position = position
-//							addChild(node)
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
-
-//	func createPlayer() {
-//		player = SKSpriteNode(imageNamed: "player")
-//		player.position = CGPoint(x: 96, y: 672+4*64)
-//		player.physicsBody = SKPhysicsBody(circleOfRadius: player.size.width / 2)
-//		player.physicsBody?.allowsRotation = false
-//		player.physicsBody?.linearDamping = 0.5
-//
-//		player.physicsBody?.categoryBitMask = CollisionTypes.player.rawValue
-//		player.physicsBody?.contactTestBitMask = CollisionTypes.checkpoint.rawValue | CollisionTypes.vortex.rawValue | CollisionTypes.finish.rawValue
-//		player.physicsBody?.collisionBitMask = CollisionTypes.wall.rawValue
-//		addChild(player)
-//	}
-
-//	override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-//		if let touch = touches.first {
-//			let location = touch.location(in: self)
-//			lastTouchPosition = location
-//		}
-//	}
-//
-//	override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-//		if let touch = touches.first {
-//			let location = touch.location(in: self)
-//			lastTouchPosition = location
-//		}
-//	}
-//
-//	override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-//		lastTouchPosition = nil
-//	}
-//
-//	override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-//		lastTouchPosition = nil
-//	}
-
-//	override func update(_ currentTime: TimeInterval) {
-//		guard isGameOver == false else { return }
-//		#if targetEnvironment(simulator)
-//			if let currentTouch = lastTouchPosition {
-//				let diff = CGPoint(x: currentTouch.x - player.position.x, y: currentTouch.y - player.position.y)
-//				physicsWorld.gravity = CGVector(dx: diff.x / 100, dy: diff.y / 100)
-//			}
-////		#else
-////			if let accelerometerData = motionManager.accelerometerData {
-////				physicsWorld.gravity = CGVector(dx: accelerometerData.acceleration.y * -50, dy: accelerometerData.acceleration.x * 50)
-////			}
-//        #else
-//            if let accelerometerData = motionManager.accelerometerData {
-//                physicsWorld.gravity = CGVector(dx: accelerometerData.acceleration.x * 10, dy: accelerometerData.acceleration.y * 10)
-//            }
-//		#endif
-//	}
-
-//	func didBegin(_ contact: SKPhysicsContact) {
-//		if contact.bodyA.node == player {
-//			playerCollided(with: contact.bodyB.node!)
-//		} else if contact.bodyB.node == player {
-//			playerCollided(with: contact.bodyA.node!)
-//		}
-//	}
-
-//	func playerCollided(with node: SKNode) {
-//		if node.name == "vortex" {
-//			player.physicsBody?.isDynamic = false
-//			isGameOver = true
-//			score -= 1
-//
-//			let move = SKAction.move(to: node.position, duration: 0.25)
-//			let scale = SKAction.scale(to: 0.0001, duration: 0.25)
-//			let remove = SKAction.removeFromParent()
-//			let sequence = SKAction.sequence([move, scale, remove])
-//
-//			player.run(sequence) { [unowned self] in
-//				self.createPlayer()
-//				self.isGameOver = false
-//			}
-//		} else if node.name == "star" {
-//			node.removeFromParent()
-//			score += 1
-//		} else if node.name == "finish" {
-//			// next level?
-//		}
-//	}
 }

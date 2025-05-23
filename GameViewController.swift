@@ -11,72 +11,47 @@ import SpriteKit
 
 class GameViewController: UIViewController {
     
-//    // Fauzan
+    override func loadView() {
+        self.view = SKView()
+    }
+
 //    override func viewDidLoad() {
 //        super.viewDidLoad()
-//        
-//        if let view = self.view as! SKView? {
-//            // Create scene with a more appropriate size
-//            // Using 16:9 aspect ratio which is common for mobile games
-//            let sceneWidth = view.bounds.width
-//            let sceneHeight = sceneWidth * (16/9) // Maintain 16:9 aspect ratio
-//            
-//            let scene = GameScene(size: CGSize(width: sceneWidth, height: sceneHeight))
-//            
-//            // Set the scale mode to fit the entire view
-//            scene.scaleMode = .aspectFill
-//            
-//            // Center the scene in the view
-//            view.presentScene(scene)
-//            
-////            let scene = GameScene(size: CGSize(width: 768, height: 1088))
-////            scene.scaleMode = .aspectFit  // or .aspectFill, etc.
-//            view.showsFPS = true
-//            view.showsNodeCount = true
-//        }
+//
+//        guard let skView = self.view as? SKView else { return }
+//
+//        let sceneWidth = skView.bounds.width
+//        let sceneHeight = sceneWidth * (16/9)
+//        let scene = GameScene(size: CGSize(width: sceneWidth, height: sceneHeight))
+//        scene.scaleMode = .aspectFit
+//
+//        skView.presentScene(scene)
+//        skView.ignoresSiblingOrder = true
+//        skView.showsFPS = true
+//        skView.showsNodeCount = true
 //    }
 
-            
-    // Wesly
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        if let view = self.view as! SKView? {
-            let sceneWidth = view.bounds.width
-            let sceneHeight = sceneWidth * (16/9) // Maintain 16:9 aspect ratio
-            
-//            let scene = GameScene(size: CGSize(width: 768, height: 1088))
+
+        DispatchQueue.main.async {
+            guard let skView = self.view as? SKView else { return }
+
+            let sceneWidth = skView.bounds.width
+            let sceneHeight = sceneWidth * (16/9)
             let scene = GameScene(size: CGSize(width: sceneWidth, height: sceneHeight))
-            scene.scaleMode = .aspectFit  // or .aspectFill, etc.
-            view.presentScene(scene)
-            
-            view.ignoresSiblingOrder = true
-            view.showsFPS = true
-            view.showsNodeCount = true
+            scene.scaleMode = .aspectFit
+
+            skView.presentScene(scene)
+            skView.ignoresSiblingOrder = true
+            skView.showsFPS = true
+            skView.showsNodeCount = true
         }
     }
 
     override var shouldAutorotate: Bool {
         return true
     }
-//
-//    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-//        // force landscape on phones, but allow everything on iPad
-//        if UIDevice.current.userInterfaceIdiom == .phone {
-//            return [.landscapeLeft, .landscapeRight]
-//        } else {
-//            return .all
-//        }
-//    }
-    
-//    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-//        // force portrait on phones
-//        if UIDevice.current.userInterfaceIdiom == .phone {
-//            return [.portrait]
-//        } else {
-//            return .all
-//        }
-//    }
     
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         // force portrait on phones
