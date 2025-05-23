@@ -52,7 +52,7 @@
 		517347B71D674416008DBF2B /* star@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star@2x.png"; sourceTree = "<group>"; };
 		517347B81D674416008DBF2B /* vortex.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = vortex.png; sourceTree = "<group>"; };
 		517347B91D674416008DBF2B /* vortex@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "vortex@2x.png"; sourceTree = "<group>"; };
-		D71CEC9E2DDB0914005815AC /* Marble.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Marble.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D71CEC9E2DDB0914005815AC /* SpaceMaze.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpaceMaze.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F557B1472DDE44CF00BF5244 /* level1Portrait.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = level1Portrait.txt; sourceTree = "<group>"; };
 		F557B15E2DE01E3100BF5244 /* GameViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewWrapper.swift; sourceTree = "<group>"; };
 		F595A8A82DE033BF00C0C3F1 /* star.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = star.png; sourceTree = "<group>"; };
@@ -89,7 +89,7 @@
 				F557B1492DDF19D400BF5244 /* Home */,
 				517347A61D67436F008DBF2B /* Info.plist */,
 				517347AC1D674416008DBF2B /* Content */,
-				D71CEC9E2DDB0914005815AC /* Marble.app */,
+				D71CEC9E2DDB0914005815AC /* SpaceMaze.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -117,9 +117,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		517347901D67436F008DBF2B /* Marble */ = {
+		517347901D67436F008DBF2B /* SpaceMaze */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 517347A91D67436F008DBF2B /* Build configuration list for PBXNativeTarget "Marble" */;
+			buildConfigurationList = 517347A91D67436F008DBF2B /* Build configuration list for PBXNativeTarget "SpaceMaze" */;
 			buildPhases = (
 				5173478D1D67436F008DBF2B /* Sources */,
 				5173478E1D67436F008DBF2B /* Frameworks */,
@@ -133,9 +133,9 @@
 				F557B1492DDF19D400BF5244 /* Home */,
 				F557B1542DE0046700BF5244 /* Lobby */,
 			);
-			name = Marble;
+			name = SpaceMaze;
 			productName = Project26;
-			productReference = D71CEC9E2DDB0914005815AC /* Marble.app */;
+			productReference = D71CEC9E2DDB0914005815AC /* SpaceMaze.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -156,7 +156,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 5173478C1D67436F008DBF2B /* Build configuration list for PBXProject "Marble" */;
+			buildConfigurationList = 5173478C1D67436F008DBF2B /* Build configuration list for PBXProject "SpaceMaze" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -169,7 +169,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				517347901D67436F008DBF2B /* Marble */,
+				517347901D67436F008DBF2B /* SpaceMaze */,
 			);
 		};
 /* End PBXProject section */
@@ -396,7 +396,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		5173478C1D67436F008DBF2B /* Build configuration list for PBXProject "Marble" */ = {
+		5173478C1D67436F008DBF2B /* Build configuration list for PBXProject "SpaceMaze" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				517347A71D67436F008DBF2B /* Debug */,
@@ -405,7 +405,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		517347A91D67436F008DBF2B /* Build configuration list for PBXNativeTarget "Marble" */ = {
+		517347A91D67436F008DBF2B /* Build configuration list for PBXNativeTarget "SpaceMaze" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				517347AA1D67436F008DBF2B /* Debug */,
