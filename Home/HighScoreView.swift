@@ -3,7 +3,7 @@
 //  Marble
 //
 //  Created by WESLY CHAU LI ZHAN on 22/05/25.
-//  Copyright © 2025 Paul Hudson. All rights reserved.
+//  Copyright © 2025 Apple Team. All rights reserved.
 //
 
 import SwiftUI
