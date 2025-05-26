@@ -211,22 +211,30 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func createPlayer() {
         let imageName = "player"
         let texture = SKTexture(imageNamed: imageName)
-        
+
         if texture.size() == .zero {
             fatalError("🚨 Image '\(imageName)' is missing or invalid.")
         }
-        
+
+        // Define a base player size
+        let basePlayerSize: CGFloat = 32
+
+        // Scale the player size relative to the cellSize.  This makes the player
+        // proportional to the level's overall scale.
+        let scaledPlayerSize = basePlayerSize * (cellSize / 50)  // Assuming a base cellSize of 50
+
         player = SKSpriteNode(
             texture: texture,
-            size: CGSize(width: 32, height: 32)
+            size: CGSize(width: scaledPlayerSize, height: scaledPlayerSize)
         )
         player.position = lastCheckpoint  // Use last checkpoint position
-        
-        //        player.position = CGPoint(x: 96, y: 672+4*64)
-        player.physicsBody = SKPhysicsBody(circleOfRadius: player.size.width / 2)
+
+        // Scale the physics body radius based on the scaled player size
+        let physicsBodyRadius = scaledPlayerSize / 2
+        player.physicsBody = SKPhysicsBody(circleOfRadius: physicsBodyRadius)
         player.physicsBody?.allowsRotation = false
         player.physicsBody?.linearDamping = 0.5
-        
+
         player.physicsBody?.categoryBitMask = CollisionTypes.player.rawValue
         player.physicsBody?.contactTestBitMask = CollisionTypes.checkpoint.rawValue | CollisionTypes.vortex.rawValue | CollisionTypes.finish.rawValue
         player.physicsBody?.collisionBitMask = CollisionTypes.wall.rawValue
@@ -234,13 +242,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             fatalError("⚠️ worldNode is no longer attached to scene!")
         }
         worldNode.addChild(player)
-        
+
         // Add a brief invulnerability effect when spawning
         let fadeAction = SKAction.sequence([
             SKAction.fadeAlpha(to: 0.5, duration: 0.1),
             SKAction.fadeAlpha(to: 1.0, duration: 0.1)
         ])
-        
+
         player.run(SKAction.repeat(fadeAction, count: 5))
     }
     
