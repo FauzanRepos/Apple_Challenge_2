@@ -1,0 +1,108 @@
+//
+//  folder.txt
+//  Space Maze
+//
+//  Created by Apple Dev on 27/05/25.
+//  Copyright © 2025 ADA Team. All rights reserved.
+//
+
+SpaceMaze/
+├── App/
+│   ├── AppDelegate.swift               // ✅ Already exists
+│   └── GameViewWrapper.swift           // ✅ Already exists
+│
+├── Core/
+│   ├── Managers/
+│   │   ├── GameManager.swift           // Central game logic coordinator
+│   │   ├── LevelManager.swift          // Handles level loading/progression
+│   │   ├── AudioManager.swift          // Sound effects and music
+│   │   ├── StorageManager.swift        // Save/load game data
+│   │   └── SettingsManager.swift       // Game settings and preferences
+│   │
+│   ├── Multiplayer/
+│   │   ├── MultipeerManager.swift      // Core MultipeerConnectivity logic
+│   │   ├── GameSession.swift           // Manages multiplayer game sessions
+│   │   ├── NetworkMessage.swift        // Message types for communication
+│   │   ├── PlayerSyncManager.swift     // Sync player positions/states
+│   │   └── GameCodeManager.swift       // Handle code generation/validation
+│   │
+│   └── Utils/
+│       ├── Constants.swift             // Game constants and configurations
+│       ├── Extensions/
+│       │   ├── CGPoint+Extensions.swift
+│       │   ├── SKScene+Extensions.swift
+│       │   └── String+Extensions.swift
+│       └── Helpers/
+│           ├── CollisionHelper.swift   // Physics collision utilities
+│           └── ValidationHelper.swift  // Input validation
+│
+├── Models/
+│   ├── Game/
+│   │   ├── Player.swift                // Player properties (with network ID)
+│   │   ├── GameState.swift             // Overall game state (multiplayer-aware)
+│   │   ├── Level.swift                 // Level structure and metadata
+│   │   ├── Checkpoint.swift            // Checkpoint data model
+│   │   ├── PowerUp.swift               // Power-up types and effects
+│   │   └── GameRecord.swift            // High scores and progress tracking
+│   │
+│   └── Multiplayer/
+│       ├── Room.swift                  // ✅ Move existing Room.swift here
+│       ├── NetworkPlayer.swift         // Network-specific player data
+│       ├── SessionState.swift          // Multiplayer session states
+│       └── GameEvent.swift             // Network game events
+│
+├── Views/
+│   ├── Home/
+│   │   ├── HomeView.swift              // ✅ Already exists - update for multiplayer
+│   │   ├── HighScoreView.swift         // ✅ Already exists
+│   │   ├── StartGameSliderView.swift   // ✅ Already exists - update for code input
+│   │   ├── CodeInputView.swift         // NEW - Code input/generation
+│   │   └── SettingsView.swift          // Game settings
+│   │
+│   ├── Lobby/
+│   │   ├── LobbyView.swift             // ✅ Already exists - update for multiplayer
+│   │   ├── RoomRowView.swift           // ✅ Already exists - update for multiplayer
+│   │   ├── PlayerListView.swift        // NEW - Show connected players
+│   │   └── ReadyButtonView.swift       // NEW - Ready state component
+│   │
+│   ├── Game/
+│   │   ├── GameScene.swift             // ✅ Already exists - update for multiplayer
+│   │   ├── GameViewController.swift    // ✅ Already exists - update for multiplayer
+│   │   └── Components/                 // NEW - Reusable game UI components
+│   │       ├── LivesIndicatorView.swift
+│   │       ├── ScoreDisplayView.swift
+│   │       ├── DirectionIndicatorView.swift
+│   │       └── MultiplayerHUDView.swift
+│   │
+│   └── Shared/
+│       ├── LoadingView.swift           // Loading screens
+│       ├── ErrorView.swift             // Error display
+│       └── ConnectionStatusView.swift  // Network connection status
+│
+├── Resources/
+│   ├── Levels/                         // NEW - Move level1.txt here
+│   │   ├── level1.txt                  // ✅ Move existing file
+│   │   ├── level2.txt                  // Future levels
+│   │   └── LevelConfig.json            // Level metadata
+│   │
+│   ├── Assets.xcassets/                // ✅ Already exists with all assets
+│   │
+│   ├── Sounds/                         // NEW - Audio files (future)
+│   │   ├── SFX/
+│   │   └── Music/
+│   │
+│   └── Configurations/                 // NEW - Configuration files
+│       ├── GameConfig.plist           // Game balance settings
+│       └── NetworkConfig.plist        // Network configurations
+│
+├── Storyboards/
+│   ├── Main.storyboard                 // ✅ Already exists
+│   └── LaunchScreen.storyboard         // ✅ Already exists
+│
+└── Info.plist                          // ✅ Already exists         // Unit and integration tests
+    ├── GameLogicTests.swift
+    ├── MultiplayerTests.swift
+    ├── LevelLoadingTests.swift
+    └── MockData/
+        ├── MockLevels/
+        └── MockGameStates/

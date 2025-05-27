@@ -53,12 +53,19 @@
 		517347B81D674416008DBF2B /* vortex.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = vortex.png; sourceTree = "<group>"; };
 		517347B91D674416008DBF2B /* vortex@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "vortex@2x.png"; sourceTree = "<group>"; };
 		D71CEC9E2DDB0914005815AC /* Space Maze.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Space Maze.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D79E93D22DE5692E00ACD318 /* folder.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = folder.txt; sourceTree = "<group>"; };
 		F557B1472DDE44CF00BF5244 /* level1Portrait.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = level1Portrait.txt; sourceTree = "<group>"; };
 		F557B15E2DE01E3100BF5244 /* GameViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewWrapper.swift; sourceTree = "<group>"; };
 		F595A8A82DE033BF00C0C3F1 /* star.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = star.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		D79E94152DE59C3600ACD318 /* Core */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Core; sourceTree = "<group>"; };
+		D79E94162DE59C5100ACD318 /* Models */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Models; sourceTree = "<group>"; };
+		D79E94172DE59C5D00ACD318 /* Views */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Views; sourceTree = "<group>"; };
+		D79E94182DE59C6D00ACD318 /* Resources */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Resources; sourceTree = "<group>"; };
+		D79E94192DE59C8200ACD318 /* Storyboards */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Storyboards; sourceTree = "<group>"; };
+		D79E941B2DE59C9000ACD318 /* App */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = App; sourceTree = "<group>"; };
 		F557B1492DDF19D400BF5244 /* Home */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Home; sourceTree = "<group>"; };
 		F557B1542DE0046700BF5244 /* Lobby */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Lobby; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -77,6 +84,13 @@
 		517347881D67436F008DBF2B = {
 			isa = PBXGroup;
 			children = (
+				D79E93D22DE5692E00ACD318 /* folder.txt */,
+				D79E941B2DE59C9000ACD318 /* App */,
+				D79E94152DE59C3600ACD318 /* Core */,
+				D79E94162DE59C5100ACD318 /* Models */,
+				D79E94172DE59C5D00ACD318 /* Views */,
+				D79E94182DE59C6D00ACD318 /* Resources */,
+				D79E94192DE59C8200ACD318 /* Storyboards */,
 				517347941D67436F008DBF2B /* AppDelegate.swift */,
 				517347961D67436F008DBF2B /* GameScene.sks */,
 				5173479A1D67436F008DBF2B /* GameScene.swift */,
@@ -130,6 +144,12 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				D79E94152DE59C3600ACD318 /* Core */,
+				D79E94162DE59C5100ACD318 /* Models */,
+				D79E94172DE59C5D00ACD318 /* Views */,
+				D79E94182DE59C6D00ACD318 /* Resources */,
+				D79E94192DE59C8200ACD318 /* Storyboards */,
+				D79E941B2DE59C9000ACD318 /* App */,
 				F557B1492DDF19D400BF5244 /* Home */,
 				F557B1542DE0046700BF5244 /* Lobby */,
 			);
