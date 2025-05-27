@@ -29,6 +29,7 @@
 		F557B1482DDE44CF00BF5244 /* level1Portrait.txt in Resources */ = {isa = PBXBuildFile; fileRef = F557B1472DDE44CF00BF5244 /* level1Portrait.txt */; };
 		F557B15F2DE01E3100BF5244 /* GameViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F557B15E2DE01E3100BF5244 /* GameViewWrapper.swift */; };
 		F595A8A92DE033BF00C0C3F1 /* star.png in Resources */ = {isa = PBXBuildFile; fileRef = F595A8A82DE033BF00C0C3F1 /* star.png */; };
+		F5DC2E222DE5A6110081A017 /* LANPermissionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DC2E212DE5A6110081A017 /* LANPermissionManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -57,6 +58,7 @@
 		F557B1472DDE44CF00BF5244 /* level1Portrait.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = level1Portrait.txt; sourceTree = "<group>"; };
 		F557B15E2DE01E3100BF5244 /* GameViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewWrapper.swift; sourceTree = "<group>"; };
 		F595A8A82DE033BF00C0C3F1 /* star.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = star.png; sourceTree = "<group>"; };
+		F5DC2E212DE5A6110081A017 /* LANPermissionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LANPermissionManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -68,6 +70,7 @@
 		D79E941B2DE59C9000ACD318 /* App */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = App; sourceTree = "<group>"; };
 		F557B1492DDF19D400BF5244 /* Home */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Home; sourceTree = "<group>"; };
 		F557B1542DE0046700BF5244 /* Lobby */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Lobby; sourceTree = "<group>"; };
+		F5DC2E092DE583FF0081A017 /* Warning */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Warning; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,9 +94,11 @@
 				D79E94172DE59C5D00ACD318 /* Views */,
 				D79E94182DE59C6D00ACD318 /* Resources */,
 				D79E94192DE59C8200ACD318 /* Storyboards */,
+				F5DC2E092DE583FF0081A017 /* Warning */,
 				517347941D67436F008DBF2B /* AppDelegate.swift */,
 				517347961D67436F008DBF2B /* GameScene.sks */,
 				5173479A1D67436F008DBF2B /* GameScene.swift */,
+				F5DC2E212DE5A6110081A017 /* LANPermissionManager.swift */,
 				5173479C1D67436F008DBF2B /* GameViewController.swift */,
 				F557B15E2DE01E3100BF5244 /* GameViewWrapper.swift */,
 				5173479E1D67436F008DBF2B /* Main.storyboard */,
@@ -152,6 +157,7 @@
 				D79E941B2DE59C9000ACD318 /* App */,
 				F557B1492DDF19D400BF5244 /* Home */,
 				F557B1542DE0046700BF5244 /* Lobby */,
+				F5DC2E092DE583FF0081A017 /* Warning */,
 			);
 			name = "Space Maze";
 			productName = Project26;
@@ -229,6 +235,7 @@
 			files = (
 				5173479B1D67436F008DBF2B /* GameScene.swift in Sources */,
 				5173479D1D67436F008DBF2B /* GameViewController.swift in Sources */,
+				F5DC2E222DE5A6110081A017 /* LANPermissionManager.swift in Sources */,
 				F557B15F2DE01E3100BF5244 /* GameViewWrapper.swift in Sources */,
 				517347951D67436F008DBF2B /* AppDelegate.swift in Sources */,
 			);
@@ -380,7 +387,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 3G4HRWR252;
+				DEVELOPMENT_TEAM = 2Q8C3D68K9;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Space Maze";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
@@ -403,7 +410,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 3G4HRWR252;
+				DEVELOPMENT_TEAM = 2Q8C3D68K9;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Space Maze";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
