@@ -16,6 +16,7 @@ struct GameViewWrapper: UIViewControllerRepresentable {
     let players: [NetworkPlayer]
     let isHost: Bool
     let gameCode: String?
+    let playerType: PlayerType
     
     // Initialize for single player
     init() {
@@ -23,14 +24,16 @@ struct GameViewWrapper: UIViewControllerRepresentable {
         self.players = []
         self.isHost = false
         self.gameCode = nil
+        self.playerType = .mapMover
     }
     
     // Initialize for multiplayer
-    init(gameMode: GameMode, players: [NetworkPlayer], isHost: Bool, gameCode: String?) {
+    init(gameMode: GameMode, players: [NetworkPlayer], isHost: Bool, gameCode: String?, playerType: PlayerType = .mapMover) {
         self.gameMode = gameMode
         self.players = players
         self.isHost = isHost
         self.gameCode = gameCode
+        self.playerType = playerType
     }
     
     func makeUIViewController(context: Context) -> GameViewController {
@@ -41,7 +44,8 @@ struct GameViewWrapper: UIViewControllerRepresentable {
             mode: gameMode,
             players: players,
             isHost: isHost,
-            gameCode: gameCode
+            gameCode: gameCode,
+            playerType: playerType
         )
         
         return gameController
@@ -61,6 +65,59 @@ enum GameMode {
     case singlePlayer
     case multiplayerHost
     case multiplayerClient
+    
+    var displayName: String {
+        switch self {
+        case .singlePlayer: return "Single Player"
+        case .multiplayerHost: return "Multiplayer Host"
+        case .multiplayerClient: return "Multiplayer Client"
+        }
+    }
+}
+
+// MARK: - Convenience Initializers
+extension GameViewWrapper {
+    
+    // Create single player game
+    static func singlePlayer() -> GameViewWrapper {
+        return GameViewWrapper()
+    }
+    
+    // Create multiplayer host game
+    static func multiplayerHost(gameCode: String, players: [NetworkPlayer]) -> GameViewWrapper {
+        return GameViewWrapper(
+            gameMode: .multiplayerHost,
+            players: players,
+            isHost: true,
+            gameCode: gameCode,
+            playerType: .mapMover
+        )
+    }
+    
+    // Create multiplayer client game
+    static func multiplayerClient(gameCode: String, players: [NetworkPlayer], playerType: PlayerType) -> GameViewWrapper {
+        return GameViewWrapper(
+            gameMode: .multiplayerClient,
+            players: players,
+            isHost: false,
+            gameCode: gameCode,
+            playerType: playerType
+        )
+    }
+    
+    // Create from MultipeerManager state
+    static func fromMultipeerState() -> GameViewWrapper {
+        let multipeerManager = MultipeerManager.shared
+        let gameMode: GameMode = multipeerManager.isHost ? .multiplayerHost : .multiplayerClient
+        
+        return GameViewWrapper(
+            gameMode: gameMode,
+            players: multipeerManager.connectedPlayers,
+            isHost: multipeerManager.isHost,
+            gameCode: multipeerManager.gameCode.isEmpty ? nil : multipeerManager.gameCode,
+            playerType: multipeerManager.getLocalPlayer().playerType
+        )
+    }
 }
 
 // MARK: - SwiftUI Preview

@@ -17,9 +17,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
-        // Initialize core managers
-        _ = GameManager.shared
+        // Initialize core managers in correct order
+        _ = SettingsManager.shared
         _ = StorageManager.shared
+        _ = AudioManager.shared
+        _ = GameManager.shared
+        _ = LevelManager.shared
+        _ = MultipeerManager.shared
         
         // Set up the main SwiftUI view
         let homeView = NavigationStack {
@@ -30,6 +34,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window.rootViewController = UIHostingController(rootView: homeView)
         self.window = window
         window.makeKeyAndVisible()
+        
+        // Configure audio session
+        configureAudioSession()
+        
+        // Start background audio if enabled
+        if SettingsManager.shared.gameSettings.musicEnabled {
+            AudioManager.shared.playBackgroundMusic()
+        }
         
         return true
     }
@@ -47,12 +59,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Handle multiplayer disconnect gracefully
         MultipeerManager.shared.handleAppDidEnterBackground()
+        
+        // Pause background music
+        AudioManager.shared.pauseBackgroundMusic()
     }
     
     func applicationWillEnterForeground(_ application: UIApplication) {
         // Called as part of the transition from the background to the active state
         // Undo changes made on entering the background
         MultipeerManager.shared.handleAppWillEnterForeground()
+        
+        // Resume background music if enabled
+        if SettingsManager.shared.gameSettings.musicEnabled {
+            AudioManager.shared.resumeBackgroundMusic()
+        }
     }
     
     func applicationDidBecomeActive(_ application: UIApplication) {
@@ -68,5 +88,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Clean up multiplayer connections
         MultipeerManager.shared.disconnect()
+        
+        // Stop all audio
+        AudioManager.shared.stopBackgroundMusic()
+    }
+    
+    // MARK: - Private Methods
+    private func configureAudioSession() {
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("❌ Failed to configure audio session: \(error)")
+        }
     }
 }

@@ -6,103 +6,119 @@
 //  Copyright © 2025 ADA Team. All rights reserved.
 //
 
+Provided new folder structures
+
 SpaceMaze/
 ├── App/
-│   ├── AppDelegate.swift               // ✅ Already exists
-│   └── GameViewWrapper.swift           // ✅ Already exists
+│   ├── AppDelegate.swift               // ✅ Updated with manager initialization
+│   └── GameViewWrapper.swift           // ✅ Updated for multiplayer integration
 │
 ├── Core/
 │   ├── Managers/
-│   │   ├── GameManager.swift           // Central game logic coordinator
-│   │   ├── LevelManager.swift          // Handles level loading/progression
-│   │   ├── AudioManager.swift          // Sound effects and music
-│   │   ├── StorageManager.swift        // Save/load game data
-│   │   └── SettingsManager.swift       // Game settings and preferences
+│   │   ├── GameManager.swift           // ✅ Central game logic coordinator
+│   │   ├── LevelManager.swift          // ✅ Handles level progression (no selection)
+│   │   ├── AudioManager.swift          // ✅ Background music + SFX
+│   │   ├── StorageManager.swift        // ✅ High scores & settings persistence
+│   │   └── SettingsManager.swift       // ✅ Game preferences
 │   │
 │   ├── Multiplayer/
-│   │   ├── MultipeerManager.swift      // Core MultipeerConnectivity logic
-│   │   ├── GameSession.swift           // Manages multiplayer game sessions
-│   │   ├── NetworkMessage.swift        // Message types for communication
-│   │   ├── PlayerSyncManager.swift     // Sync player positions/states
-│   │   └── GameCodeManager.swift       // Handle code generation/validation
+│   │   ├── MultipeerManager.swift      // ✅ Core multiplayer connectivity
+│   │   ├── GameSession.swift           // ✅ Manages game sessions
+│   │   ├── NetworkMessage.swift        // ✅ Message types for communication
+│   │   ├── PlayerSyncManager.swift     // ✅ Real-time player synchronization
+│   │   └── GameCodeManager.swift       // ✅ 6-character code generation/validation
 │   │
 │   └── Utils/
-│       ├── Constants.swift             // Game constants and configurations
+│       ├── Constants.swift             // ✅ Game constants & configurations
 │       ├── Extensions/
-│       │   ├── CGPoint+Extensions.swift
-│       │   ├── SKScene+Extensions.swift
-│       │   └── String+Extensions.swift
+│       │   ├── CGPoint+Extensions.swift     // ✅ Game-specific point operations
+│       │   ├── SKScene+Extensions.swift     // ✅ SpriteKit helper methods
+│       │   └── String+Extensions.swift      // ✅ Validation & formatting
 │       └── Helpers/
-│           ├── CollisionHelper.swift   // Physics collision utilities
-│           └── ValidationHelper.swift  // Input validation
+│           ├── CollisionHelper.swift        // ✅ Physics collision utilities
+│           └── ValidationHelper.swift       // ✅ Input validation
 │
 ├── Models/
 │   ├── Game/
-│   │   ├── Player.swift                // Player properties (with network ID)
-│   │   ├── GameState.swift             // Overall game state (multiplayer-aware)
-│   │   ├── Level.swift                 // Level structure and metadata
-│   │   ├── Checkpoint.swift            // Checkpoint data model
-│   │   ├── PowerUp.swift               // Power-up types and effects
-│   │   └── GameRecord.swift            // High scores and progress tracking
+│   │   ├── Player.swift                // 🔄 Player properties (with network ID)
+│   │   ├── GameState.swift             // 🔄 Overall game state (multiplayer-aware)
+│   │   ├── Level.swift                 // 🔄 Level structure and metadata
+│   │   ├── Checkpoint.swift            // 🔄 Checkpoint data model
+│   │   ├── PowerUp.swift               // 🔄 Power-up types and effects (oil/grass)
+│   │   └── GameRecord.swift            // 🔄 High scores and progress tracking
 │   │
 │   └── Multiplayer/
-│       ├── Room.swift                  // ✅ Move existing Room.swift here
-│       ├── NetworkPlayer.swift         // Network-specific player data
-│       ├── SessionState.swift          // Multiplayer session states
-│       └── GameEvent.swift             // Network game events
+│       ├── Room.swift                  // ✅ Existing Room.swift (moved here)
+│       ├── NetworkPlayer.swift         // 🔄 Network-specific player data
+│       ├── SessionState.swift          // 🔄 Multiplayer session states
+│       └── GameEvent.swift             // 🔄 Network game events
 │
 ├── Views/
 │   ├── Home/
-│   │   ├── HomeView.swift              // ✅ Already exists - update for multiplayer
-│   │   ├── HighScoreView.swift         // ✅ Already exists
-│   │   ├── StartGameSliderView.swift   // ✅ Already exists - update for code input
-│   │   ├── CodeInputView.swift         // NEW - Code input/generation
-│   │   └── SettingsView.swift          // Game settings
+│   │   ├── HomeView.swift              // ✅ Existing - add animations to green areas
+│   │   ├── HighScoreView.swift         // ✅ Existing - add pulse animations
+│   │   ├── StartGameSliderView.swift   // ✅ Existing - enhance animations
+│   │   ├── CodeInputView.swift         // 🆕 NEW - Enter 6-character game code
+│   │   └── SettingsView.swift          // 🆕 NEW - Audio/player settings
 │   │
 │   ├── Lobby/
-│   │   ├── LobbyView.swift             // ✅ Already exists - update for multiplayer
-│   │   ├── RoomRowView.swift           // ✅ Already exists - update for multiplayer
-│   │   ├── PlayerListView.swift        // NEW - Show connected players
-│   │   └── ReadyButtonView.swift       // NEW - Ready state component
+│   │   ├── LobbyView.swift             // ✅ Updated for multiplayer integration
+│   │   ├── RoomRowView.swift           // ✅ Updated for real player counts
+│   │   ├── PlayerListView.swift        // 🆕 NEW - Show connected players with ready status
+│   │   └── ReadyButtonView.swift       // 🆕 NEW - Ready state with animations
 │   │
 │   ├── Game/
-│   │   ├── GameScene.swift             // ✅ Already exists - update for multiplayer
-│   │   ├── GameViewController.swift    // ✅ Already exists - update for multiplayer
-│   │   └── Components/                 // NEW - Reusable game UI components
-│   │       ├── LivesIndicatorView.swift
-│   │       ├── ScoreDisplayView.swift
-│   │       ├── DirectionIndicatorView.swift
-│   │       └── MultiplayerHUDView.swift
+│   │   ├── GameScene.swift             // 🔄 MAJOR UPDATE - Integration with new architecture
+│   │   ├── GameViewController.swift    // 🔄 Updated for multiplayer support
+│   │   └── Components/                 // 🆕 NEW - Reusable game UI components
+│   │       ├── LivesIndicatorView.swift     // Hearts display (top-right)
+│   │       ├── ScoreDisplayView.swift       // Score display (top-left)
+│   │       ├── DirectionIndicatorView.swift // Compass arrow (bottom-right)
+│   │       └── MultiplayerHUDView.swift     // Mission clue + multiplayer info
 │   │
 │   └── Shared/
-│       ├── LoadingView.swift           // Loading screens
-│       ├── ErrorView.swift             // Error display
-│       └── ConnectionStatusView.swift  // Network connection status
+│       ├── LoadingView.swift           // 🆕 NEW - Connection loading screens
+│       ├── ErrorView.swift             // 🆕 NEW - Error display with retry
+│       └── ConnectionStatusView.swift  // 🆕 NEW - Network status indicator
 │
 ├── Resources/
-│   ├── Levels/                         // NEW - Move level1.txt here
-│   │   ├── level1.txt                  // ✅ Move existing file
-│   │   ├── level2.txt                  // Future levels
-│   │   └── LevelConfig.json            // Level metadata
+│   ├── Levels/                         // 🆕 NEW - Level files directory
+│   │   ├── level1.txt                  // ✅ Provided level file
+│   │   ├── level2.txt                  // 🆕 NEW - Generate additional levels
+│   │   ├── level3.txt                  // 🆕 NEW - Increasing difficulty
+│   │   └── LevelConfig.json            // 🆕 NEW - Level metadata & progression
 │   │
-│   ├── Assets.xcassets/                // ✅ Already exists with all assets
+│   ├── Assets.xcassets/                // 🔄 PLACEHOLDER ASSETS
+│   │   ├── Game/                       // Game sprites (colored placeholders)
+│   │   │   ├── player.imageset         // Blue circle placeholder
+│   │   │   ├── block.imageset          // Brown rectangle placeholder
+│   │   │   ├── vortex.imageset         // Red swirl placeholder
+│   │   │   ├── checkpoint.imageset     // Green star placeholder
+│   │   │   ├── finish.imageset         // Gold trophy placeholder
+│   │   │   ├── background.imageset     // Space texture placeholder
+│   │   │   └── Compass.imageset        // Green arrow placeholder
+│   │   │
+│   │   └── UI/                         // UI elements
+│   │       ├── heart.imageset          // Red heart for lives
+│   │       └── ready_indicator.imageset // Green checkmark
 │   │
-│   ├── Sounds/                         // NEW - Audio files (future)
+│   ├── Sounds/                         // 🆕 NEW - Audio files (future)
 │   │   ├── SFX/
+│   │   │   ├── checkpoint.wav          // Checkpoint reached sound
+│   │   │   ├── collision.wav           // Wall collision sound
+│   │   │   ├── death.wav              // Player death sound
+│   │   │   └── victory.wav            // Level complete sound
+│   │   │
 │   │   └── Music/
+│   │       ├── game_theme.mp3         // Background music
+│   │       └── menu_theme.mp3         // Menu background music
 │   │
-│   └── Configurations/                 // NEW - Configuration files
+│   └── Configurations/                 // 🆕 NEW - Configuration files
 │       ├── GameConfig.plist           // Game balance settings
 │       └── NetworkConfig.plist        // Network configurations
 │
 ├── Storyboards/
-│   ├── Main.storyboard                 // ✅ Already exists
-│   └── LaunchScreen.storyboard         // ✅ Already exists
+│   ├── Main.storyboard                 // ✅ Existing - GameViewController
+│   └── LaunchScreen.storyboard         // ✅ Existing - Launch screen
 │
-└── Info.plist                          // ✅ Already exists         // Unit and integration tests
-    ├── GameLogicTests.swift
-    ├── MultiplayerTests.swift
-    ├── LevelLoadingTests.swift
-    └── MockData/
-        ├── MockLevels/
-        └── MockGameStates/
+└── Info.plist                          // ✅ Existing - App configuration
