@@ -57,7 +57,6 @@
 		D79E94192DE59C8200ACD318 /* Storyboards */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Storyboards; sourceTree = "<group>"; };
 		D79E941B2DE59C9000ACD318 /* App */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = App; sourceTree = "<group>"; };
 		F557B1492DDF19D400BF5244 /* Home */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Home; sourceTree = "<group>"; };
-		F557B1542DE0046700BF5244 /* Lobby */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Lobby; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,7 +83,6 @@
 				517347961D67436F008DBF2B /* GameScene.sks */,
 				5173479A1D67436F008DBF2B /* GameScene.swift */,
 				5173479C1D67436F008DBF2B /* GameViewController.swift */,
-				F557B1542DE0046700BF5244 /* Lobby */,
 				F557B1492DDF19D400BF5244 /* Home */,
 				517347A61D67436F008DBF2B /* Info.plist */,
 				517347AC1D674416008DBF2B /* Content */,
@@ -136,7 +134,6 @@
 				D79E94192DE59C8200ACD318 /* Storyboards */,
 				D79E941B2DE59C9000ACD318 /* App */,
 				F557B1492DDF19D400BF5244 /* Home */,
-				F557B1542DE0046700BF5244 /* Lobby */,
 			);
 			name = "Space Maze";
 			productName = Project26;
