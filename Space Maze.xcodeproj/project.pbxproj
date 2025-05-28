@@ -12,7 +12,6 @@
 		5173479B1D67436F008DBF2B /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5173479A1D67436F008DBF2B /* GameScene.swift */; };
 		5173479D1D67436F008DBF2B /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5173479C1D67436F008DBF2B /* GameViewController.swift */; };
 		517347A01D67436F008DBF2B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5173479E1D67436F008DBF2B /* Main.storyboard */; };
-		517347A21D67436F008DBF2B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 517347A11D67436F008DBF2B /* Assets.xcassets */; };
 		517347A51D67436F008DBF2B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 517347A31D67436F008DBF2B /* LaunchScreen.storyboard */; };
 		517347BA1D674416008DBF2B /* background.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 517347AD1D674416008DBF2B /* background.jpg */; };
 		517347BB1D674416008DBF2B /* background@2x.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 517347AE1D674416008DBF2B /* background@2x.jpg */; };
@@ -38,7 +37,6 @@
 		5173479A1D67436F008DBF2B /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 		5173479C1D67436F008DBF2B /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		5173479F1D67436F008DBF2B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		517347A11D67436F008DBF2B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		517347A41D67436F008DBF2B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		517347A61D67436F008DBF2B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		517347AD1D674416008DBF2B /* background.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = background.jpg; sourceTree = "<group>"; };
@@ -102,7 +100,6 @@
 				5173479C1D67436F008DBF2B /* GameViewController.swift */,
 				F557B15E2DE01E3100BF5244 /* GameViewWrapper.swift */,
 				5173479E1D67436F008DBF2B /* Main.storyboard */,
-				517347A11D67436F008DBF2B /* Assets.xcassets */,
 				517347A31D67436F008DBF2B /* LaunchScreen.storyboard */,
 				F557B1542DE0046700BF5244 /* Lobby */,
 				F557B1492DDF19D400BF5244 /* Home */,
@@ -214,7 +211,6 @@
 				517347C51D674416008DBF2B /* vortex.png in Resources */,
 				517347BD1D674416008DBF2B /* block@2x.png in Resources */,
 				517347C41D674416008DBF2B /* star@2x.png in Resources */,
-				517347A21D67436F008DBF2B /* Assets.xcassets in Resources */,
 				517347BB1D674416008DBF2B /* background@2x.jpg in Resources */,
 				517347BF1D674416008DBF2B /* finish@2x.png in Resources */,
 				F595A8A92DE033BF00C0C3F1 /* star.png in Resources */,
