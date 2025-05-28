@@ -176,7 +176,7 @@ class GameSession: ObservableObject {
     }
     
     // MARK: - Power-Up Management
-    func activatePowerUp(_ type: PowerUpTypeEnum, for playerId: String, duration: TimeInterval = 5.0) {
+    func activatePowerUp(_ type: PowerUpType, for playerId: String, duration: TimeInterval = 5.0) {
         let powerUp = ActivePowerUpInstance(
             id: UUID().uuidString,
             type: type,
@@ -243,27 +243,9 @@ enum GameEndReasonType: String, CaseIterable {
     case gameAborted = "gameAborted"
 }
 
-enum PowerUpTypeEnum: String, CaseIterable {
-    case oil = "oil"
-    case grass = "grass"
-    case shield = "shield"
-    case magnet = "magnet"
-    case invulnerability = "invulnerability"
-    
-    var displayName: String {
-        switch self {
-        case .oil: return "Speed Boost"
-        case .grass: return "Slow Motion"
-        case .shield: return "Shield"
-        case .magnet: return "Magnet"
-        case .invulnerability: return "Invulnerability"
-        }
-    }
-}
-
 struct ActivePowerUpInstance: Identifiable {
     let id: String
-    let type: PowerUpTypeEnum
+    let type: PowerUpType
     let playerId: String
     let activatedAt: Date
     let duration: TimeInterval

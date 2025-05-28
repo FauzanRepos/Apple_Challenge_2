@@ -142,7 +142,7 @@ class MultipeerManager: NSObject, ObservableObject {
         
         // Set timeout for finding the game
         DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) { [weak self] in
-            if self?.sessionState == .searching {
+            if self?.sessionState == .searchingForGame {
                 self?.stopBrowsing()
                 completion(false, "Game not found. Please check the code and try again.")
             }

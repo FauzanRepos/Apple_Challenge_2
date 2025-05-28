@@ -6,6 +6,7 @@
 //  Copyright © 2025 ADA Team. All rights reserved.
 //
 
+import UIKit
 import Foundation
 import CoreGraphics
 
@@ -700,9 +701,9 @@ extension GameEvent {
 // MARK: - Array Extensions
 extension Array where Element == GameEvent {
     
-    func sortedByPriority() -> [GameEvent] {
-        return sorted()
-    }
+//    func sortedByPriority() -> [GameEvent] {
+//        return sorted()
+//    }
     
     func filterByType(_ type: GameEventType) -> [GameEvent] {
         return filter { $0.type == type }
@@ -734,11 +735,17 @@ extension Array where Element == GameEvent {
     }
     
     func groupByPlayer() -> [String: [GameEvent]] {
-        return Dictionary(grouping: self.compactMap { event in
-            guard let playerId = event.playerId else { return nil }
-            return (playerId, event)
-        }) { $0.0 }.mapValues { $0.map { $0.1 } }
+        return Dictionary(grouping: self) { event in
+            event.playerId ?? "unknown"
+        }
     }
+    
+//    func groupByPlayer() -> [String: [GameEvent]] {
+//        return Dictionary(grouping: self.compactMap { event in
+//            guard let playerId = event.playerId else { return nil }
+//            return (playerId, event)
+//        }) { $0.0 }.mapValues { $0.map { $0.1 } }
+//    }
     
     mutating func markAllAsProcessed() {
         for i in indices {

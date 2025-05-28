@@ -15,8 +15,8 @@ class GameCodeManager {
     private static let validCharacters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
     private static let excludedCharacters = "IO01" // Confusing characters
     
-    // Code expiration time (30 minutes)
-    private static let codeExpirationTime: TimeInterval = 30 * 60
+    // Code expiration time (10 minutes)
+    static let codeExpirationTime: TimeInterval = 10 * 60
     
     // MARK: - Active Codes Storage
     private static var activeCodes: [String: GameCodeInfo] = [:]

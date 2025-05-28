@@ -227,16 +227,24 @@ struct PowerUp: Codable, Identifiable {
     }
 }
 
+public enum PowerUpType: String, CaseIterable, Codable {
+    case oil = "oil"
+    case grass = "grass"
+    case shield = "shield"
+    case magnet = "magnet"
+    case invulnerability = "invulnerability"
+}
+
 // MARK: - PowerUp Types (Extended)
 extension PowerUpType {
-    static let oil = PowerUpTypeEnum(rawValue: "oil")!
-    static let grass = PowerUpTypeEnum(rawValue: "grass")!
-    static let shield = PowerUpTypeEnum(rawValue: "shield")!
-    static let magnet = PowerUpTypeEnum(rawValue: "magnet")!
-    static let invulnerability = PowerUpTypeEnum(rawValue: "invulnerability")!
-//    static let teleport = PowerUpTypeEnum(rawValue: "teleport")!
-//    static let ghost = PowerUpTypeEnum(rawValue: "ghost")!
-//    static let time = PowerUpTypeEnum(rawValue: "time")!
+    //    static let oil = PowerUpType(rawValue: "oil")
+    //    static let grass = PowerUpType(rawValue: "grass")!
+    //    static let shield = PowerUpType(rawValue: "shield")!
+    //    static let magnet = PowerUpType(rawValue: "magnet")!
+    //    static let invulnerability = PowerUpType(rawValue: "invulnerability")!
+    //    static let teleport = PowerUpTypeEnum(rawValue: "teleport")!
+    //    static let ghost = PowerUpTypeEnum(rawValue: "ghost")!
+    //    static let time = PowerUpTypeEnum(rawValue: "time")!
     
     var spriteName: String {
         return "powerup_\(rawValue)"
@@ -248,9 +256,10 @@ extension PowerUpType {
         case .grass: return "Slow Motion"
         case .shield: return "Shield"
         case .magnet: return "Magnet"
-//        case .teleport: return "Teleport"
-//        case .ghost: return "Ghost Mode"
-//        case .time: return "Time Stop"
+            //        case .teleport: return "Teleport"
+            //        case .ghost: return "Ghost Mode"
+            //        case .time: return "Time Stop"
+        case .invulnerability: return "Invulnerability"
         default: return rawValue.capitalized
         }
     }
@@ -261,9 +270,9 @@ extension PowerUpType {
         case .grass: return "Slows down movement for precise control"
         case .shield: return "Protects from vortex damage"
         case .magnet: return "Attracts nearby checkpoints"
-//        case .teleport: return "Instantly move to last checkpoint"
-//        case .ghost: return "Pass through walls temporarily"
-//        case .time: return "Freezes time for strategic planning"
+            //        case .teleport: return "Instantly move to last checkpoint"
+            //        case .ghost: return "Pass through walls temporarily"
+            //        case .time: return "Freezes time for strategic planning"
         default: return "Unknown power-up effect"
         }
     }
@@ -274,9 +283,9 @@ extension PowerUpType {
         case .grass: return "#32CD32"    // Lime Green
         case .shield: return "#4169E1"   // Royal Blue
         case .magnet: return "#FF1493"   // Deep Pink
-//        case .teleport: return "#9370DB" // Medium Purple
-//        case .ghost: return "#F0F8FF"    // Alice Blue
-//        case .time: return "#FF4500"     // Orange Red
+            //        case .teleport: return "#9370DB" // Medium Purple
+            //        case .ghost: return "#F0F8FF"    // Alice Blue
+            //        case .time: return "#FF4500"     // Orange Red
         default: return "#FFFFFF"
         }
     }
@@ -287,9 +296,9 @@ extension PowerUpType {
         case .grass: return "Slow motion enabled!"
         case .shield: return "Shield up!"
         case .magnet: return "Magnetic field active!"
-//        case .teleport: return "Teleporter ready!"
-//        case .ghost: return "Ghost mode engaged!"
-//        case .time: return "Time frozen!"
+            //        case .teleport: return "Teleporter ready!"
+            //        case .ghost: return "Ghost mode engaged!"
+            //        case .time: return "Time frozen!"
         default: return "Power-up collected!"
         }
     }
@@ -299,9 +308,9 @@ extension PowerUpType {
         case .oil, .grass: return 5
         case .shield: return 10
         case .magnet: return 8
-//        case .teleport: return 15
-//        case .ghost: return 20
-//        case .time: return 25
+            //        case .teleport: return 15
+            //        case .ghost: return 20
+            //        case .time: return 25
         default: return 5
         }
     }
@@ -311,9 +320,9 @@ extension PowerUpType {
         case .oil, .grass: return 5.0
         case .shield: return 8.0
         case .magnet: return 6.0
-//        case .teleport: return 0.0    // Instant effect
-//        case .ghost: return 3.0
-//        case .time: return 2.0
+            //        case .teleport: return 0.0    // Instant effect
+            //        case .ghost: return 3.0
+            //        case .time: return 2.0
         default: return 5.0
         }
     }
@@ -322,8 +331,8 @@ extension PowerUpType {
         switch self {
         case .oil, .grass: return .common
         case .shield, .magnet: return .uncommon
-//        case .teleport: return .rare
-//        case .ghost, .time: return .legendary
+            //        case .teleport: return .rare
+            //        case .ghost, .time: return .legendary
         default: return .common
         }
     }
@@ -336,6 +345,9 @@ extension PowerUpType {
         switch self {
         case .oil: return Constants.oilSpeedMultiplier
         case .grass: return Constants.grassSpeedMultiplier
+        case .shield: return 1.0
+        case .magnet: return 1.0
+        case .invulnerability: return 1.0
         }
     }
 }
@@ -419,14 +431,14 @@ enum PowerUpAnimation: String, CaseIterable, Codable {
 // MARK: - PowerUp Effect
 struct PowerUpEffect: Codable, Identifiable {
     let id = UUID()
-    let type: PowerUpTypeEnum
+    let type: PowerUpType
     let duration: TimeInterval
     let strength: CGFloat
     let playerId: String
     let powerUpId: String
     let activatedAt: Date
     
-    init(type: PowerUpTypeEnum, duration: TimeInterval, strength: CGFloat, playerId: String, powerUpId: String) {
+    init(type: PowerUpType, duration: TimeInterval, strength: CGFloat, playerId: String, powerUpId: String) {
         self.type = type
         self.duration = duration
         self.strength = strength
@@ -459,8 +471,8 @@ struct PowerUpEffect: Codable, Identifiable {
         case .grass: return Constants.grassSpeedMultiplier * strength
         case .shield: return 1.0 // Boolean effect
         case .magnet: return 2.0 * strength
-//        case .ghost: return 1.0 // Boolean effect
-//        case .time: return 0.1 * strength // Time scale
+            //        case .ghost: return 1.0 // Boolean effect
+            //        case .time: return 0.1 * strength // Time scale
         default: return strength
         }
     }
@@ -486,9 +498,9 @@ struct PowerUpFactory {
     
     static func createOilPowerUp(at position: CGPoint) -> PowerUp {
         return PowerUp(
-            type: PowerUpTypeEnum.oil,
+            type: .oil,
             position: position,
-            duration: PowerUpTypeEnum.oil.defaultDuration,
+            duration: PowerUpType.oil.defaultDuration,
             rarity: .common,
             animationType: .float,
             particleEffect: "oil_splash"
@@ -497,28 +509,28 @@ struct PowerUpFactory {
     
     static func createGrassPowerUp(at position: CGPoint) -> PowerUp {
         return PowerUp(
-            type: PowerUpTypeEnum.grass,
+            type: PowerUpType.grass,
             position: position,
-            duration: PowerUpTypeEnum.grass.defaultDuration,
+            duration: PowerUpType.grass.defaultDuration,
             rarity: .common,
             animationType: .bounce,
             particleEffect: "grass_leaves"
         )
     }
     
-//    static func createShieldPowerUp(at position: CGPoint) -> PowerUp {
-//        return PowerUp(
-//            type: PowerUpTypeEnum.shield,
-//            position: position,
-//            duration: PowerUpTypeEnum.shield.defaultDuration,
-//            rarity: .uncommon,
-//            animationType: .pulse,
-//            particleEffect: "shield_energy"
-//        )
-//    }
+    //    static func createShieldPowerUp(at position: CGPoint) -> PowerUp {
+    //        return PowerUp(
+    //            type: PowerUpTypeEnum.shield,
+    //            position: position,
+    //            duration: PowerUpTypeEnum.shield.defaultDuration,
+    //            rarity: .uncommon,
+    //            animationType: .pulse,
+    //            particleEffect: "shield_energy"
+    //        )
+    //    }
     
     static func createRandomPowerUp(at position: CGPoint, allowedTypes: [PowerUpType]? = nil) -> PowerUp {
-        let types = allowedTypes ?? [PowerUpTypeEnum.oil, PowerUpTypeEnum.grass, .shield, .magnet]
+        let types = allowedTypes ?? [PowerUpType.oil, PowerUpType.grass, .shield, .magnet]
         let randomType = types.randomElement()!
         
         // Determine rarity based on spawn chance
@@ -610,9 +622,9 @@ extension Array where Element == PowerUp {
         return filter { $0.isInRange(of: position, radius: radius) }
     }
     
-    func ofType(_ type: PowerUpTypeEnum) -> [PowerUpTypeEnum] {
-        return filter { $0.type == type }
-    }
+    //    func ofType(_ type: PowerUpType) -> [PowerUpType] {
+    //        return filter { $0.type == type }
+    //    }
     
     func ofRarity(_ rarity: PowerUpRarity) -> [PowerUp] {
         return filter { $0.rarity == rarity }
