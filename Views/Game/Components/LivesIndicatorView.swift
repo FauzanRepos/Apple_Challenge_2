@@ -10,296 +10,261 @@ import SwiftUI
 
 struct LivesIndicatorView: View {
     
-    // MARK: - Properties
-    let lives: Int
-    let maxLives: Int
-    let showAnimation: Bool
-    
-    @State private var animateHeartbeat = false
-    @State private var animateLoss = false
-    @State private var lastLives: Int
-    
-    // MARK: - Initialization
-    init(lives: Int, maxLives: Int = 5, showAnimation: Bool = true) {
-        self.lives = lives
-        self.maxLives = maxLives
-        self.showAnimation = showAnimation
-        self._lastLives = State(initialValue: lives)
-    }
+    let currentLives: Int
+    let maxLives: Int = 5
+    @State private var animateHeartbeat: Bool = false
+    @State private var animateLoss: Bool = false
+    @State private var lastLivesCount: Int = 5
     
     var body: some View {
         HStack(spacing: 8) {
-            // Lives label
+            // Lives Label
             Text("Lives:")
-                .font(.caption)
-                .fontWeight(.semibold)
+                .font(.callout)
+                .fontWeight(.medium)
                 .foregroundColor(.white)
-                .shadow(color: .black.opacity(0.8), radius: 2, x: 1, y: 1)
+                .shadow(color: .black.opacity(0.5), radius: 2, x: 1, y: 1)
             
-            // Hearts display
+            // Hearts Display
             HStack(spacing: 4) {
                 ForEach(0..<maxLives, id: \.self) { index in
                     heartView(for: index)
                 }
             }
+            
+            // Lives Counter
+            Text("\(currentLives)")
+                .font(.callout)
+                .fontWeight(.bold)
+                .foregroundColor(livesColor)
+                .padding(.leading, 4)
+                .scaleEffect(animateLoss ? 1.3 : 1.0)
+                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: animateLoss)
+                .shadow(color: .black.opacity(0.7), radius: 2, x: 1, y: 1)
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 6)
+        .padding(.vertical, 8)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            Capsule()
                 .fill(Color.black.opacity(0.6))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                    Capsule()
+                        .stroke(
+                            LinearGradient(
+                                colors: [livesColor.opacity(0.5), livesColor.opacity(0.2)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
                 )
+                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
         )
-        .onChange(of: lives) { oldValue, newValue in
+        .onChange(of: currentLives) { oldValue, newValue in
             handleLivesChange(from: oldValue, to: newValue)
         }
         .onAppear {
-            if showAnimation {
-                startHeartbeatAnimation()
+            lastLivesCount = currentLives
+            if currentLives <= 2 {
+                animateHeartbeat = true
             }
         }
     }
     
     // MARK: - Heart View
     private func heartView(for index: Int) -> some View {
-        let isAlive = index < lives
-        let isRecentlyLost = index >= lives && index < lastLives && animateLoss
-        
-        return ZStack {
-            // Heart background/shadow
+        ZStack {
+            // Heart Background/Shadow
             Image(systemName: "heart.fill")
-                .font(.system(size: 16, weight: .bold))
+                .font(.title3)
                 .foregroundColor(.black.opacity(0.3))
                 .offset(x: 1, y: 1)
             
-            // Main heart
-            Image(systemName: isAlive ? "heart.fill" : "heart")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(heartColor(for: index))
+            // Main Heart
+            Image(systemName: index < currentLives ? "heart.fill" : "heart")
+                .font(.title3)
+                .foregroundColor(index < currentLives ? heartColor(for: index) : .gray.opacity(0.4))
                 .scaleEffect(heartScale(for: index))
-                .opacity(heartOpacity(for: index))
-                .animation(.easeInOut(duration: 0.3), value: lives)
-                .animation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: animateHeartbeat)
-            
-            // Loss animation overlay
-            if isRecentlyLost {
-                lossAnimationOverlay
-            }
-            
-            // Critical warning overlay
-            if lives <= 1 && isAlive && showAnimation {
-                criticalWarningOverlay
-            }
+                .animation(heartAnimation(for: index), value: animateHeartbeat)
+                .animation(.spring(response: 0.4, dampingFraction: 0.6), value: currentLives)
         }
     }
     
     // MARK: - Heart Properties
     private func heartColor(for index: Int) -> Color {
-        let isAlive = index < lives
-        
-        if !isAlive {
-            return .gray.opacity(0.4)
-        }
-        
-        // Color based on remaining lives
-        switch lives {
+        switch currentLives {
         case 5: return .green
-        case 4: return .yellow
-        case 3: return .orange
-        case 2: return .red.opacity(0.8)
+        case 4: return .green
+        case 3: return .yellow
+        case 2: return .orange
         case 1: return .red
         default: return .gray
         }
     }
     
     private func heartScale(for index: Int) -> CGFloat {
-        let isAlive = index < lives
-        
-        if !isAlive {
-            return 0.8
-        }
-        
-        // Animate heartbeat for low lives
-        if lives <= 2 && animateHeartbeat && showAnimation {
-            return 1.2
-        }
-        
-        return 1.0
-    }
-    
-    private func heartOpacity(for index: Int) -> Double {
-        let isAlive = index < lives
-        return isAlive ? 1.0 : 0.6
-    }
-    
-    // MARK: - Animation Overlays
-    private var lossAnimationOverlay: some View {
-        VStack {
-            // Breaking animation
-            ForEach(0..<6, id: \.self) { i in
-                Image(systemName: "sparkle")
-                    .font(.system(size: 8))
-                    .foregroundColor(.red)
-                    .offset(
-                        x: CGFloat.random(in: -15...15),
-                        y: CGFloat.random(in: -15...15)
-                    )
-                    .opacity(animateLoss ? 0.0 : 1.0)
-                    .animation(
-                        .easeOut(duration: 0.6)
-                        .delay(Double(i) * 0.1),
-                        value: animateLoss
-                    )
+        if index < currentLives {
+            if currentLives <= 2 && animateHeartbeat {
+                return index == 0 ? 1.2 : 1.1
             }
+            return 1.0
+        }
+        return 0.8
+    }
+    
+    private func heartAnimation(for index: Int) -> Animation? {
+        if index < currentLives && currentLives <= 2 {
+            return .easeInOut(duration: 0.8)
+                .repeatForever(autoreverses: true)
+                .delay(Double(index) * 0.1)
+        }
+        return nil
+    }
+    
+    // MARK: - Computed Properties
+    private var livesColor: Color {
+        switch currentLives {
+        case 5: return .green
+        case 4: return .green
+        case 3: return .yellow
+        case 2: return .orange
+        case 1: return .red
+        default: return .gray
         }
     }
     
-    private var criticalWarningOverlay: some View {
-        Circle()
-            .stroke(Color.red, lineWidth: 2)
-            .frame(width: 24, height: 24)
-            .scaleEffect(animateHeartbeat ? 1.5 : 1.0)
-            .opacity(animateHeartbeat ? 0.0 : 0.8)
-            .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: false), value: animateHeartbeat)
+    private var livesPercentage: Double {
+        return Double(currentLives) / Double(maxLives)
     }
     
-    // MARK: - Animation Methods
+    // MARK: - Methods
     private func handleLivesChange(from oldValue: Int, to newValue: Int) {
-        lastLives = oldValue
+        lastLivesCount = oldValue
         
-        if newValue < oldValue && showAnimation {
-            // Lives lost - trigger loss animation
+        if newValue < oldValue {
+            // Lives decreased - trigger loss animation
             triggerLossAnimation()
-            
-            // Haptic feedback
-            let impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
-            impactFeedback.impactOccurred()
         }
         
-        // Update heartbeat animation based on current lives
-        if newValue <= 2 && showAnimation {
-            startHeartbeatAnimation()
+        // Update heartbeat animation based on remaining lives
+        if newValue <= 2 && newValue > 0 {
+            animateHeartbeat = true
+        } else {
+            animateHeartbeat = false
         }
     }
     
     private func triggerLossAnimation() {
         animateLoss = true
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             animateLoss = false
-        }
-    }
-    
-    private func startHeartbeatAnimation() {
-        guard showAnimation else { return }
-        
-        withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
-            animateHeartbeat = true
         }
     }
 }
 
 // MARK: - Team Lives Indicator
 struct TeamLivesIndicatorView: View {
-    let teamLives: Int
-    let maxTeamLives: Int
-    let playerCount: Int
     
-    var body: some View {
-        VStack(alignment: .trailing, spacing: 4) {
-            // Team lives
-            LivesIndicatorView(lives: teamLives, maxLives: maxTeamLives)
-            
-            // Player count
-            if playerCount > 1 {
-                HStack(spacing: 4) {
-                    Image(systemName: "person.2.fill")
-                        .font(.caption2)
-                        .foregroundColor(.white.opacity(0.8))
-                    
-                    Text("\(playerCount) crew")
-                        .font(.caption2)
-                        .foregroundColor(.white.opacity(0.8))
-                }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 2)
-                .background(
-                    Capsule()
-                        .fill(Color.black.opacity(0.4))
-                )
-            }
-        }
-    }
-}
-
-// MARK: - Animated Lives Counter
-struct AnimatedLivesCounterView: View {
     let currentLives: Int
-    let previousLives: Int
-    
-    @State private var showChange = false
-    @State private var changeAmount = 0
+    let maxLives: Int = 5
+    let playerCount: Int
+    @State private var animateTeamEffect: Bool = false
     
     var body: some View {
-        ZStack {
-            LivesIndicatorView(lives: currentLives, maxLives: 5)
+        VStack(alignment: .leading, spacing: 4) {
+            // Team Lives Header
+            HStack(spacing: 6) {
+                Image(systemName: "person.2.fill")
+                    .font(.caption)
+                    .foregroundColor(.blue)
+                
+                Text("Team Lives")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
+            }
             
-            // Change indicator
-            if showChange && changeAmount != 0 {
-                HStack {
-                    Image(systemName: changeAmount > 0 ? "plus" : "minus")
-                        .font(.caption)
-                        .fontWeight(.bold)
-                    
-                    Text("\(abs(changeAmount))")
-                        .font(.caption)
-                        .fontWeight(.bold)
+            // Lives Display
+            HStack(spacing: 8) {
+                // Progress Bar Style
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(height: 8)
+                            .cornerRadius(4)
+                        
+                        Rectangle()
+                            .fill(
+                                LinearGradient(
+                                    colors: livesGradientColors,
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .frame(width: geometry.size.width * livesProgress, height: 8)
+                            .cornerRadius(4)
+                            .scaleEffect(y: animateTeamEffect ? 1.2 : 1.0)
+                            .animation(.easeInOut(duration: 0.3), value: animateTeamEffect)
+                    }
                 }
-                .foregroundColor(changeAmount > 0 ? .green : .red)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(
-                    Capsule()
-                        .fill(Color.black.opacity(0.8))
-                        .overlay(
-                            Capsule()
-                                .stroke(changeAmount > 0 ? Color.green : Color.red, lineWidth: 1)
-                        )
-                )
-                .offset(y: -30)
-                .opacity(showChange ? 1.0 : 0.0)
-                .scaleEffect(showChange ? 1.0 : 0.5)
-                .animation(.spring(response: 0.5, dampingFraction: 0.6), value: showChange)
+                .frame(height: 8)
+                
+                // Lives Text
+                Text("\(currentLives)/\(maxLives)")
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .monospacedDigit()
             }
         }
-        .onChange(of: currentLives) { oldValue, newValue in
-            let change = newValue - oldValue
-            if change != 0 {
-                showChangeAnimation(change)
-            }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.black.opacity(0.6))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                )
+        )
+        .onChange(of: currentLives) { _, _ in
+            triggerTeamEffect()
         }
     }
     
-    private func showChangeAnimation(_ change: Int) {
-        changeAmount = change
-        showChange = true
+    private var livesProgress: CGFloat {
+        return CGFloat(currentLives) / CGFloat(maxLives)
+    }
+    
+    private var livesGradientColors: [Color] {
+        switch currentLives {
+        case 5: return [.green, .green]
+        case 4: return [.green, .yellow]
+        case 3: return [.yellow, .yellow]
+        case 2: return [.orange, .orange]
+        case 1: return [.red, .red]
+        default: return [.gray, .gray]
+        }
+    }
+    
+    private func triggerTeamEffect() {
+        animateTeamEffect = true
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            showChange = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            animateTeamEffect = false
         }
     }
 }
 
-// MARK: - Preview
 #Preview {
-    VStack(spacing: 20) {
-        LivesIndicatorView(lives: 5, maxLives: 5)
-        LivesIndicatorView(lives: 3, maxLives: 5)
-        LivesIndicatorView(lives: 1, maxLives: 5)
-        TeamLivesIndicatorView(teamLives: 3, maxTeamLives: 5, playerCount: 4)
+    VStack(spacing: 30) {
+        LivesIndicatorView(currentLives: 5)
+        LivesIndicatorView(currentLives: 3)
+        LivesIndicatorView(currentLives: 1)
+        
+        TeamLivesIndicatorView(currentLives: 3, playerCount: 4)
     }
     .padding()
     .background(Color.black)
