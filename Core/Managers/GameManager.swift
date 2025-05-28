@@ -105,8 +105,8 @@ class GameManager: ObservableObject {
         audioManager.stopBackgroundMusic()
         
         // Save high score if needed
-        if currentGameState.score > storageManager.getHighScore() {
-            storageManager.saveHighScore(currentGameState.score)
+        if currentGameState.teamScore > storageManager.getHighScore() {
+            storageManager.saveHighScore(currentGameState.teamScore)
         }
         
         // Handle multiplayer cleanup
@@ -139,31 +139,32 @@ class GameManager: ObservableObject {
         audioManager.playLevelCompleteSound()
         
         // Update game state
-        currentGameState.levelsCompleted += 1
+        currentGameState.currentLevel += 1
         
         // Advance to next level after a delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             self.advanceToNextLevel()
         }
     }
-    
+
     // MARK: - Player Management
-    func addPlayer(_ player: NetworkPlayer) {
+    func addPlayer(_ networkPlayer: NetworkPlayer) {
+        let player = Player(from: self.currentLevel, networkPlayer: networkPlayer)
         currentGameState.players.append(player)
         print("👤 Player added: \(player.name)")
     }
-    
-    func removePlayer(_ player: NetworkPlayer) {
-        currentGameState.players.removeAll { $0.id == player.id }
-        print("👤 Player removed: \(player.name)")
+
+    func removePlayer(_ networkPlayer: NetworkPlayer) {
+        currentGameState.players.removeAll { $0.id == networkPlayer.id }
+        print("👤 Player removed: \(networkPlayer.name)")
     }
-    
+
     func updatePlayerScore(_ playerId: String, score: Int) {
         if let index = currentGameState.players.firstIndex(where: { $0.id == playerId }) {
             currentGameState.players[index].score = score
         }
     }
-    
+
     func updatePlayerLives(_ playerId: String, lives: Int) {
         if let index = currentGameState.players.firstIndex(where: { $0.id == playerId }) {
             currentGameState.players[index].lives = lives
@@ -203,7 +204,7 @@ class GameManager: ObservableObject {
         removePlayer(player)
     }
     
-    private func handleSessionStateChange(_ state: SessionState) {
+    private func handleSessionStateChange(_ state: StateS) {
         switch state {
         case .notConnected:
             if gameMode != .singlePlayer {
@@ -216,6 +217,8 @@ class GameManager: ObservableObject {
             if isGamePaused && gameMode != .singlePlayer {
                 resumeGame()
             }
+        default:
+            break // Empty space
         }
     }
     

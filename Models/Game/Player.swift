@@ -97,6 +97,26 @@ class Player: ObservableObject, Identifiable, Codable {
         try container.encode(isLocal, forKey: .isLocal)
         try container.encode(lastUpdateTimestamp, forKey: .lastUpdateTimestamp)
     }
+
+    // MARK: - Extension Initializer
+    convenience init(from level: Int, networkPlayer: NetworkPlayer) {
+        self.init(
+            id: networkPlayer.id,
+            name: networkPlayer.name,
+            playerType: networkPlayer.playerType,
+            isLocal: networkPlayer.isLocal
+        )
+        self.score = networkPlayer.score
+        self.lives = networkPlayer.lives
+        self.isReady = networkPlayer.isReady
+        self.position = networkPlayer.position
+        self.velocity = networkPlayer.velocity
+        self.lastCheckpointId = nil
+        self.activePowerUps = []
+        self.isAlive = networkPlayer.lives > 0
+        self.respawnTimer = nil
+        self.lastUpdateTimestamp = Date().timeIntervalSince1970
+    }
     
     // MARK: - Player Actions
     func updatePosition(_ newPosition: CGPoint, velocity newVelocity: CGVector) {
@@ -166,6 +186,8 @@ class Player: ObservableObject, Identifiable, Codable {
                 multiplier *= Constants.oilSpeedMultiplier
             case .grass:
                 multiplier *= Constants.grassSpeedMultiplier
+            default:
+                break
             }
         }
         
