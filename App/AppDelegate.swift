@@ -9,6 +9,7 @@
 import UIKit
 import SwiftUI
 import MultipeerConnectivity
+import AVFoundation
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
