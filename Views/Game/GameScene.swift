@@ -9,604 +9,629 @@
 import CoreMotion
 import SpriteKit
 
-enum CollisionTypes: UInt32 {
-    case player = 1
-    case wall = 2
-    case checkpoint = 4
-    case vortex = 8
-    case finish = 16
-}
-
-enum PlayerType {
-    case mapMover   // Player that can move the map
-    case regular    // Player that encounters spikes at screen edge
-}
-
 class GameScene: SKScene, SKPhysicsContactDelegate {
-    var player: SKSpriteNode!
-    var playerType: PlayerType = .mapMover  // Default player type (can be set before game starts)
-    var lastTouchPosition: CGPoint?
-    var worldNode: SKNode!  // Container for all level elements
-    
-    var motionManager: CMMotionManager!
-    
+
+    // MARK: - Properties
+    var worldNode: SKNode!
+    var gameHUD: GameHUD!
+    var players: [String: PlayerNode] = [:]
+    var localPlayerId: String = ""
+    var playerType: PlayerType = .mapMover
+    var gameMode: GameMode = .singlePlayer
+    var isHost: Bool = false
+
+    // Game State
     var isGameOver = false
-    var scoreLabel: SKLabelNode!
-    var livesLabel: SKLabelNode!
-    var lives = 3 {
-        didSet {
-            livesLabel.text = "Lives: \(lives)"
-        }
-    }
-    
-    var score = 0 {
-        didSet  {
-            scoreLabel.text = "Score: \(score)"
-        }
-    }
-    
-    // Screen dimensions and boundaries
-    var screenWidth: CGFloat = 0
-    var screenHeight: CGFloat = 0
+    var isPaused = false
+    var lives = 5
+    var score = 0
+    var currentLevel = 1
+
+    // Motion
+    var motionManager: CMMotionManager!
+    var lastTouchPosition: CGPoint?
+
+    // Level Elements
+    var checkpoints: [String: SKSpriteNode] = [:]
+    var vortexes: [SKSpriteNode] = []
+    var powerUps: [String: SKSpriteNode] = [:]
+    var walls: [SKSpriteNode] = []
+    var finishNode: SKSpriteNode?
+
+    // Map Properties
     var mapWidth: CGFloat = 0
     var mapHeight: CGFloat = 0
-    
-    // Screen edge detection areas
-    var leftEdgeMargin: CGFloat = 150
-    var rightEdgeMargin: CGFloat = 150
-    var topEdgeMargin: CGFloat = 150
-    var bottomEdgeMargin: CGFloat = 150
-    var cellSize: CGFloat = 50
-    
-    // Last checkpoint position
-    /* var lastCheckpoint = CGPoint(x: 10000, y: 20000) */
-    var currentLevel = 1
-    
-    // Direction indicator
-    var directionIndicator: SKSpriteNode!
-    
-    // Initial player spawn point (before any checkpoints)
-    var initialSpawnPoint = CGPoint(x: 96, y: 672 - 256)
-    var lastCheckpoint: CGPoint {
-        didSet {
-            // Optional: Update any UI or game state when checkpoint changes
+    var cellSize: CGFloat = 64
+
+    // Screen Edge Detection
+    var leftEdgeMargin: CGFloat = 100
+    var rightEdgeMargin: CGFloat = 100
+    var topEdgeMargin: CGFloat = 100
+    var bottomEdgeMargin: CGFloat = 100
+
+    // Delegates
+    weak var gameDelegate: GameSceneDelegate?
+
+    // Managers
+    private let levelManager = LevelManager.shared
+    private let audioManager = AudioManager.shared
+    private let gameManager = GameManager.shared
+
+    // MARK: - Scene Setup
+    override func didMove(to view: SKView) {
+        setupScene()
+        setupPhysics()
+        setupHUD()
+        setupMotion()
+        setupSpikeBorders()
+    }
+
+    private func setupScene() {
+        backgroundColor = .black
+
+        // Create world node container
+        worldNode = SKNode()
+        addChild(worldNode)
+
+        // Calculate screen margins based on player type
+        let marginRatio = playerType == .mapMover ? Constants.mapMoverEdgeMarginRatio : Constants.regularPlayerEdgeMarginRatio
+        let margin = min(size.width, size.height) * marginRatio
+
+        leftEdgeMargin = margin
+        rightEdgeMargin = margin
+        topEdgeMargin = margin
+        bottomEdgeMargin = margin
+    }
+
+    private func setupPhysics() {
+        physicsWorld.gravity = CGVector(dx: 0, dy: 0)
+        physicsWorld.contactDelegate = self
+    }
+
+    private func setupHUD() {
+        gameHUD = GameHUD(size: size)
+        gameHUD.updateLives(lives)
+        gameHUD.updateScore(score)
+        gameHUD.updateLevel(currentLevel)
+        addChild(gameHUD)
+    }
+
+    private func setupMotion() {
+        motionManager = CMMotionManager()
+        motionManager.startAccelerometerUpdates()
+    }
+
+    private func setupSpikeBorders() {
+        let spikeTexture = SKTexture(imageNamed: "spike")
+        let spikeSize = CGSize(width: 32, height: 32)
+
+        // Top spikes
+        let topSpikesCount = Int(size.width / spikeSize.width) + 1
+        for i in 0..<topSpikesCount {
+            let spike = SKSpriteNode(texture: spikeTexture, size: spikeSize)
+            spike.position = CGPoint(x: CGFloat(i) * spikeSize.width, y: size.height - spikeSize.height/2)
+            spike.zPosition = 1000
+            spike.name = "spike"
+            addChild(spike)
+        }
+
+        // Bottom spikes
+        for i in 0..<topSpikesCount {
+            let spike = SKSpriteNode(texture: spikeTexture, size: spikeSize)
+            spike.position = CGPoint(x: CGFloat(i) * spikeSize.width, y: spikeSize.height/2)
+            spike.zRotation = .pi
+            spike.zPosition = 1000
+            spike.name = "spike"
+            addChild(spike)
+        }
+
+        // Left spikes
+        let leftSpikesCount = Int(size.height / spikeSize.height) + 1
+        for i in 0..<leftSpikesCount {
+            let spike = SKSpriteNode(texture: spikeTexture, size: spikeSize)
+            spike.position = CGPoint(x: spikeSize.width/2, y: CGFloat(i) * spikeSize.height)
+            spike.zRotation = -.pi/2
+            spike.zPosition = 1000
+            spike.name = "spike"
+            addChild(spike)
+        }
+
+        // Right spikes
+        for i in 0..<leftSpikesCount {
+            let spike = SKSpriteNode(texture: spikeTexture, size: spikeSize)
+            spike.position = CGPoint(x: size.width - spikeSize.width/2, y: CGFloat(i) * spikeSize.height)
+            spike.zRotation = .pi/2
+            spike.zPosition = 1000
+            spike.name = "spike"
+            addChild(spike)
         }
     }
-    
-    func loadLevel() {
-        // Track the maximum level dimensions
-        var maxX: CGFloat = 0
-        var maxY: CGFloat = 0
-        
-        if let levelPath = Bundle.main.path(forResource: "level1", ofType: "txt") {
-            if let levelString = try? String(contentsOfFile: levelPath) {
-                let lines = levelString.components(separatedBy: "\n")
-                
-                for (row, line) in lines.reversed().enumerated() {
-                    for (column, letter) in line.enumerated() {
-                        let position = CGPoint(
-                            x: (cellSize * CGFloat(column)) + (cellSize/16),
-                            y: (cellSize * CGFloat(row)) + (cellSize/16)
-                        )
-                        
-                        // Update maximum coordinates
-                        maxX = max(maxX, position.x + cellSize/2)
-                        maxY = max(maxY, position.y + cellSize/2)
-                        
-                        
-                        if letter == "x" {
-                            // load wall
-                            let imageName = "block"
-                            let texture = SKTexture(imageNamed: imageName)
-                            
-                            if texture.size() == .zero {
-                                fatalError("🚨 Image '\(imageName)' is missing or invalid.")
-                            }
-                            
-                            let node = SKSpriteNode(
-                                texture: texture,
-                                size: CGSize(width: cellSize, height: cellSize)
-                            )
-                            node.position = position
-                            node.physicsBody = SKPhysicsBody(rectangleOf: node.size)
-                            node.physicsBody?.categoryBitMask = CollisionTypes.wall.rawValue
-                            node.physicsBody?.isDynamic = false
-                            guard worldNode.inParentHierarchy(self) else {
-                                fatalError("⚠️ worldNode is no longer attached to scene!")
-                            }
-                            worldNode.addChild(node)
-                        } else if letter == "v"  {
-                            // load vortex
-                            let imageName = "vortex"
-                            let texture = SKTexture(imageNamed: imageName)
-                            
-                            if texture.size() == .zero {
-                                fatalError("🚨 Image '\(imageName)' is missing or invalid.")
-                            }
-                            
-                            let node = SKSpriteNode(
-                                texture: texture,
-                                size: CGSize(width: cellSize, height: cellSize)
-                            )
-                            node.name = "vortex"
-                            node.position = position
-                            node.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat.pi, duration: 1)))
-                            node.physicsBody = SKPhysicsBody(circleOfRadius: node.size.width / 2)
-                            node.physicsBody?.isDynamic = false
-                            
-                            node.physicsBody?.categoryBitMask = CollisionTypes.vortex.rawValue
-                            node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
-                            node.physicsBody?.collisionBitMask = 0
-                            guard worldNode.inParentHierarchy(self) else {
-                                fatalError("⚠️ worldNode is no longer attached to scene!")
-                            }
-                            worldNode.addChild(node)
-                        } else if letter == "s"  {
-                            // Changed: load checkpoint (previously star)
-                            let imageName = "checkpoint"
-                            let texture = SKTexture(imageNamed: imageName)
-                            
-                            if texture.size() == .zero {
-                                fatalError("🚨 Image '\(imageName)' is missing or invalid.")
-                            }
-                            
-                            let node = SKSpriteNode(
-                                texture: texture,
-                                size: CGSize(width: cellSize, height: cellSize)
-                            )  // Keep using the star image for now
-                            node.name = "checkpoint"
-                            node.size = CGSize(width: cellSize, height: cellSize)
-                            node.physicsBody = SKPhysicsBody(circleOfRadius: node.size.width / 2)
-                            node.physicsBody?.isDynamic = false
-                            
-                            node.physicsBody?.categoryBitMask = CollisionTypes.checkpoint.rawValue  // Updated category
-                            node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
-                            node.physicsBody?.collisionBitMask = 0
-                            node.position = position
-                            guard worldNode.inParentHierarchy(self) else {
-                                fatalError("⚠️ worldNode is no longer attached to scene!")
-                            }
-                            worldNode.addChild(node)
-                            
-                            // Add a pulsing animation to make checkpoints more visible
-                            let scaleUp = SKAction.scale(to: 1.1, duration: 0.5)
-                            let scaleDown = SKAction.scale(to: 0.9, duration: 0.5)
-                            let pulse = SKAction.sequence([scaleUp, scaleDown])
-                            node.run(SKAction.repeatForever(pulse))
-                        } else if letter == "f"  {
-                            // load finish
-                            let imageName = "finish"
-                            let texture = SKTexture(imageNamed: imageName)
-                            
-                            if texture.size() == .zero {
-                                fatalError("🚨 Image '\(imageName)' is missing or invalid.")
-                            }
-                            
-                            let node = SKSpriteNode(
-                                texture: texture,
-                                size: CGSize(width: cellSize, height: cellSize))
-                            node.name = "finish"
-                            node.physicsBody = SKPhysicsBody(circleOfRadius: node.size.width / 2)
-                            node.physicsBody?.isDynamic = false
-                            
-                            node.physicsBody?.categoryBitMask = CollisionTypes.finish.rawValue
-                            node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
-                            node.physicsBody?.collisionBitMask = 0
-                            node.position = position
-                            guard worldNode.inParentHierarchy(self) else {
-                                fatalError("⚠️ worldNode is no longer attached to scene!")
-                            }
-                            worldNode.addChild(node)
-                        }
-                    }
-                }
-                
-                // Store map dimensions
-                mapWidth = maxX
-                mapHeight = maxY
+
+    // MARK: - Multiplayer Setup
+    func setupMultiplayer(mode: GameMode, players: [NetworkPlayer], isHost: Bool, playerType: PlayerType) {
+        self.gameMode = mode
+        self.isHost = isHost
+        self.playerType = playerType
+
+        // Create player nodes
+        for player in players {
+            createPlayerNode(for: player)
+            if player.isLocal {
+                localPlayerId = player.id
             }
         }
     }
-    
-    func createPlayer() {
-        let imageName = "player"
-        let texture = SKTexture(imageNamed: imageName)
 
-        if texture.size() == .zero {
-            fatalError("🚨 Image '\(imageName)' is missing or invalid.")
+    func updatePlayers(_ players: [NetworkPlayer]) {
+        for player in players {
+            if self.players[player.id] == nil {
+                createPlayerNode(for: player)
+            }
+        }
+    }
+
+    private func createPlayerNode(for player: NetworkPlayer) -> PlayerNode {
+        let playerNode = PlayerNode(player: player, cellSize: cellSize)
+        players[player.id] = playerNode
+        worldNode.addChild(playerNode)
+
+        if player.isLocal {
+            playerNode.isLocal = true
         }
 
-        // Define a base player size
-        let basePlayerSize: CGFloat = 32
+        return playerNode
+    }
 
-        // Scale the player size relative to the cellSize.  This makes the player
-        // proportional to the level's overall scale.
-        let scaledPlayerSize = basePlayerSize * (cellSize / 50)  // Assuming a base cellSize of 50
+    // MARK: - Level Management
+    func startLevel() {
+        loadCurrentLevel()
+        spawnPlayers()
+        isPaused = false
+    }
 
-        player = SKSpriteNode(
-            texture: texture,
-            size: CGSize(width: scaledPlayerSize, height: scaledPlayerSize)
+    private func loadCurrentLevel() {
+        // Clear existing level elements
+        clearLevel()
+
+        // Load level from manager
+        guard let level = levelManager.currentLevel else {
+            print("❌ No current level loaded")
+            return
+        }
+
+        mapWidth = level.size.width
+        mapHeight = level.size.height
+        cellSize = level.cellSize
+
+        // Create background
+        createBackground()
+
+        // Create walls
+        for wall in level.walls {
+            createWall(at: wall.position, size: wall.size)
+        }
+
+        // Create checkpoints
+        for checkpoint in level.checkpoints {
+            createCheckpoint(at: checkpoint.position, id: checkpoint.id)
+        }
+
+        // Create vortexes
+        for vortex in level.vortexes {
+            createVortex(at: vortex.position)
+        }
+
+        // Create power-ups
+        for powerUp in level.powerUps {
+            createPowerUp(powerUp.type, at: powerUp.position, id: powerUp.id)
+        }
+
+        // Create finish point
+        createFinish(at: level.finishPoint.position)
+    }
+
+    private func clearLevel() {
+        worldNode.removeAllChildren()
+        checkpoints.removeAll()
+        vortexes.removeAll()
+        powerUps.removeAll()
+        walls.removeAll()
+        finishNode = nil
+    }
+
+    private func createBackground() {
+        let backgroundSize = CGSize(
+            width: max(mapWidth, size.width) * 1.2,
+            height: max(mapHeight, size.height) * 1.2
         )
-        player.position = lastCheckpoint  // Use last checkpoint position
 
-        // Scale the physics body radius based on the scaled player size
-        let physicsBodyRadius = scaledPlayerSize / 2
-        player.physicsBody = SKPhysicsBody(circleOfRadius: physicsBodyRadius)
-        player.physicsBody?.allowsRotation = false
-        player.physicsBody?.linearDamping = 0.5
-
-        player.physicsBody?.categoryBitMask = CollisionTypes.player.rawValue
-        player.physicsBody?.contactTestBitMask = CollisionTypes.checkpoint.rawValue | CollisionTypes.vortex.rawValue | CollisionTypes.finish.rawValue
-        player.physicsBody?.collisionBitMask = CollisionTypes.wall.rawValue
-        guard worldNode.inParentHierarchy(self) else {
-            fatalError("⚠️ worldNode is no longer attached to scene!")
-        }
-        worldNode.addChild(player)
-
-        // Add a brief invulnerability effect when spawning
-        let fadeAction = SKAction.sequence([
-            SKAction.fadeAlpha(to: 0.5, duration: 0.1),
-            SKAction.fadeAlpha(to: 1.0, duration: 0.1)
-        ])
-
-        player.run(SKAction.repeat(fadeAction, count: 5))
+        let background = SKSpriteNode(imageNamed: "background")
+        background.size = backgroundSize
+        background.position = CGPoint(x: backgroundSize.width/2, y: backgroundSize.height/2)
+        background.zPosition = -100
+        worldNode.addChild(background)
     }
-    
-    func updateDirectionIndicator() {
-        // Find the finish node
-        guard worldNode.inParentHierarchy(self) else {
-            fatalError("⚠️ worldNode is no longer attached to scene!")
-        }
-        guard let finish = worldNode.childNode(withName: "finish") else { return }
-        
-        // Calculate vector from player to finish in the world coordinate system
-        let playerPositionInWorld = player.position
-        let finishPositionInWorld = finish.position
-        
-        let playerToFinish = CGVector(dx: finishPositionInWorld.x - playerPositionInWorld.x,
-                                      dy: finishPositionInWorld.y - playerPositionInWorld.y)
-        
-        // Calculate angle to the finish point
-        let angle = atan2(playerToFinish.dy, playerToFinish.dx)
-        
-        // Set the angle of the direction indicator
-        directionIndicator.zRotation = angle
+
+    private func createWall(at position: CGPoint, size: CGSize) {
+        let wall = SKSpriteNode(imageNamed: "block")
+        wall.position = position
+        wall.size = size
+        wall.name = "wall"
+
+        wall.physicsBody = SKPhysicsBody(rectangleOf: size)
+        wall.physicsBody?.isDynamic = false
+        wall.physicsBody?.categoryBitMask = CollisionTypes.wall.rawValue
+
+        walls.append(wall)
+        worldNode.addChild(wall)
     }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let touch = touches.first {
-            let location = touch.location(in: self)
-            lastTouchPosition = location
-        }
+
+    private func createCheckpoint(at position: CGPoint, id: String) {
+        let checkpoint = createCheckpoint(at: position, id: id)
+        checkpoints[id] = checkpoint
+        worldNode.addChild(checkpoint)
     }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let touch = touches.first {
-            let location = touch.location(in: self)
-            lastTouchPosition = location
+
+    private func createVortex(at position: CGPoint) {
+        let vortex = createVortex(at: position)
+        vortexes.append(vortex)
+        worldNode.addChild(vortex)
+    }
+
+    private func createPowerUp(_ type: PowerUpType, at position: CGPoint, id: String) {
+        let powerUp = createPowerUp(type: type, at: position)
+        powerUp.name = "powerup_\(id)"
+        powerUps[id] = powerUp
+        worldNode.addChild(powerUp)
+    }
+
+    private func createFinish(at position: CGPoint) {
+        finishNode = createFinish(at: position)
+        worldNode.addChild(finishNode!)
+    }
+
+    private func spawnPlayers() {
+        guard let level = levelManager.currentLevel else { return }
+
+        let startPositions = level.getPlayerStartPositions(for: players.count)
+
+        for (index, (playerId, playerNode)) in players.enumerated() {
+            let position = index < startPositions.count ? startPositions[index] : startPositions[0]
+            playerNode.position = position
+            playerNode.resetPlayer()
         }
     }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        lastTouchPosition = nil
-    }
-    
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        lastTouchPosition = nil
-    }
-    
+
+    // MARK: - Game Update
     override func update(_ currentTime: TimeInterval) {
-        guard isGameOver == false else { return }
-        
+        guard !isGameOver && !isPaused else { return }
+
+        handleInput()
+        updatePlayers()
+        checkScreenEdges()
+        updatePowerUps()
+
+        gameHUD.updateLives(lives)
+        gameHUD.updateScore(score)
+    }
+
+    private func handleInput() {
+        guard let localPlayer = players[localPlayerId] else { return }
+
 #if targetEnvironment(simulator)
-        if let currentTouch = lastTouchPosition {
-            let diff = CGPoint(x: currentTouch.x - player.position.x, y: currentTouch.y - player.position.y)
+        if let touchPosition = lastTouchPosition {
+            let diff = CGPoint(x: touchPosition.x - localPlayer.position.x, y: touchPosition.y - localPlayer.position.y)
             physicsWorld.gravity = CGVector(dx: diff.x / 100, dy: diff.y / 100)
         }
 #else
         if let accelerometerData = motionManager.accelerometerData {
-            physicsWorld.gravity = CGVector(dx: accelerometerData.acceleration.x * 10, dy: accelerometerData.acceleration.y * 10)
+            let gravity = CGVector(
+                dx: accelerometerData.acceleration.x * Constants.accelerometerSensitivity,
+                dy: accelerometerData.acceleration.y * Constants.accelerometerSensitivity
+            )
+            physicsWorld.gravity = gravity
         }
 #endif
-        
-        // Update direction indicator
-        updateDirectionIndicator()
-        
-        // Check if player is near screen edge and scroll map if necessary
-        checkAndScrollMap()
     }
-    
-    func checkAndScrollMap() {
-        guard worldNode.inParentHierarchy(self) else {
-            fatalError("⚠️ worldNode is no longer attached to scene!")
+
+    private func updatePlayers() {
+        for (playerId, playerNode) in players {
+            playerNode.update()
+
+            // Send position updates for local player
+            if playerNode.isLocal && gameMode != .singlePlayer {
+                gameDelegate?.gameScene(self, playerDidMove: playerId, position: playerNode.position, velocity: playerNode.physicsBody?.velocity ?? .zero)
+            }
         }
-        // Get player's position in the scene coordinates
-        let playerPositionInScene = worldNode.convert(player.position, to: self)
-        
-        // Determine if player is near any edge of the screen
+    }
+
+    private func checkScreenEdges() {
+        guard let localPlayer = players[localPlayerId] else { return }
+
+        let playerPositionInScene = worldNode.convert(localPlayer.position, to: self)
+
         let nearLeftEdge = playerPositionInScene.x < leftEdgeMargin
-        let nearRightEdge = playerPositionInScene.x > frame.width - rightEdgeMargin
-        let nearTopEdge = playerPositionInScene.y > frame.height - topEdgeMargin
+        let nearRightEdge = playerPositionInScene.x > size.width - rightEdgeMargin
+        let nearTopEdge = playerPositionInScene.y > size.height - topEdgeMargin
         let nearBottomEdge = playerPositionInScene.y < bottomEdgeMargin
-        
-        // Calculate the amount to scroll
-        var dx: CGFloat = 0
-        var dy: CGFloat = 0
-        
+
         if playerType == .mapMover {
-            // For map movers, move the map when near edge
-            if nearLeftEdge {
-                dx = 10  // Scroll right (move worldNode right)
-            } else if nearRightEdge {
-                dx = -10  // Scroll left (move worldNode left)
-            }
-            
-            if nearTopEdge {
-                dy = -10  // Scroll down (move worldNode down)
-            } else if nearBottomEdge {
-                dy = 10  // Scroll up (move worldNode up)
-            }
-            
-            // Apply the scroll if needed
+            // Map mover scrolls the map
+            var dx: CGFloat = 0
+            var dy: CGFloat = 0
+
+            if nearLeftEdge { dx = Constants.mapScrollSpeed }
+            else if nearRightEdge { dx = -Constants.mapScrollSpeed }
+
+            if nearTopEdge { dy = -Constants.mapScrollSpeed }
+            else if nearBottomEdge { dy = Constants.mapScrollSpeed }
+
             if dx != 0 || dy != 0 {
-                print("Scrolling map dx: \(dx), dy: \(dy)")
                 scrollMap(dx: dx, dy: dy)
             }
-        } else if (nearLeftEdge || nearRightEdge || nearTopEdge || nearBottomEdge) {
-            // For regular players, they "die" when they hit the edge
-            handleVortexCollision()
+        } else {
+            // Regular player dies at edges
+            if nearLeftEdge || nearRightEdge || nearTopEdge || nearBottomEdge {
+                handlePlayerDeath(localPlayerId)
+            }
         }
     }
-    
-    func scrollMap(dx: CGFloat, dy: CGFloat) {
-        // Move the world node to scroll the map
-        guard worldNode.inParentHierarchy(self) else {
-            fatalError("⚠️ worldNode is no longer attached to scene!")
-        }
+
+    private func scrollMap(dx: CGFloat, dy: CGFloat) {
         worldNode.position = CGPoint(x: worldNode.position.x + dx, y: worldNode.position.y + dy)
-        
-        // Ensure the player stays within the visible area after scrolling
-        constrainPlayer()
     }
-    
-    func constrainPlayer() {
-        // Optional: Add logic here to ensure the player doesn't move outside
-        // any desired boundaries of the larger level
+
+    private func updatePowerUps() {
+        for (powerUpId, powerUpNode) in powerUps {
+            if let activePowerUp = powerUpNode.userData?["powerUp"] as? PowerUp {
+                // Update respawn timer if needed
+                // This would be handled by the PowerUp model
+            }
+        }
     }
-    
+
+    // MARK: - Collision Handling
     func didBegin(_ contact: SKPhysicsContact) {
-        if contact.bodyA.node == player {
-            playerCollided(with: contact.bodyB.node!)
-        } else if contact.bodyB.node == player {
-            playerCollided(with: contact.bodyA.node!)
+        let collision = contact.bodyA.categoryBitMask | contact.bodyB.categoryBitMask
+
+        var playerNode: PlayerNode?
+        var otherNode: SKNode?
+
+        if contact.bodyA.categoryBitMask == CollisionTypes.player.rawValue {
+            playerNode = contact.bodyA.node as? PlayerNode
+            otherNode = contact.bodyB.node
+        } else if contact.bodyB.categoryBitMask == CollisionTypes.player.rawValue {
+            playerNode = contact.bodyB.node as? PlayerNode
+            otherNode = contact.bodyA.node
+        }
+
+        guard let player = playerNode, let other = otherNode else { return }
+
+        handleCollision(player: player, with: other)
+    }
+
+    private func handleCollision(player: PlayerNode, with node: SKNode) {
+        guard let nodeName = node.name else { return }
+
+        switch nodeName {
+        case let name where name.hasPrefix("checkpoint"):
+            handleCheckpointCollision(player: player, checkpoint: node)
+
+        case "vortex":
+            handleVortexCollision(player: player)
+
+        case "finish":
+            handleFinishCollision(player: player)
+
+        case let name where name.hasPrefix("powerup"):
+            handlePowerUpCollision(player: player, powerUp: node)
+
+        default:
+            break
         }
     }
-    
-    func playerCollided(with node: SKNode) {
-        if node.name == "vortex" {
-            handleVortexCollision()
-        } else if node.name == "checkpoint" {
-            // Changed behavior for checkpoints (previously stars)
-            handleCheckpointCollision(at: node.position)
-        } else if node.name == "finish" {
-            // next level?
-            print("Level completed!")
+
+    private func handleCheckpointCollision(player: PlayerNode, checkpoint: SKNode) {
+        guard let checkpointName = checkpoint.name,
+              let checkpointId = checkpointName.components(separatedBy: "_").last else { return }
+
+        // Remove checkpoint
+        checkpoint.removeFromParent()
+        checkpoints.removeValue(forKey: checkpointId)
+
+        // Update score
+        score += Constants.checkpointScore
+
+        // Play sound
+        audioManager.playCheckpointSound()
+
+        // Create checkpoint effect
+        createCheckpointEffect(at: checkpoint.position)
+
+        // Notify delegate
+        gameDelegate?.gameScene(self, playerDidReachCheckpoint: checkpointId, playerId: player.playerId)
+    }
+
+    private func handleVortexCollision(player: PlayerNode) {
+        handlePlayerDeath(player.playerId)
+    }
+
+    private func handleFinishCollision(player: PlayerNode) {
+        // Check if all alive players reached finish
+        let alivePlayers = players.values.filter { $0.isAlive }
+        let playersAtFinish = alivePlayers.filter { finishNode?.contains($0.position) == true }
+
+        if playersAtFinish.count == alivePlayers.count {
+            handleLevelComplete()
         }
     }
-    
-    func handleCheckpointCollision(at position: CGPoint) {
-        // Don't remove the checkpoint node - it stays in place
-        // Just save the position and increment score
-        lastCheckpoint = position
-        
-        // Find the specific checkpoint node at this position
-        var targetCheckpoint: SKSpriteNode?
-        
-        // Search through all checkpoint nodes to find the one at this position
-        guard worldNode.inParentHierarchy(self) else {
-            fatalError("⚠️ worldNode is no longer attached to scene!")
+
+    private func handlePowerUpCollision(player: PlayerNode, powerUp: SKNode) {
+        guard let powerUpName = powerUp.name,
+              let powerUpId = powerUpName.components(separatedBy: "_").last,
+              let powerUpNode = powerUps[powerUpId] else { return }
+
+        // Determine power-up type from sprite name
+        var powerUpType: PowerUpType = .oil
+        if powerUpName.contains("grass") {
+            powerUpType = .grass
         }
-        worldNode.enumerateChildNodes(withName: "checkpoint") { (node, _) in
-            if let checkpointNode = node as? SKSpriteNode {
-                // Check if this checkpoint is at the collision position (with small tolerance)
-                let distance = sqrt(pow(checkpointNode.position.x - position.x, 2) + pow(checkpointNode.position.y - position.y, 2))
-                if distance < 5.0 { // Small tolerance for position matching
-                    targetCheckpoint = checkpointNode
-                }
-            }
-        }
-        
-        // Create a brief flash or highlight effect on the correct checkpoint
-        if let checkpoint = targetCheckpoint {
-            let originalColor = checkpoint.color
-            let originalColorBlendFactor = checkpoint.colorBlendFactor
-            
-            let highlight = SKAction.sequence([
-                SKAction.colorize(with: .green, colorBlendFactor: 0.7, duration: 0.1),
-                SKAction.wait(forDuration: 0.2),
-                SKAction.colorize(with: originalColor, colorBlendFactor: originalColorBlendFactor, duration: 0.1)
-            ])
-            
-            checkpoint.run(highlight)
+
+        // Apply power-up effect
+        player.applyPowerUp(powerUpType)
+
+        // Remove power-up
+        powerUpNode.removeFromParent()
+        powerUps.removeValue(forKey: powerUpId)
+
+        // Update score
+        score += Constants.starCollectionScore
+
+        // Play sound
+        audioManager.playPowerUpSound()
+
+        // Create effect
+        createPowerUpEffect(at: powerUp.position, type: powerUpType)
+    }
+
+    // MARK: - Player Management
+    func updatePlayerPosition(playerId: String, position: CGPoint, velocity: CGVector, timestamp: TimeInterval) {
+        guard let playerNode = players[playerId] else { return }
+        playerNode.updateNetworkPosition(position: position, velocity: velocity, timestamp: timestamp)
+    }
+
+    func handleCheckpointReached(_ checkpointId: String, by playerId: String) {
+        if let checkpoint = checkpoints[checkpointId] {
             checkpoint.removeFromParent()
+            checkpoints.removeValue(forKey: checkpointId)
+            createCheckpointEffect(at: checkpoint.position)
         }
-        
-        
-        // Increment score as before
-        score += 1
     }
-    
-    func handleVortexCollision() {
-        player.physicsBody?.isDynamic = false
-        isGameOver = true
+
+    func handlePlayerDied(_ playerId: String) {
+        guard let playerNode = players[playerId] else { return }
+
         lives -= 1
-        
+
         if lives <= 0 {
-            // Game over logic - show alert with retry option
-            let gameOverAction = SKAction.run { [weak self] in
-                guard let self = self else { return }
-                
-                // Pause the game
-                self.isPaused = true
-                
-                // Get the main view controller to present the alert
-                if let viewController = self.view?.window?.rootViewController {
-                    // Create the alert controller
-                    let alertController = UIAlertController(
-                        title: "Game Over",
-                        message: "You ran out of lives!",
-                        preferredStyle: .alert
-                    )
-                    
-                    // Add retry action
-                    let retryAction = UIAlertAction(title: "Retry", style: .default) { [weak self] _ in
-                        guard let self = self else { return }
-                        
-                        // Reset the game state
-                        self.score = 0
-                        self.lives = 3
-                        self.lastCheckpoint = self.initialSpawnPoint
-                        
-                        // Remove the current player
-                        self.player.removeFromParent()
-                        
-                        // Create a new player at the initial spawn point
-                        self.createPlayer()
-                        
-                        // Unpause the game
-                        self.isPaused = false
-                        self.isGameOver = false
-                    }
-                    
-                    // Add the actions to the alert controller
-                    alertController.addAction(retryAction)
-                    
-                    // Present the alert controller
-                    viewController.present(alertController, animated: true)
-                }
-            }
-            
-            player.run(gameOverAction)
-            return
+            handleGameOver()
+        } else {
+            // Respawn player
+            respawnPlayer(playerId)
         }
-        
-        let move = SKAction.move(to: player.position, duration: 0.25)
-        let scale = SKAction.scale(to: 0.0001, duration: 0.25)
-        let remove = SKAction.removeFromParent()
-        let sequence = SKAction.sequence([move, scale, remove])
-        
-        player.run(sequence) { [unowned self] in
-            score -= 1
-            self.createPlayer()  // Will use lastCheckpoint position
-            self.isGameOver = false
+
+        audioManager.playDeathSound()
+        gameDelegate?.gameScene(self, playerDidDie: playerId)
+    }
+
+    private func respawnPlayer(_ playerId: String) {
+        guard let playerNode = players[playerId],
+              let level = levelManager.currentLevel else { return }
+
+        let spawnPosition = level.getPlayerStartPosition(for: 0)
+        playerNode.respawn(at: spawnPosition)
+    }
+
+    private func handlePlayerDeath(_ playerId: String) {
+        handlePlayerDied(playerId)
+    }
+
+    // MARK: - Game States
+    private func handleLevelComplete() {
+        audioManager.playVictorySound()
+        gameDelegate?.gameScene(self, didCompleteLevel: currentLevel)
+
+        currentLevel += 1
+
+        // Show level complete alert
+        showAlert(title: "Mission Accomplished", message: "Congratulations on completing the mission. There is still a long journey ahead of you", type: .success) {
+            // Continue to next level
         }
     }
-    
-    override func didMove(to view: SKView) {
-        
-        // Create a world node that will contain all level elements
-        worldNode = SKNode()
-        addChild(worldNode)
-        
-        // Calculate the actual visible area for the game
-        let playableHeight = size.height
-        let playableWidth = size.width
-        
-        let levelWidth: CGFloat = 31 * cellSize  // 1550 pixels
-        let levelHeight: CGFloat = 23 * cellSize // 1150 pixels
-        
-        // Create a properly sized background - ensure it fills the playable area
-        let imageNameBG = "background"
-        let textureBG = SKTexture(imageNamed: imageNameBG)
-        
-        if textureBG.size() == .zero {
-            fatalError("🚨 Image '\(imageNameBG)' is missing or invalid.")
+
+    private func handleGameOver() {
+        isGameOver = true
+        audioManager.playDeathSound()
+
+        gameDelegate?.gameScene(self, didFailLevel: currentLevel)
+
+        // Show game over alert
+        showAlert(title: "Mission Failed", message: "Long journey ahead but your mech can't make it. Better luck on your next journey", type: .failure) {
+            // Return to menu
         }
-        
-        let backgroundWidth = max(levelWidth, playableWidth) * 1.5
-        let backgroundHeight = max(levelHeight, playableHeight) * 1.5
-        
-        let background = SKSpriteNode(
-            texture: textureBG,
-            size: CGSize(width: backgroundWidth, height: backgroundHeight)
-        )
-        
-        // Center the background in the world coordinate system
-        background.position = CGPoint(x: backgroundWidth/2, y: backgroundHeight/2)
-        background.zPosition = -1
-        worldNode.addChild(background)
-        
-        // UI elements adjusted for actual playable area
-        scoreLabel = SKLabelNode(fontNamed: "Chalkduster")
-        scoreLabel.text = "Score: 0"
-        scoreLabel.horizontalAlignmentMode = .left
-        scoreLabel.position = CGPoint(x: 16, y: playableHeight - 30)
-        scoreLabel.zPosition = 100
-        addChild(scoreLabel)
-        
-        livesLabel = SKLabelNode(fontNamed: "Chalkduster")
-        livesLabel.text = "Lives: 3"
-        livesLabel.horizontalAlignmentMode = .right
-        livesLabel.position = CGPoint(x: playableWidth - 16, y: playableHeight - 30)
-        livesLabel.zPosition = 100
-        addChild(livesLabel)
-        
-        // Add direction indicator (triangle)
-        let imageName = "Compass"
-        let texture = SKTexture(imageNamed: imageName)
-        
-        if texture.size() == .zero {
-            fatalError("🚨 Image '\(imageName)' is missing or invalid.")
+    }
+
+    func pauseGame() {
+        isPaused = true
+    }
+
+    func resumeGame() {
+        isPaused = false
+    }
+
+    func endGame(reason: GameEndReason) {
+        isGameOver = true
+
+        let alertType: GameAlertType = (reason == .gameCompleted) ? .success : .failure
+        let title = (reason == .gameCompleted) ? "Mission Accomplished" : "Mission Failed"
+        let message = reason.displayMessage
+
+        showAlert(title: title, message: message, type: alertType) {
+            // Handle end game
         }
-        
-        directionIndicator = SKSpriteNode(
-            texture: texture,
-            size: CGSize(width: 32, height: 32)
-        )
-        directionIndicator.name = "directionIndicator"
-        directionIndicator.position = CGPoint(x: playableWidth - 50, y: 50)
-        directionIndicator.zPosition = 100
-        addChild(directionIndicator)
-        
-        // Set up screen edge margins based on playable area
-        let marginScreen = playerType == .mapMover ? 0.15 : 0.075
-        leftEdgeMargin = CGFloat(playableWidth) * marginScreen
-        rightEdgeMargin = CGFloat(playableWidth) * marginScreen
-        topEdgeMargin = CGFloat(playableHeight) * marginScreen
-        bottomEdgeMargin = CGFloat(playableHeight) * marginScreen
-        
-        physicsWorld.gravity = CGVector(dx: 0, dy: 0)
-        physicsWorld.contactDelegate = self
-        
-        // Calculate a cell size that will fit the level nicely in the playable area
-        // For example, make the cell size proportional to the screen width
-        cellSize = CGFloat(playableWidth / 8) // Adjust divisor based on level width
-        
-        // Initialize lastCheckpoint to the initial spawn point
-        lastCheckpoint = initialSpawnPoint
-        
-        loadLevel()
-        createPlayer()
-        
-        motionManager = CMMotionManager()
-        motionManager.startAccelerometerUpdates()
     }
-    
-    // Initialize all properties before super.init
-    override init(size: CGSize) {
-        // Initialize lastCheckpoint
-        lastCheckpoint = CGPoint(x: 96, y: 672+4*64)
-        
-        // Call super.init after initializing all properties
-        super.init(size: size)
+
+    // MARK: - Visual Effects
+    private func createCheckpointEffect(at position: CGPoint) {
+        createCheckpointEffect(at: position)
     }
-    
-    // Look into this
-    required init?(coder aDecoder: NSCoder) {
-        // Initialize lastCheckpoint
-        lastCheckpoint = CGPoint(x: 96, y: 672+4*64)
-        
-        // Call super.init after initializing all properties
-        super.init(coder: aDecoder)
+
+    private func createPowerUpEffect(at position: CGPoint, type: PowerUpType) {
+        let effectColor: UIColor = (type == .oil) ? .yellow : .green
+
+        for i in 0..<10 {
+            let particle = SKSpriteNode(color: effectColor, size: CGSize(width: 4, height: 4))
+            particle.position = position
+            worldNode.addChild(particle)
+
+            let angle = (Float.pi * 2 / 10) * Float(i)
+            let moveAction = SKAction.move(
+                by: CGVector(dx: cos(angle) * 30, dy: sin(angle) * 30),
+                duration: 0.5
+            )
+            let fadeAction = SKAction.fadeOut(withDuration: 0.5)
+            let removeAction = SKAction.removeFromParent()
+
+            let sequence = SKAction.sequence([
+                SKAction.group([moveAction, fadeAction]),
+                removeAction
+            ])
+
+            particle.run(sequence)
+        }
+    }
+
+    private func showAlert(title: String, message: String, type: GameAlertType, completion: @escaping () -> Void) {
+        let alert = GameAlert(title: title, message: message, type: type, size: size)
+        alert.zPosition = 2000
+        alert.completion = completion
+        addChild(alert)
+    }
+
+    // MARK: - Touch Handling
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first {
+            lastTouchPosition = touch.location(in: self)
+        }
+    }
+
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first {
+            lastTouchPosition = touch.location(in: self)
+        }
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        lastTouchPosition = nil
     }
 }
