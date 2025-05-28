@@ -23,7 +23,6 @@
 		517347C51D674416008DBF2B /* vortex.png in Resources */ = {isa = PBXBuildFile; fileRef = 517347B81D674416008DBF2B /* vortex.png */; };
 		517347C61D674416008DBF2B /* vortex@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 517347B91D674416008DBF2B /* vortex@2x.png */; };
 		F557B1482DDE44CF00BF5244 /* level1Portrait.txt in Resources */ = {isa = PBXBuildFile; fileRef = F557B1472DDE44CF00BF5244 /* level1Portrait.txt */; };
-		F557B15F2DE01E3100BF5244 /* GameViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F557B15E2DE01E3100BF5244 /* GameViewWrapper.swift */; };
 		F595A8A92DE033BF00C0C3F1 /* star.png in Resources */ = {isa = PBXBuildFile; fileRef = F595A8A82DE033BF00C0C3F1 /* star.png */; };
 /* End PBXBuildFile section */
 
@@ -47,7 +46,6 @@
 		D71CEC9E2DDB0914005815AC /* Space Maze.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Space Maze.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D79E93D22DE5692E00ACD318 /* folder.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = folder.txt; sourceTree = "<group>"; };
 		F557B1472DDE44CF00BF5244 /* level1Portrait.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = level1Portrait.txt; sourceTree = "<group>"; };
-		F557B15E2DE01E3100BF5244 /* GameViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewWrapper.swift; sourceTree = "<group>"; };
 		F595A8A82DE033BF00C0C3F1 /* star.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = star.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -88,7 +86,6 @@
 				517347961D67436F008DBF2B /* GameScene.sks */,
 				5173479A1D67436F008DBF2B /* GameScene.swift */,
 				5173479C1D67436F008DBF2B /* GameViewController.swift */,
-				F557B15E2DE01E3100BF5244 /* GameViewWrapper.swift */,
 				F557B1542DE0046700BF5244 /* Lobby */,
 				F557B1492DDF19D400BF5244 /* Home */,
 				517347A61D67436F008DBF2B /* Info.plist */,
@@ -217,7 +214,6 @@
 			files = (
 				5173479B1D67436F008DBF2B /* GameScene.swift in Sources */,
 				5173479D1D67436F008DBF2B /* GameViewController.swift in Sources */,
-				F557B15F2DE01E3100BF5244 /* GameViewWrapper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
