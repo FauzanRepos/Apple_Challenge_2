@@ -28,7 +28,6 @@
 		F557B1482DDE44CF00BF5244 /* level1Portrait.txt in Resources */ = {isa = PBXBuildFile; fileRef = F557B1472DDE44CF00BF5244 /* level1Portrait.txt */; };
 		F557B15F2DE01E3100BF5244 /* GameViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F557B15E2DE01E3100BF5244 /* GameViewWrapper.swift */; };
 		F595A8A92DE033BF00C0C3F1 /* star.png in Resources */ = {isa = PBXBuildFile; fileRef = F595A8A82DE033BF00C0C3F1 /* star.png */; };
-		F5DC2E222DE5A6110081A017 /* LANPermissionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DC2E212DE5A6110081A017 /* LANPermissionManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,7 +55,6 @@
 		F557B1472DDE44CF00BF5244 /* level1Portrait.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = level1Portrait.txt; sourceTree = "<group>"; };
 		F557B15E2DE01E3100BF5244 /* GameViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewWrapper.swift; sourceTree = "<group>"; };
 		F595A8A82DE033BF00C0C3F1 /* star.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = star.png; sourceTree = "<group>"; };
-		F5DC2E212DE5A6110081A017 /* LANPermissionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LANPermissionManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -96,7 +94,6 @@
 				517347941D67436F008DBF2B /* AppDelegate.swift */,
 				517347961D67436F008DBF2B /* GameScene.sks */,
 				5173479A1D67436F008DBF2B /* GameScene.swift */,
-				F5DC2E212DE5A6110081A017 /* LANPermissionManager.swift */,
 				5173479C1D67436F008DBF2B /* GameViewController.swift */,
 				F557B15E2DE01E3100BF5244 /* GameViewWrapper.swift */,
 				5173479E1D67436F008DBF2B /* Main.storyboard */,
@@ -231,7 +228,6 @@
 			files = (
 				5173479B1D67436F008DBF2B /* GameScene.swift in Sources */,
 				5173479D1D67436F008DBF2B /* GameViewController.swift in Sources */,
-				F5DC2E222DE5A6110081A017 /* LANPermissionManager.swift in Sources */,
 				F557B15F2DE01E3100BF5244 /* GameViewWrapper.swift in Sources */,
 				517347951D67436F008DBF2B /* AppDelegate.swift in Sources */,
 			);
