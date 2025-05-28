@@ -35,7 +35,7 @@ struct MultiplayerHUDView: View {
         self.currentLevel = currentLevel
         self.missionClue = missionClue
         self.showFullHUD = showFullHUD
-        self._lastPlayerCount = State(initialValue: players.count)
+        self._lastPlayerCount = StateS(initialValue: players.count)
     }
     
     var body: some View {

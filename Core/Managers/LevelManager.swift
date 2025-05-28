@@ -87,10 +87,10 @@ class LevelManager: ObservableObject {
                     finishPoint = FinishPoint(position: position)
                     
                 case "o": // Oil power-up
-                    powerUps.append(PowerUp(type: .oil, position: position))
+                    powerUps.append(PowerUp(type: PowerUpType.oil, position: position))
                     
                 case "g": // Grass power-up
-                    powerUps.append(PowerUp(type: .grass, position: position))
+                    powerUps.append(PowerUp(type: PowerUpType.grass, position: position))
                     
                 case "p": // Player start position
                     playerStartPositions.append(position)

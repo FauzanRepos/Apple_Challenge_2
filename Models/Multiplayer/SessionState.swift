@@ -13,7 +13,7 @@ import CoreGraphics
 class SessionState: ObservableObject, Codable {
     
     // MARK: - Published Properties
-    @Published var currentState: State = .notConnected
+    @Published var currentState: StateS = .notConnected
     @Published var gameCode: String = ""
     @Published var hostPlayer: NetworkPlayer?
     @Published var connectedPlayers: [NetworkPlayer] = []
@@ -74,7 +74,7 @@ class SessionState: ObservableObject, Codable {
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        currentState = try container.decode(State.self, forKey: .currentState)
+        currentState = try container.decode(StateS.self, forKey: .currentState)
         gameCode = try container.decode(String.self, forKey: .gameCode)
         hostPlayer = try container.decodeIfPresent(NetworkPlayer.self, forKey: .hostPlayer)
         connectedPlayers = try container.decode([NetworkPlayer].self, forKey: .connectedPlayers)
@@ -144,7 +144,7 @@ class SessionState: ObservableObject, Codable {
     }
     
     // MARK: - State Management
-    func transitionTo(_ newState: State, reason: String = "") {
+    func transitionTo(_ newState: StateS, reason: String = "") {
         let previousState = currentState
         currentState = newState
         lastStateChange = Date()
@@ -169,7 +169,7 @@ class SessionState: ObservableObject, Codable {
         handleStateTransition(from: previousState, to: newState)
     }
     
-    private func handleStateTransition(from: State, to: State) {
+    private func handleStateTransition(from: StateS, to: StateS) {
         switch to {
         case .notConnected:
             reset()
@@ -499,7 +499,7 @@ class SessionState: ObservableObject, Codable {
 }
 
 // MARK: - Supporting Types
-enum State: String, Codable, CaseIterable {
+enum StateS: String, Codable, CaseIterable {
     case notConnected = "notConnected"
     case searchingForGame = "searchingForGame"
     case connecting = "connecting"
@@ -583,8 +583,8 @@ enum SyncStatus: String, Codable, CaseIterable {
 }
 
 struct StateTransition: Codable {
-    let from: State
-    let to: State
+    let from: StateS
+    let to: StateS
     let timestamp: Date
     let reason: String
     

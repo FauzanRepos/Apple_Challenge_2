@@ -172,7 +172,7 @@ class Player: ObservableObject, Identifiable, Codable {
         return multiplier
     }
     
-    func hasActivePowerUp(of type: PowerUpType) -> Bool {
+    func hasActivePowerUp(of type: PowerUpTypeEnum) -> Bool {
         return activePowerUps.contains { $0.type == type }
     }
     
@@ -196,7 +196,7 @@ class Player: ObservableObject, Identifiable, Codable {
     private func addInvulnerability() {
         let invulnerability = ActivePowerUp(
             id: UUID().uuidString,
-            type: .invulnerability,
+            type: PowerUpTypeEnum.invulnerability,
             playerId: id,
             activatedAt: Date(),
             duration: 2.0
@@ -206,7 +206,7 @@ class Player: ObservableObject, Identifiable, Codable {
     
     // MARK: - Computed Properties
     var isInvulnerable: Bool {
-        return hasActivePowerUp(of: .invulnerability)
+        return hasActivePowerUp(of: PowerUpTypeEnum.invulnerability)
     }
     
     var displayName: String {
@@ -263,11 +263,6 @@ struct ActivePowerUp: Codable, Identifiable {
         let elapsed = Date().timeIntervalSince(activatedAt)
         return min(1.0, elapsed / duration)
     }
-}
-
-// MARK: - Extended Power Up Types
-extension PowerUpType {
-    static let invulnerability = PowerUpType(rawValue: "invulnerability")!
 }
 
 // MARK: - Player Factory

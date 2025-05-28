@@ -7,8 +7,9 @@
 //
 
 import Foundation
-import CoreGraphics
+import MultipeerConnectivity
 
+// MARK: - Game Session
 class GameSession: ObservableObject {
     
     // MARK: - Properties
@@ -18,7 +19,7 @@ class GameSession: ObservableObject {
     let createdAt: Date
     
     @Published var players: [NetworkPlayer] = []
-    @Published var sessionState: SessionState = .notConnected
+    @Published var sessionState: SessionStateType = .notConnected
     @Published var currentLevel: Int = 1
     @Published var gameStarted: Bool = false
     @Published var gamePaused: Bool = false
@@ -28,7 +29,7 @@ class GameSession: ObservableObject {
     private var playerVelocities: [String: CGVector] = [:]
     private var lastUpdateTimestamps: [String: TimeInterval] = [:]
     private var completedCheckpoints: Set<String> = []
-    private var activePowerUps: [ActivePowerUp] = []
+    private var activePowerUpInstances: [ActivePowerUpInstance] = []
     
     // MARK: - Synchronization
     private let syncQueue = DispatchQueue(label: "gameSession.sync", qos: .userInitiated)
@@ -50,213 +51,73 @@ class GameSession: ObservableObject {
     
     // MARK: - Player Management
     func addPlayer(_ player: NetworkPlayer) -> Bool {
-        guard players.count < maxPlayers else {
-            print("❌ Cannot add player: session is full")
-            return false
-        }
-        
-        guard !players.contains(where: { $0.id == player.id }) else {
-            print("❌ Player already in session: \(player.id)")
-            return false
-        }
+        guard players.count < maxPlayers else { return false }
+        guard !players.contains(where: { $0.id == player.id }) else { return false }
         
         players.append(player)
-        playerPositions[player.id] = CGPoint.zero
-        playerVelocities[player.id] = CGVector.zero
-        lastUpdateTimestamps[player.id] = Date().timeIntervalSince1970
         
-        print("✅ Player added to session: \(player.name) (\(players.count)/\(maxPlayers))")
+        // Assign player type based on order
+        if players.count == 1 {
+            player.playerType = .mapMover
+        } else {
+            player.playerType = .regular
+        }
+        
+        print("👤 Player added: \(player.displayName) (\(players.count)/\(maxPlayers))")
         return true
     }
     
-    func removePlayer(_ playerId: String) {
-        players.removeAll { $0.id == playerId }
-        playerPositions.removeValue(forKey: playerId)
-        playerVelocities.removeValue(forKey: playerId)
-        lastUpdateTimestamps.removeValue(forKey: playerId)
+    func removePlayer(with id: String) {
+        players.removeAll { $0.id == id }
+        playerPositions.removeValue(forKey: id)
+        playerVelocities.removeValue(forKey: id)
+        lastUpdateTimestamps.removeValue(forKey: id)
         
-        print("❌ Player removed from session: \(playerId)")
-        
-        // If host left, handle session cleanup
-        if playerId == hostPlayer.id {
-            handleHostLeft()
-        }
+        print("👤 Player removed: \(id) (\(players.count)/\(maxPlayers))")
     }
     
-    func updatePlayerReadyState(_ playerId: String, isReady: Bool) {
-        if let index = players.firstIndex(where: { $0.id == playerId }) {
-            players[index].isReady = isReady
-            print("✅ Player \(playerId) ready state: \(isReady)")
-        }
+    func getPlayer(with id: String) -> NetworkPlayer? {
+        return players.first { $0.id == id }
     }
     
     func areAllPlayersReady() -> Bool {
-        return players.count >= 2 && players.allSatisfy { $0.isReady }
+        return !players.isEmpty && players.allSatisfy { $0.isReady }
     }
     
     // MARK: - Game State Management
-    func startGame() -> Bool {
-        guard areAllPlayersReady() else {
-            print("❌ Cannot start game: not all players are ready")
-            return false
-        }
+    func startGame() {
+        guard areAllPlayersReady() && players.count >= 2 else { return }
         
         gameStarted = true
         sessionState = .gameInProgress
-        assignPlayerTypes()
+        currentLevel = 1
         
-        print("🚀 Game session started with \(players.count) players")
-        return true
+        // Reset game state
+        completedCheckpoints.removeAll()
+        activePowerUpInstances.removeAll()
+        
+        print("🚀 Game started with \(players.count) players")
     }
     
     func pauseGame() {
         gamePaused = true
-        print("⏸️ Game session paused")
     }
     
     func resumeGame() {
         gamePaused = false
-        print("▶️ Game session resumed")
     }
     
-    func endGame(reason: GameEndReason) {
+    func endGame(reason: GameEndReasonType) {
         gameStarted = false
         gamePaused = false
         sessionState = .gameEnded
         
-        print("🏁 Game session ended: \(reason)")
-        
-        // Clean up game state
-        cleanupGameState()
+        print("🏁 Game ended: \(reason)")
     }
     
-    private func assignPlayerTypes() {
-        let totalPlayers = players.count
-        let mapMoverCount = max(1, totalPlayers / 3)
-        
-        // Shuffle players for random assignment
-        var shuffledPlayers = players.shuffled()
-        
-        for (index, player) in shuffledPlayers.enumerated() {
-            let playerType: PlayerType = index < mapMoverCount ? .mapMover : .regular
-            
-            if let originalIndex = players.firstIndex(where: { $0.id == player.id }) {
-                players[originalIndex].playerType = playerType
-            }
-        }
-        
-        print("🎯 Player types assigned: \(mapMoverCount) map movers, \(totalPlayers - mapMoverCount) regular")
-    }
-    
-    // MARK: - Position Synchronization
-    func updatePlayerPosition(_ playerId: String, position: CGPoint, velocity: CGVector, timestamp: TimeInterval) {
-        syncQueue.async { [weak self] in
-            guard let self = self else { return }
-            
-            // Check if this update is newer than what we have
-            if let lastTimestamp = self.lastUpdateTimestamps[playerId],
-               timestamp <= lastTimestamp {
-                return // Ignore older updates
-            }
-            
-            self.playerPositions[playerId] = position
-            self.playerVelocities[playerId] = velocity
-            self.lastUpdateTimestamps[playerId] = timestamp
-        }
-    }
-    
-    func getPlayerPosition(_ playerId: String) -> CGPoint? {
-        return syncQueue.sync {
-            return playerPositions[playerId]
-        }
-    }
-    
-    func getAllPlayerPositions() -> [String: CGPoint] {
-        return syncQueue.sync {
-            return playerPositions
-        }
-    }
-    
-    func predictPlayerPosition(_ playerId: String, at futureTime: TimeInterval) -> CGPoint? {
-        return syncQueue.sync {
-            guard let currentPosition = playerPositions[playerId],
-                  let velocity = playerVelocities[playerId],
-                  let lastTimestamp = lastUpdateTimestamps[playerId] else {
-                return nil
-            }
-            
-            let deltaTime = futureTime - lastTimestamp
-            let predictedX = currentPosition.x + velocity.dx * deltaTime
-            let predictedY = currentPosition.y + velocity.dy * deltaTime
-            
-            return CGPoint(x: predictedX, y: predictedY)
-        }
-    }
-    
-    // MARK: - Game Events
-    func handleCheckpointReached(_ checkpointId: String, by playerId: String) {
-        completedCheckpoints.insert(checkpointId)
-        
-        // Update player score
-        if let index = players.firstIndex(where: { $0.id == playerId }) {
-            players[index].score += Constants.checkpointScore
-        }
-        
-        print("🏁 Checkpoint \(checkpointId) reached by \(playerId)")
-    }
-    
-    func handlePlayerDeath(_ playerId: String) {
-        // Decrease player lives
-        if let index = players.firstIndex(where: { $0.id == playerId }) {
-            players[index].lives -= 1
-            
-            if players[index].lives <= 0 {
-                handlePlayerEliminated(playerId)
-            }
-        }
-        
-        print("💀 Player \(playerId) died")
-    }
-    
-    private func handlePlayerEliminated(_ playerId: String) {
-        // In cooperative mode, respawn all players when one is eliminated
-        for index in players.indices {
-            players[index].lives = 3 // Reset lives for cooperative play
-        }
-        
-        print("🔄 All players respawned due to elimination")
-    }
-    
-    func activatePowerUp(_ powerUp: PowerUp, for playerId: String) {
-        let activePowerUp = ActivePowerUp(
-            type: powerUp.type,
-            playerId: playerId,
-            activatedAt: Date(),
-            duration: powerUp.duration
-        )
-        
-        activePowerUps.append(activePowerUp)
-        
-        print("⚡ Power-up \(powerUp.type) activated for \(playerId)")
-    }
-    
-    func updateActivePowerUps() {
-        let now = Date()
-        activePowerUps.removeAll { powerUp in
-            let elapsed = now.timeIntervalSince(powerUp.activatedAt)
-            return elapsed >= powerUp.duration
-        }
-    }
-    
-    func getActivePowerUps(for playerId: String) -> [ActivePowerUp] {
-        return activePowerUps.filter { $0.playerId == playerId }
-    }
-    
-    // MARK: - Level Management
     func advanceToNextLevel() {
         currentLevel += 1
         completedCheckpoints.removeAll()
-        activePowerUps.removeAll()
         
         // Reset player positions
         playerPositions.removeAll()
@@ -265,123 +126,154 @@ class GameSession: ObservableObject {
         print("📈 Advanced to level \(currentLevel)")
     }
     
-    // MARK: - Session Info
-    func getSessionInfo() -> SessionInfo {
-        return SessionInfo(
-            gameCode: gameCode,
-            hostName: hostPlayer.name,
-            playerCount: players.count,
-            maxPlayers: maxPlayers,
-            currentLevel: currentLevel,
-            isGameStarted: gameStarted,
-            createdAt: createdAt
-        )
-    }
-    
-    func isExpired() -> Bool {
-        let expirationTime: TimeInterval = 30 * 60 // 30 minutes
-        return Date().timeIntervalSince(createdAt) > expirationTime
-    }
-    
-    func getPlayersInfo() -> [PlayerInfo] {
-        return players.map { player in
-            PlayerInfo(
-                id: player.id,
-                name: player.name,
-                isHost: player.isHost,
-                isReady: player.isReady,
-                playerType: player.playerType,
-                lives: player.lives,
-                score: player.score,
-                position: playerPositions[player.id] ?? CGPoint.zero
-            )
+    // MARK: - Position Synchronization
+    func updatePlayerPosition(playerId: String, position: CGPoint, velocity: CGVector, timestamp: TimeInterval) {
+        syncQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            // Check if this update is newer than the last one
+            if let lastTimestamp = self.lastUpdateTimestamps[playerId],
+               timestamp <= lastTimestamp {
+                return // Ignore older updates
+            }
+            
+            self.playerPositions[playerId] = position
+            self.playerVelocities[playerId] = velocity
+            self.lastUpdateTimestamps[playerId] = timestamp
+            
+            // Update the player object
+            if let player = self.getPlayer(with: playerId) {
+                DispatchQueue.main.async {
+                    player.updatePosition(position, velocity: velocity, timestamp: Date(timeIntervalSince1970: timestamp))
+                }
+            }
         }
     }
     
-    // MARK: - Private Methods
-    private func handleHostLeft() {
-        // If host leaves, end the game session
-        sessionState = .hostDisconnected
-        endGame(reason: .connectionLost)
+    func getPlayerPosition(playerId: String) -> CGPoint? {
+        return playerPositions[playerId]
     }
     
-    private func cleanupGameState() {
+    func getPlayerVelocity(playerId: String) -> CGVector? {
+        return playerVelocities[playerId]
+    }
+    
+    // MARK: - Checkpoint Management
+    func completeCheckpoint(_ checkpointId: String, by playerId: String) {
+        guard !completedCheckpoints.contains(checkpointId) else { return }
+        
+        completedCheckpoints.insert(checkpointId)
+        
+        if let player = getPlayer(with: playerId) {
+            player.addScore(Constants.checkpointScore)
+        }
+        
+        print("🏁 Checkpoint \(checkpointId) completed by \(playerId)")
+    }
+    
+    func isCheckpointCompleted(_ checkpointId: String) -> Bool {
+        return completedCheckpoints.contains(checkpointId)
+    }
+    
+    // MARK: - Power-Up Management
+    func activatePowerUp(_ type: PowerUpTypeEnum, for playerId: String, duration: TimeInterval = 5.0) {
+        let powerUp = ActivePowerUpInstance(
+            id: UUID().uuidString,
+            type: type,
+            playerId: playerId,
+            activatedAt: Date(),
+            duration: duration
+        )
+        
+        activePowerUpInstances.append(powerUp)
+        
+        print("⚡ Power-up \(type) activated for \(playerId)")
+    }
+    
+    func updateActivePowerUps() {
+        let now = Date()
+        activePowerUpInstances.removeAll { powerUp in
+            now.timeIntervalSince(powerUp.activatedAt) >= powerUp.duration
+        }
+    }
+    
+    func getActivePowerUps(for playerId: String) -> [ActivePowerUpInstance] {
+        return activePowerUpInstances.filter { $0.playerId == playerId }
+    }
+    
+    // MARK: - Session State
+    var canJoinGame: Bool {
+        return players.count < maxPlayers && !gameStarted
+    }
+    
+    var connectionSummary: String {
+        let readyCount = players.filter { $0.isReady }.count
+        return "\(players.count)/\(maxPlayers) players • \(readyCount) ready"
+    }
+    
+    // MARK: - Cleanup
+    func cleanup() {
+        players.removeAll()
         playerPositions.removeAll()
         playerVelocities.removeAll()
         lastUpdateTimestamps.removeAll()
         completedCheckpoints.removeAll()
-        activePowerUps.removeAll()
-    }
-    
-    // MARK: - Debug Info
-    func getDebugInfo() -> String {
-        return """
-        Session: \(gameCode)
-        Players: \(players.count)/\(maxPlayers)
-        State: \(sessionState)
-        Level: \(currentLevel)
-        Started: \(gameStarted)
-        Paused: \(gamePaused)
-        Checkpoints: \(completedCheckpoints.count)
-        Active Power-ups: \(activePowerUps.count)
-        """
+        activePowerUpInstances.removeAll()
+        
+        print("🧹 Game session cleaned up")
     }
 }
 
-// MARK: - Supporting Data Types
-struct ActivePowerUp {
-    let type: PowerUpType
+// MARK: - Supporting Types
+enum SessionStateType: String, CaseIterable {
+    case notConnected = "notConnected"
+    case connecting = "connecting"
+    case connected = "connected"
+    case hosting = "hosting"
+    case gameInProgress = "gameInProgress"
+    case gameEnded = "gameEnded"
+    case error = "error"
+}
+
+enum GameEndReasonType: String, CaseIterable {
+    case gameCompleted = "gameCompleted"
+    case allPlayersEliminated = "allPlayersEliminated"
+    case hostDisconnected = "hostDisconnected"
+    case networkError = "networkError"
+    case gameAborted = "gameAborted"
+}
+
+enum PowerUpTypeEnum: String, CaseIterable {
+    case oil = "oil"
+    case grass = "grass"
+    case shield = "shield"
+    case magnet = "magnet"
+    case invulnerability = "invulnerability"
+    
+    var displayName: String {
+        switch self {
+        case .oil: return "Speed Boost"
+        case .grass: return "Slow Motion"
+        case .shield: return "Shield"
+        case .magnet: return "Magnet"
+        case .invulnerability: return "Invulnerability"
+        }
+    }
+}
+
+struct ActivePowerUpInstance: Identifiable {
+    let id: String
+    let type: PowerUpTypeEnum
     let playerId: String
     let activatedAt: Date
     let duration: TimeInterval
     
-    var isExpired: Bool {
-        Date().timeIntervalSince(activatedAt) >= duration
+    var remainingTime: TimeInterval {
+        let elapsed = Date().timeIntervalSince(activatedAt)
+        return max(0, duration - elapsed)
     }
-}
-
-struct SessionInfo {
-    let gameCode: String
-    let hostName: String
-    let playerCount: Int
-    let maxPlayers: Int
-    let currentLevel: Int
-    let isGameStarted: Bool
-    let createdAt: Date
-}
-
-struct PlayerInfo {
-    let id: String
-    let name: String
-    let isHost: Bool
-    let isReady: Bool
-    let playerType: PlayerType
-    let lives: Int
-    let score: Int
-    let position: CGPoint
-}
-
-// MARK: - Session State Enum
-enum SessionState {
-    case notConnected
-    case searching
-    case connecting
-    case connected
-    case hosting
-    case gameInProgress
-    case gameEnded
-    case hostDisconnected
     
-    var description: String {
-        switch self {
-        case .notConnected: return "Not Connected"
-        case .searching: return "Searching for Game"
-        case .connecting: return "Connecting"
-        case .connected: return "Connected"
-        case .hosting: return "Hosting Game"
-        case .gameInProgress: return "Game in Progress"
-        case .gameEnded: return "Game Ended"
-        case .hostDisconnected: return "Host Disconnected"
-        }
+    var isExpired: Bool {
+        return remainingTime <= 0
     }
 }

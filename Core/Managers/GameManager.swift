@@ -289,12 +289,28 @@ class GameManager: ObservableObject {
 }
 
 // MARK: - Game End Reasons
-enum GameEndReason {
-    case playerQuit
-    case gameCompleted
-    case allPlayersEliminated
-    case connectionLost
+enum GameEndReason: String, Codable {
+    case playerQuit = "playerQuit"
+    case gameCompleted = "gameCompleted"
+    case allPlayersEliminated = "allPlayersEliminated"
+    case connectionLost = "connectionLost"
+    case hostDisconnected = "hostDisconnected"
+    case timeout = "timeout"
+    case error = "error"
+    
+    var displayMessage: String {
+        switch self {
+        case .playerQuit: return "A player quit the game"
+        case .gameCompleted: return "Congratulations! Game completed!"
+        case .allPlayersEliminated: return "All players were eliminated"
+        case .connectionLost: return "Connection lost"
+        case .hostDisconnected: return "Host disconnected"
+        case .timeout: return "Game timed out"
+        case .error: return "An error occurred"
+        }
+    }
 }
+
 
 // MARK: - Notification Names
 extension Notification.Name {

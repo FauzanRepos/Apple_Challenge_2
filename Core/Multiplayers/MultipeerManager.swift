@@ -14,7 +14,7 @@ class MultipeerManager: NSObject, ObservableObject {
     static let shared = MultipeerManager()
     
     // MARK: - Published Properties
-    @Published var sessionState: SessionState = .notConnected
+    @Published var sessionState: StateS = .notConnected
     @Published var connectedPlayers: [NetworkPlayer] = []
     @Published var isHost: Bool = false
     @Published var gameCode: String = ""
@@ -118,7 +118,7 @@ class MultipeerManager: NSObject, ObservableObject {
         gameCode = code
         isHost = false
         localPlayer.isHost = false
-        sessionState = .searching
+        sessionState = .searchingForGame
         
         // Start browsing for the game
         startBrowsing { [weak self] success, error in
