@@ -133,7 +133,7 @@ class NetworkPlayer: ObservableObject, Identifiable, Codable {
         self.peerID = MCPeerID(displayName: id)
         self.lastPositionUpdate = Date()
         self.pendingUpdates = []
-        self.predictedPosition = position
+        self.predictedPosition = CGPoint(x: 100, y: 200)
         self.interpolationBuffer = []
     }
     

@@ -515,7 +515,7 @@ extension Array where Element == Checkpoint {
     }
     
     func nearest(to position: CGPoint) -> Checkpoint? {
-        return min { checkpoint1, checkpoint2 in
+        return self.min { checkpoint1, checkpoint2 in
             checkpoint1.getDistanceTo(position) < checkpoint2.getDistanceTo(position)
         }
     }

@@ -199,7 +199,7 @@ class MultipeerManager: NSObject, ObservableObject {
         let totalPlayers = connectedPlayers.count
         let mapMoverCount = max(1, totalPlayers / 3) // 1/3 of players can move map
         
-        for (index, player) in connectedPlayers.enumerated() {
+        for (index, _) in connectedPlayers.enumerated() {
             if index < mapMoverCount {
                 connectedPlayers[index].playerType = .mapMover
             } else {
@@ -212,45 +212,45 @@ class MultipeerManager: NSObject, ObservableObject {
     
     // MARK: - Message Sending
     func sendPlayerMovement(_ position: CGPoint, velocity: CGVector) {
-        let message = NetworkMessage.playerMovement(
+        let message = MessageFactory.createPlayerMovementMessage(
             playerId: localPlayer.id,
             position: position,
-            velocity: velocity,
-            timestamp: Date().timeIntervalSince1970
+            velocity: velocity
+            // timestamp: Date().timeIntervalSince1970
         )
         sendMessage(message)
     }
     
     func sendCheckpointReached(_ checkpointId: String, playerId: String) {
-        let message = NetworkMessage.checkpointReached(
-            checkpointId: checkpointId,
-            playerId: playerId
+        let message = MessageFactory.createCheckpointMessage(
+            playerId: playerId,
+            checkpointId: checkpointId
         )
         sendMessage(message)
     }
     
     func sendPlayerDied(_ playerId: String) {
-        let message = NetworkMessage.playerDied(playerId: playerId)
+        let message = MessageFactory.playerDied(playerId: playerId)
         sendMessage(message)
     }
     
     func sendGamePaused() {
-        let message = NetworkMessage.gamePaused
+        let message = MessageFactory.gamePaused
         sendMessage(message)
     }
     
     func sendGameResumed() {
-        let message = NetworkMessage.gameResumed
+        let message = MessageFactory.gameResumed
         sendMessage(message)
     }
     
     func sendGameEnded(reason: GameEndReason) {
-        let message = NetworkMessage.gameEnded(reason: reason)
+        let message = MessageFactory.createGameEndMessage(reason: reason)
         sendMessage(message)
     }
     
     private func sendPlayerReadyState(_ isReady: Bool) {
-        let message = NetworkMessage.playerReady(
+        let message = MessageFactory.createPlayerJoinedMessage(
             playerId: localPlayer.id,
             isReady: isReady
         )
@@ -258,7 +258,7 @@ class MultipeerManager: NSObject, ObservableObject {
     }
     
     private func sendGameStart() {
-        let message = NetworkMessage.gameStart(players: connectedPlayers)
+        let message = MessageFactory.createGameStartMessage(players: connectedPlayers)
         sendMessage(message)
     }
     
@@ -306,6 +306,9 @@ class MultipeerManager: NSObject, ObservableObject {
                 
             case .gameEnded(let reason):
                 self?.gameDelegate?.gameDidEnd(reason: reason)
+                
+            default:
+                print("⚠️ Unhandled message type: \(message.type)")
             }
         }
     }
@@ -350,7 +353,7 @@ class MultipeerManager: NSObject, ObservableObject {
     
     private func sendCurrentGameStateToPlayer(_ player: NetworkPlayer) {
         // Send current player list
-        let message = NetworkMessage.playerJoined(player: localPlayer)
+        let message = MessageFactory.createPlayerJoinedMessage(player: localPlayer)
         sendMessage(message)
     }
     
@@ -437,7 +440,7 @@ extension MultipeerManager: MCSessionDelegate {
                     self.sessionState = .connected
                     
                     // Send join message to host
-                    let message = NetworkMessage.playerJoined(player: self.localPlayer)
+                    let message = MessageFactory.createPlayerJoinedMessage(player: self.localPlayer)
                     self.sendMessage(message)
                 }
                 

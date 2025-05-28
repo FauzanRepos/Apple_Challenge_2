@@ -6,6 +6,7 @@
 //  Copyright © 2025 ADA Team. All rights reserved.
 //
 
+import UIKit
 import Foundation
 
 // MARK: - Game Record Model

@@ -193,7 +193,7 @@ extension String {
         for i in 1...selfCount {
             for j in 1...otherCount {
                 let cost = selfArray[i - 1] == otherArray[j - 1] ? 0 : 1
-                matrix[i][j] = min(
+                matrix[i][j] = Swift.min(
                     matrix[i - 1][j] + 1,
                     matrix[i][j - 1] + 1,
                     matrix[i - 1][j - 1] + cost
@@ -273,9 +273,9 @@ extension String {
         return size(withFont: font, constrainedTo: CGSize(width: width, height: .greatestFiniteMagnitude)).height
     }
     
-    func width(withFont font: UIFont) -> CGFloat {
-        return size(withFont: font, constrainedTo: CGSize(width: .greatestFiniteMagnitude, height: .greatestFiniteMagnitude)).width
-    }
+//    func width(withFont font: UIFont) -> CGFloat {
+//        return size(withFont: font, constrainedTo: CGSize(width: .greatestFiniteMagnitude, height: .greatestFiniteMagnitude)).width
+//    }
     
     // MARK: - Random Generation
     static func randomString(length: Int, characters: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") -> String {
@@ -477,6 +477,12 @@ extension String {
             return "\(score)"
         }
     }
+    
+//    static func formatScore(_ score: Int) -> String {
+//        let formatter = NumberFormatter()
+//        formatter.numberStyle = .decimal
+//        return formatter.string(from: NSNumber(value: score)) ?? "\(score)"
+//    }
     
     static func formatTime(_ timeInterval: TimeInterval) -> String {
         let formatter = DateComponentsFormatter()

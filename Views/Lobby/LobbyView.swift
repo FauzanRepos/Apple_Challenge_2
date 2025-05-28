@@ -252,25 +252,19 @@ struct LobbyView: View {
         }
     }
 
-    // MARK: - Methods
     private func setupLobby() {
-        gameCode = generateGameCode()
-        isHost = true
+        // Call the existing createGame() method
+        let code = multipeerManager.createGame()
 
-        // Add local player
-        let localPlayer = NetworkPlayerFactory.createLocalPlayer(name: "Commander")
-        localPlayer.isHost = true
-        localPlayer.isLocal = true
-        localPlayer.playerType = .mapMover
-        players.append(localPlayer)
+        // Retrieve the local player that was set up inside createGame()
+        let localPlayer = multipeerManager.getLocalPlayer()
 
-        sessionState.createGame(with: gameCode)
+        // Set any additional UI-specific or state logic
+        sessionState.createGame(with: code)
         sessionState.addPlayer(localPlayer)
 
         animateCode = true
-
-        // Start advertising game
-        multipeerManager.startHosting(gameCode: gameCode)
+        print("🎮 Lobby setup complete with code: \(code)")
     }
 
     private func generateGameCode() -> String {
@@ -288,14 +282,6 @@ struct LobbyView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             navigateToGame = true
         }
-    }
-}
-
-struct ScaleButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 

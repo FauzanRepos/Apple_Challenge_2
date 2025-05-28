@@ -6,6 +6,8 @@
 //  Copyright © 2025 ADA Team. All rights reserved.
 //
 
+// MARK: - Import for Core Motion
+import CoreMotion
 import Foundation
 import UIKit
 
@@ -803,6 +805,3 @@ class ValidationHelper {
            Constants.maxPlayersPerRoom
        )
     }
-
-    // MARK: - Import for Core Motion
-    import CoreMotion

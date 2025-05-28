@@ -314,15 +314,6 @@ struct ScoreAnimationOverlay: View {
     }
 }
 
-// MARK: - String Extension
-extension String {
-    static func formatScore(_ score: Int) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        return formatter.string(from: NSNumber(value: score)) ?? "\(score)"
-    }
-}
-
 #Preview {
     VStack(spacing: 30) {
         ScoreDisplayView(currentScore: 1250, highScore: 1000)

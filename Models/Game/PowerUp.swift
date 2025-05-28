@@ -256,10 +256,10 @@ extension PowerUpType {
         case .grass: return "Slow Motion"
         case .shield: return "Shield"
         case .magnet: return "Magnet"
+            //        case .invulnerability: return "Invulnerability"
             //        case .teleport: return "Teleport"
             //        case .ghost: return "Ghost Mode"
             //        case .time: return "Time Stop"
-        case .invulnerability: return "Invulnerability"
         default: return rawValue.capitalized
         }
     }
@@ -430,7 +430,7 @@ enum PowerUpAnimation: String, CaseIterable, Codable {
 
 // MARK: - PowerUp Effect
 struct PowerUpEffect: Codable, Identifiable {
-    let id = UUID()
+    let id: UUID
     let type: PowerUpType
     let duration: TimeInterval
     let strength: CGFloat
@@ -439,6 +439,7 @@ struct PowerUpEffect: Codable, Identifiable {
     let activatedAt: Date
     
     init(type: PowerUpType, duration: TimeInterval, strength: CGFloat, playerId: String, powerUpId: String) {
+        self.id = UUID()
         self.type = type
         self.duration = duration
         self.strength = strength
