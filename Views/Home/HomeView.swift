@@ -121,7 +121,7 @@ struct HomeView: View {
                         showCodeInput = false
                         showLobby = true
                     }
-                    .disabled(roomCode.count != 6)
+                    .disabled(roomCode.count != 4)
                     Button("Cancel") {
                         showCodeInput = false
                         roomCode = ""
