@@ -46,17 +46,12 @@ final class PlayerSyncManager {
                     if let lives = event.section {
                         GameManager.shared.setTeamLives(lives)
                     }
+                case .cameraMoved:
+                    if let camPos = event.cameraPosition {
+                        GameManager.shared.setCameraPosition(camPos)
+                    }
                 default:
                     GameManager.shared.handleGameEvent(event)
-                }
-            }
-        case .cameraMoved:
-            if let event = message.gameEvent, let camPos = event.cameraPosition {
-                GameManager.shared.cameraPosition = camPos
-                // Or directly update scene camera if possible
-                if let skView = UIApplication.shared.windows.first?.rootViewController?.view as? SKView,
-                   let scene = skView.scene as? GameScene {
-                    scene.centerCamera(on: camPos)
                 }
             }
         }
@@ -96,7 +91,7 @@ final class PlayerSyncManager {
         let event = GameEvent(type: .cameraMoved, cameraPosition: position)
         broadcastGameEvent(event)
     }
-
+    
     // Broadcast team lives after a death
     func broadcastTeamLives(_ lives: Int) {
         let event = GameEvent(type: .playerDeath, section: lives)

@@ -197,4 +197,9 @@ final class GameManager: ObservableObject {
         // Sync roles
         PlayerSyncManager.shared.broadcastAllPlayerUpdates(players)
     }
+    
+    /// Set camera location updated (for multiplayer sync)
+    func setCameraPosition(_ pos: CGPoint?) {
+        SKScene.centerCamera(on: pos)
+    }
 }
