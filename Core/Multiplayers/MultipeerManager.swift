@@ -27,7 +27,7 @@ final class MultipeerManager: NSObject, ObservableObject {
     @Published var isReady: Bool = false
     @Published var state: MultipeerState = .idle
     
-    private let serviceType = "spacemaze"
+    private let serviceType = "space-maze"
     private let displayName = UIDevice.current.name
     private var cancelBag = Set<AnyCancellable>()
     
