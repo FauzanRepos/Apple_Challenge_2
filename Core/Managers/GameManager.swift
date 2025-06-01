@@ -144,4 +144,43 @@ final class GameManager: ObservableObject {
             break // already handled pause/resume in PlayerSyncManager
         }
     }
+    
+    // Randomly assigns mapMover roles according to the rules
+    func assignMapMoverRoles() {
+        var players = MultipeerManager.shared.players
+        let playerCount = players.count
+        let allEdges: [EdgeRole] = [.top, .left, .bottom, .right]
+        
+        // Clear all assignments
+        for player in players { player.assignedEdge = nil }
+        
+        if playerCount == 2 {
+            // Only one mapMover, one normal
+            let randomIdx = Int.random(in: 0..<2)
+            players[randomIdx].assignedEdge = allEdges.randomElement()
+            // other player remains nil (normal)
+        } else if playerCount >= 3 && playerCount <= 5 {
+            // Assign up to 4 edges (as available, shuffled)
+            let edgeAssignments = Array(allEdges.shuffled().prefix(playerCount))
+            for (idx, player) in players.enumerated() {
+                player.assignedEdge = edgeAssignments[idx]
+            }
+            // If 5 players, the fifth gets nil (normal)
+            if playerCount == 5 {
+                players[4].assignedEdge = nil
+            }
+        } else if playerCount > 5 {
+            // Assign only 4 mapMovers (one per edge), others normal
+            let moverIdxs = Array(0..<playerCount).shuffled().prefix(4)
+            let edgeAssignments = allEdges.shuffled()
+            for (edgeIdx, playerIdx) in moverIdxs.enumerated() {
+                players[playerIdx].assignedEdge = edgeAssignments[edgeIdx]
+            }
+            // Others remain nil (normal)
+        }
+        // Save back
+        MultipeerManager.shared.players = players
+        // Sync roles
+        PlayerSyncManager.shared.broadcastAllPlayerUpdates(players)
+    }
 }

@@ -163,9 +163,89 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
+    // Returns true if the position is near any edge (within tolerance)
+    func isAtScreenEdge(_ position: CGPoint, tolerance: CGFloat = 16) -> Bool {
+        guard let levelData = LevelManager.shared.currentLevelData else { return false }
+        let minX: CGFloat = 0
+        let minY: CGFloat = 0
+        let maxX: CGFloat = CGFloat(levelData.width) * levelData.tileSize
+        let maxY: CGFloat = CGFloat(levelData.height) * levelData.tileSize
+        return abs(position.x - minX) < tolerance ||
+        abs(position.x - maxX) < tolerance ||
+        abs(position.y - minY) < tolerance ||
+        abs(position.y - maxY) < tolerance
+    }
+    
+    // Returns true if the position is at a specific edge
+    func isAtSpecificEdge(_ position: CGPoint, edge: EdgeRole, tolerance: CGFloat = 16) -> Bool {
+        guard let levelData = LevelManager.shared.currentLevelData else { return false }
+        let minX: CGFloat = 0
+        let minY: CGFloat = 0
+        let maxX: CGFloat = CGFloat(levelData.width) * levelData.tileSize
+        let maxY: CGFloat = CGFloat(levelData.height) * levelData.tileSize
+        switch edge {
+        case .left:
+            return abs(position.x - minX) < tolerance
+        case .right:
+            return abs(position.x - maxX) < tolerance
+        case .top:
+            return abs(position.y - maxY) < tolerance
+        case .bottom:
+            return abs(position.y - minY) < tolerance
+        }
+    }
+    
+    func moveCamera(for edge: EdgeRole) {
+        guard let camera = self.camera, let levelData = LevelManager.shared.currentLevelData else { return }
+        let moveAmount: CGFloat = levelData.tileSize * 2 // Move 2 tiles per camera scroll
+        var newPosition = camera.position
+        
+        switch edge {
+        case .left:
+            newPosition.x = max(newPosition.x - moveAmount, size.width / 2)
+        case .right:
+            newPosition.x = min(newPosition.x + moveAmount, CGFloat(levelData.width) * levelData.tileSize - size.width / 2)
+        case .top:
+            newPosition.y = min(newPosition.y + moveAmount, CGFloat(levelData.height) * levelData.tileSize - size.height / 2)
+        case .bottom:
+            newPosition.y = max(newPosition.y - moveAmount, size.height / 2)
+        }
+        
+        let action = SKAction.move(to: newPosition, duration: 0.2)
+        camera.run(action)
+        // After moving, broadcast the position
+        PlayerSyncManager.shared.broadcastCameraPosition(newPosition)
+    }
+    
+    func centerCamera(on position: CGPoint) {
+        camera?.run(SKAction.move(to: position, duration: 0.2))
+    }
+    
+    func handlePlayerDeath(_ playerID: String) {
+        // Example: show popup, decrease lives, respawn at last checkpoint, etc.
+        // You can expand this based on your full game logic
+        print("Player \(playerID) died!")
+        // Play sound, show popup, decrement lives, etc.
+    }
+    
     func didBegin(_ contact: SKPhysicsContact) {
         guard let nameA = contact.bodyA.node?.name, let nameB = contact.bodyB.node?.name else { return }
-        // Handle collisions (expand as needed)
+        
+        // Determine which player, which edge
+        for (playerID, node) in playerNodes {
+            if isAtScreenEdge(node.position) {
+                guard let player = MultipeerManager.shared.players.first(where: { $0.id == playerID }) else { continue }
+                if let assignedEdge = player.assignedEdge,
+                   isAtSpecificEdge(node.position, edge: assignedEdge) {
+                    // This player is the mapMover for this edge → move map/camera!
+                    moveCamera(for: assignedEdge)
+                    // Sync camera movement as needed
+                } else {
+                    // Not mapMover for this edge (or normal) → player dies
+                    handlePlayerDeath(playerID)
+                }
+            }
+        }
     }
     
     override func update(_ currentTime: TimeInterval) {

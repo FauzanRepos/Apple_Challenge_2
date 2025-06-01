@@ -20,15 +20,17 @@ final class NetworkPlayer: ObservableObject, Identifiable, Codable {
     @Published var lives: Int
     @Published var score: Int
     @Published var isReady: Bool
-    @Published var isMapMover: Bool
     @Published var lastSeen: Date
     
-    // MARK: - Codable
+    // MapMover/edge role logic
+    @Published var assignedEdge: EdgeRole?
+    var isMapMover: Bool { assignedEdge != nil }
+    
     enum CodingKeys: String, CodingKey {
-        case id, peerID, colorIndex, position, velocity, lives, score, isReady, isMapMover, lastSeen
+        case id, peerID, colorIndex, position, velocity, lives, score, isReady, assignedEdge, lastSeen
     }
     
-    init(id: String, peerID: String, colorIndex: Int, position: CGPoint = .zero, velocity: CGVector = .zero, lives: Int = Constants.defaultPlayerLives, score: Int = 0, isReady: Bool = false, isMapMover: Bool = false) {
+    init(id: String, peerID: String, colorIndex: Int, position: CGPoint = .zero, velocity: CGVector = .zero, lives: Int = Constants.defaultPlayerLives, score: Int = 0, isReady: Bool = false, assignedEdge: EdgeRole? = nil) {
         self.id = id
         self.peerID = peerID
         self.colorIndex = colorIndex
@@ -37,11 +39,11 @@ final class NetworkPlayer: ObservableObject, Identifiable, Codable {
         self.lives = lives
         self.score = score
         self.isReady = isReady
-        self.isMapMover = isMapMover
+        self.assignedEdge = assignedEdge
         self.lastSeen = Date()
     }
     
-    // MARK: - Codable
+    // Codable
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(String.self, forKey: .id)
@@ -52,7 +54,7 @@ final class NetworkPlayer: ObservableObject, Identifiable, Codable {
         lives = try container.decode(Int.self, forKey: .lives)
         score = try container.decode(Int.self, forKey: .score)
         isReady = try container.decode(Bool.self, forKey: .isReady)
-        isMapMover = try container.decode(Bool.self, forKey: .isMapMover)
+        assignedEdge = try container.decodeIfPresent(EdgeRole.self, forKey: .assignedEdge)
         lastSeen = try container.decode(Date.self, forKey: .lastSeen)
     }
     
@@ -66,7 +68,7 @@ final class NetworkPlayer: ObservableObject, Identifiable, Codable {
         try container.encode(lives, forKey: .lives)
         try container.encode(score, forKey: .score)
         try container.encode(isReady, forKey: .isReady)
-        try container.encode(isMapMover, forKey: .isMapMover)
+        try container.encodeIfPresent(EdgeRole.self, assignedEdge, forKey: .assignedEdge)
         try container.encode(lastSeen, forKey: .lastSeen)
     }
 }

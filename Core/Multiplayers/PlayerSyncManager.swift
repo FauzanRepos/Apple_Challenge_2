@@ -46,6 +46,15 @@ final class PlayerSyncManager {
                     GameManager.shared.handleGameEvent(event)
                 }
             }
+        case .cameraMoved:
+            if let event = message.gameEvent, let camPos = event.cameraPosition {
+                GameManager.shared.cameraPosition = camPos
+                // Or directly update scene camera if possible
+                if let skView = UIApplication.shared.windows.first?.rootViewController?.view as? SKView,
+                   let scene = skView.scene as? GameScene {
+                    scene.centerCamera(on: camPos)
+                }
+            }
         }
     }
     
@@ -69,6 +78,18 @@ final class PlayerSyncManager {
     
     func broadcastResumeRequest(by playerID: String) {
         let event = GameEvent(type: .resumeRequest, playerID: playerID)
+        broadcastGameEvent(event)
+    }
+    
+    func broadcastAllPlayerUpdates(_ players: [NetworkPlayer]) {
+        for player in players {
+            broadcastPlayerUpdate(player)
+        }
+    }
+    
+    // Broadcast camera position to all peers
+    func broadcastCameraPosition(_ position: CGPoint) {
+        let event = GameEvent(type: .cameraMoved, cameraPosition: position)
         broadcastGameEvent(event)
     }
 }
