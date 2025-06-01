@@ -6,17 +6,19 @@
 //  Copyright © 2025 ADA Team. All rights reserved.
 //
 
+import Foundation
 import MultipeerConnectivity
- 
-class LANPermissionManager: NSObject, ObservableObject, MCNearbyServiceAdvertiserDelegate {
+import SwiftUI
+
+/// Handles LAN (local network) permission prompt required for MultipeerConnectivity
+final class LANPermissionManager: NSObject, ObservableObject, MCNearbyServiceAdvertiserDelegate {
     private var peerID: MCPeerID!
     private var advertiser: MCNearbyServiceAdvertiser?
     @Published var isAdvertising = false
     @Published var hasPermission = false
     
-    // Completion handler for permission status
     var onPermissionStatusChanged: ((Bool) -> Void)?
-
+    
     override init() {
         super.init()
         setupPeerID()
@@ -27,42 +29,25 @@ class LANPermissionManager: NSObject, ObservableObject, MCNearbyServiceAdvertise
         advertiser = MCNearbyServiceAdvertiser(peer: peerID, discoveryInfo: nil, serviceType: "spacemaze")
         advertiser?.delegate = self
     }
-
+    
     func triggerPermissionPrompt() {
-        print("Starting permission prompt...")
         isAdvertising = true
-        
-        // Ensure we have a valid advertiser
-        if advertiser == nil {
-            setupPeerID()
-        }
-        
-        // Start advertising to trigger permission prompt
+        if advertiser == nil { setupPeerID() }
         advertiser?.startAdvertisingPeer()
-        
-        // Stop after 5 seconds to ensure prompt appears
         DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
             self?.advertiser?.stopAdvertisingPeer()
             self?.isAdvertising = false
-            print("Stopped advertising")
         }
     }
-
-    // Required delegate methods
+    
+    // MARK: - MCNearbyServiceAdvertiserDelegate
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
-        print("Received invitation from peer: \(peerID.displayName)")
-        // If we receive an invitation, it means we have permission
         hasPermission = true
         onPermissionStatusChanged?(true)
-        invitationHandler(false, nil) // We are not accepting any connections now
+        invitationHandler(false, nil)
     }
-
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: Error) {
-        print("Advertising failed: \(error.localizedDescription)")
-        print("Error domain: \(error._domain), code: \(error._code)")
         isAdvertising = false
-        
-        // Check if the error is due to permission denial
         if (error as NSError).domain == "NSNetServicesErrorDomain" {
             hasPermission = false
             onPermissionStatusChanged?(false)

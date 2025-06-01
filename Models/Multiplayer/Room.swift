@@ -8,11 +8,17 @@
 
 import Foundation
 
-struct Room: Identifiable {
+/// Represents a multiplayer room (for lobby UI and sync)
+struct Room: Codable, Identifiable {
+    let id: String
+    var code: String
+    var players: [NetworkPlayer]
+    var isOpen: Bool
     
-    let id = UUID()
-    let name: String
-    let capacity: Int
-    let filledCapacity: Int
-
+    init(id: String = UUID().uuidString, code: String, players: [NetworkPlayer] = [], isOpen: Bool = true) {
+        self.id = id
+        self.code = code
+        self.players = players
+        self.isOpen = isOpen
+    }
 }

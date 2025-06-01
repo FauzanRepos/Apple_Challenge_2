@@ -7,319 +7,96 @@
 //
 
 import Foundation
-import CoreMotion
 import Combine
+import SwiftUI
 
-class GameManager: ObservableObject {
+/// Main game state manager. Handles global game status, level flow, lives, score, and checkpoint progression.
+final class GameManager: ObservableObject {
     static let shared = GameManager()
     
-    // MARK: - Published Properties
-    @Published var currentGameState: GameState = GameState()
-    @Published var isGamePaused: Bool = false
+    // MARK: - Published State
     @Published var currentLevel: Int = 1
-    @Published var gameMode: GameMode = .singlePlayer
+    @Published var maxLevel: Int = 2
+    @Published var currentPlanet: Int = 1
+    @Published var section: Int = 1 // checkpoint section 1...4
+    @Published var totalSections: Int = 4
+    @Published var teamLives: Int = 5
+    @Published var scoreText: String = "Planet 1 Section 1/4"
+    @Published var isGameOver: Bool = false
+    @Published var isMissionAccomplished: Bool = false
+    @Published var isPaused: Bool = false
+    @Published var missionClue: String = ""
+    @Published var lastCheckpoint: CGPoint? = nil
+    @Published var mapMoverPlayerID: String? = nil // player id of mapMover
+    @Published var playersFinished: Set<String> = [] // ids of players in spaceship
     
-    // MARK: - Private Properties
-    private var cancellables = Set<AnyCancellable>()
-    private var gameTimer: Timer?
+    // For checkpoint tracking
+    @Published var reachedCheckpoints: Set<Int> = []
     
-    // MARK: - Managers
-    private let levelManager = LevelManager.shared
-    private let audioManager = AudioManager.shared
-    private let storageManager = StorageManager.shared
+    private init() {}
     
-    private init() {
-        setupBindings()
+    // MARK: - Level/Section Management
+    func startGame() {
+        resetGame()
+        loadLevel(1)
     }
     
-    // MARK: - Setup
-    private func setupBindings() {
-        // Listen to multiplayer events
-        MultipeerManager.shared.$sessionState
-            .sink { [weak self] sessionState in
-                self?.handleSessionStateChange(sessionState)
-            }
-            .store(in: &cancellables)
-        
-        // Listen to level completion
-        NotificationCenter.default.publisher(for: .levelCompleted)
-            .sink { [weak self] _ in
-                self?.handleLevelCompleted()
-            }
-            .store(in: &cancellables)
+    func loadLevel(_ level: Int) {
+        currentLevel = level
+        currentPlanet = level // 1-to-1 mapping for now
+        section = 1
+        teamLives = 5
+        reachedCheckpoints = []
+        playersFinished = []
+        isGameOver = false
+        isMissionAccomplished = false
+        isPaused = false
+        updateScoreText()
+        // Additional setup will be triggered by LevelManager
     }
     
-    // MARK: - Game Lifecycle
-    func startNewGame(mode: GameMode) {
-        print("🎮 Starting new game in mode: \(mode)")
-        
-        gameMode = mode
+    func reachCheckpoint(_ sectionIdx: Int) {
+        reachedCheckpoints.insert(sectionIdx)
+        section = max(section, sectionIdx)
+        updateScoreText()
+    }
+    
+    func playerFinished(playerID: String) {
+        playersFinished.insert(playerID)
+        if playersFinished.count == MultipeerManager.shared.players.count {
+            missionAccomplished()
+        }
+    }
+    
+    func loseLife() {
+        teamLives = max(0, teamLives - 1)
+        if teamLives == 0 {
+            isGameOver = true
+        }
+    }
+    
+    func missionAccomplished() {
+        isMissionAccomplished = true
+    }
+    
+    func pauseGame(_ pause: Bool) {
+        isPaused = pause
+    }
+    
+    func resetGame() {
         currentLevel = 1
-        currentGameState = GameState()
-        
-        // Load the first level
-        levelManager.loadLevel(currentLevel)
-        
-        // Start audio
-        audioManager.playBackgroundMusic()
-        
-        // Configure for multiplayer if needed
-        if mode != .singlePlayer {
-            setupMultiplayerGame()
-        }
-        
-        isGamePaused = false
+        currentPlanet = 1
+        section = 1
+        teamLives = 5
+        reachedCheckpoints = []
+        playersFinished = []
+        isGameOver = false
+        isMissionAccomplished = false
+        isPaused = false
+        updateScoreText()
     }
     
-    func pauseGame() {
-        guard !isGamePaused else { return }
-        
-        print("⏸️ Game paused")
-        isGamePaused = true
-        gameTimer?.invalidate()
-        audioManager.pauseBackgroundMusic()
-        
-        // Notify multiplayer peers if in multiplayer mode
-        if gameMode != .singlePlayer {
-            MultipeerManager.shared.sendGamePaused()
-        }
+    func updateScoreText() {
+        scoreText = "Planet \(currentPlanet) Section \(section)/\(totalSections)"
     }
-    
-    func resumeGame() {
-        guard isGamePaused else { return }
-        
-        print("▶️ Game resumed")
-        isGamePaused = false
-        audioManager.resumeBackgroundMusic()
-        
-        // Notify multiplayer peers if in multiplayer mode
-        if gameMode != .singlePlayer {
-            MultipeerManager.shared.sendGameResumed()
-        }
-    }
-    
-    func endGame(reason: GameEndReason) {
-        print("🏁 Game ended: \(reason)")
-        
-        gameTimer?.invalidate()
-        audioManager.stopBackgroundMusic()
-        
-        // Save high score if needed
-        if currentGameState.teamScore > storageManager.getHighScore() {
-            storageManager.saveHighScore(currentGameState.teamScore)
-        }
-        
-        // Handle multiplayer cleanup
-        if gameMode != .singlePlayer {
-            MultipeerManager.shared.sendGameEnded(reason: reason)
-        }
-        
-        // Reset state
-        currentGameState = GameState()
-        isGamePaused = false
-    }
-    
-    // MARK: - Level Management
-    func advanceToNextLevel() {
-        currentLevel += 1
-        print("📈 Advancing to level \(currentLevel)")
-        
-        // Check if level exists
-        if levelManager.levelExists(currentLevel) {
-            levelManager.loadLevel(currentLevel)
-            currentGameState.resetForNewLevel()
-        } else {
-            // Game completed!
-            endGame(reason: .gameCompleted)
-        }
-    }
-    
-    private func handleLevelCompleted() {
-        print("🎉 Level \(currentLevel) completed!")
-        audioManager.playLevelCompleteSound()
-        
-        // Update game state
-        currentGameState.currentLevel += 1
-        
-        // Advance to next level after a delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            self.advanceToNextLevel()
-        }
-    }
-
-    // MARK: - Player Management
-    func addPlayer(_ networkPlayer: NetworkPlayer) {
-        let player = Player(from: self.currentLevel, networkPlayer: networkPlayer)
-        currentGameState.players.append(player)
-        print("👤 Player added: \(player.name)")
-    }
-
-    func removePlayer(_ networkPlayer: NetworkPlayer) {
-        currentGameState.players.removeAll { $0.id == networkPlayer.id }
-        print("👤 Player removed: \(networkPlayer.name)")
-    }
-
-    func updatePlayerScore(_ playerId: String, score: Int) {
-        if let index = currentGameState.players.firstIndex(where: { $0.id == playerId }) {
-            currentGameState.players[index].score = score
-        }
-    }
-
-    func updatePlayerLives(_ playerId: String, lives: Int) {
-        if let index = currentGameState.players.firstIndex(where: { $0.id == playerId }) {
-            currentGameState.players[index].lives = lives
-        }
-    }
-    
-    // MARK: - Multiplayer Support
-    private func setupMultiplayerGame() {
-        print("🌐 Setting up multiplayer game")
-        
-        // Configure multiplayer-specific settings
-        currentGameState.isMultiplayer = true
-        
-        // Listen for multiplayer events
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handlePlayerJoined(_:)),
-            name: .playerJoined,
-            object: nil
-        )
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handlePlayerLeft(_:)),
-            name: .playerLeft,
-            object: nil
-        )
-    }
-    
-    @objc private func handlePlayerJoined(_ notification: Notification) {
-        guard let player = notification.object as? NetworkPlayer else { return }
-        addPlayer(player)
-    }
-    
-    @objc private func handlePlayerLeft(_ notification: Notification) {
-        guard let player = notification.object as? NetworkPlayer else { return }
-        removePlayer(player)
-    }
-    
-    private func handleSessionStateChange(_ state: StateS) {
-        switch state {
-        case .notConnected:
-            if gameMode != .singlePlayer {
-                // Lost connection during multiplayer game
-                pauseGame()
-            }
-        case .connecting:
-            break
-        case .connected:
-            if isGamePaused && gameMode != .singlePlayer {
-                resumeGame()
-            }
-        default:
-            break // Empty space
-        }
-    }
-    
-    // MARK: - Game Events
-    func handleCheckpointReached(_ checkpointId: String, by playerId: String) {
-        print("🏁 Checkpoint \(checkpointId) reached by player \(playerId)")
-        
-        // Update game state
-        currentGameState.lastCheckpointId = checkpointId
-        
-        // Notify other players in multiplayer
-        if gameMode != .singlePlayer {
-            MultipeerManager.shared.sendCheckpointReached(checkpointId, playerId: playerId)
-        }
-        
-        // Play checkpoint sound
-        audioManager.playCheckpointSound()
-    }
-    
-    func handlePlayerDeath(_ playerId: String) {
-        print("💀 Player \(playerId) died")
-        
-        // Update player lives
-        if let playerIndex = currentGameState.players.firstIndex(where: { $0.id == playerId }) {
-            currentGameState.players[playerIndex].lives -= 1
-            
-            if currentGameState.players[playerIndex].lives <= 0 {
-                // Player is out of lives
-                handlePlayerEliminated(playerId)
-            } else {
-                // Respawn player at last checkpoint
-                respawnPlayer(playerId)
-            }
-        }
-        
-        // Notify other players in multiplayer
-        if gameMode != .singlePlayer {
-            MultipeerManager.shared.sendPlayerDied(playerId)
-        }
-    }
-    
-    private func handlePlayerEliminated(_ playerId: String) {
-        print("❌ Player \(playerId) eliminated")
-        
-        // In cooperative mode, if any player is eliminated, restart from checkpoint
-        if gameMode == .multiplayerHost || gameMode == .multiplayerClient {
-            respawnAllPlayersAtCheckpoint()
-        }
-    }
-    
-    private func respawnPlayer(_ playerId: String) {
-        print("🔄 Respawning player \(playerId)")
-        
-        // Reset player to last checkpoint
-        NotificationCenter.default.post(
-            name: .respawnPlayer,
-            object: playerId
-        )
-    }
-    
-    private func respawnAllPlayersAtCheckpoint() {
-        print("🔄 Respawning all players at checkpoint")
-        
-        // Reset all players to last checkpoint
-        for player in currentGameState.players {
-            player.lives = 3 // Reset lives for cooperative play
-        }
-        
-        NotificationCenter.default.post(name: .respawnAllPlayers, object: nil)
-    }
-}
-
-// MARK: - Game End Reasons
-enum GameEndReason: String, Codable {
-    case playerQuit = "playerQuit"
-    case gameCompleted = "gameCompleted"
-    case allPlayersEliminated = "allPlayersEliminated"
-    case connectionLost = "connectionLost"
-    case hostDisconnected = "hostDisconnected"
-    case timeout = "timeout"
-    case error = "error"
-    
-    var displayMessage: String {
-        switch self {
-        case .playerQuit: return "A player quit the game"
-        case .gameCompleted: return "Congratulations! Game completed!"
-        case .allPlayersEliminated: return "All players were eliminated"
-        case .connectionLost: return "Connection lost"
-        case .hostDisconnected: return "Host disconnected"
-        case .timeout: return "Game timed out"
-        case .error: return "An error occurred"
-        }
-    }
-}
-
-
-// MARK: - Notification Names
-extension Notification.Name {
-    static let levelCompleted = Notification.Name("levelCompleted")
-    static let playerJoined = Notification.Name("playerJoined")
-    static let playerLeft = Notification.Name("playerLeft")
-    static let respawnPlayer = Notification.Name("respawnPlayer")
-    static let respawnAllPlayers = Notification.Name("respawnAllPlayers")
 }
