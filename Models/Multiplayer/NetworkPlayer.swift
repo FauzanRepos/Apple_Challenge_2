@@ -68,7 +68,7 @@ final class NetworkPlayer: ObservableObject, Identifiable, Codable {
         try container.encode(lives, forKey: .lives)
         try container.encode(score, forKey: .score)
         try container.encode(isReady, forKey: .isReady)
-        try container.encodeIfPresent(EdgeRole.self, assignedEdge, forKey: .assignedEdge)
+        try container.encodeIfPresent(assignedEdge, forKey: .assignedEdge)
         try container.encode(lastSeen, forKey: .lastSeen)
     }
 }

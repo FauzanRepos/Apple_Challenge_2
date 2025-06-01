@@ -78,7 +78,7 @@ struct HomeView: View {
                     .environmentObject(storageManager)
             }
             .sheet(isPresented: $showAbout) {
-                InstructionView()
+                WarningView(message: "This is about the game")
             }
         }
     }

@@ -19,8 +19,8 @@ final class MultipeerManager: NSObject, ObservableObject {
     @Published var isHost: Bool = false
     @Published var sessionCode: String = ""
     @Published var connected: Bool = false
-    @Published var localPeerID: MCPeerID
-    @Published var session: MCSession
+    @Published var localPeerID: MCPeerID!
+    @Published var session: MCSession!
     @Published var advertiser: MCNearbyServiceAdvertiser?
     @Published var browser: MCNearbyServiceBrowser?
     @Published var discoveredPeers: [MCPeerID] = []
@@ -33,9 +33,9 @@ final class MultipeerManager: NSObject, ObservableObject {
     
     // MARK: - Init
     private override init() {
+        super.init()
         localPeerID = MCPeerID(displayName: displayName)
         session = MCSession(peer: localPeerID, securityIdentity: nil, encryptionPreference: .required)
-        super.init()
         session.delegate = self
     }
     
