@@ -9,100 +9,77 @@
 import Foundation
 import CoreGraphics
 
-/// Parsed level structure (used by GameScene and LevelManager)
+/// Parsed tile-based level structure for Space Maze
 struct LevelData: Codable {
-    let wallRects: [CGRect]
+    let wallPositions: [CGPoint]
     let checkpointPositions: [CGPoint]
     let vortexPositions: [CGPoint]
     let oilPositions: [CGPoint]
     let grassPositions: [CGPoint]
-    let start: CGPoint
-    let finish: CGPoint
+    let spikePositions: [CGPoint]
+    let finishPositions: [CGPoint]
+    let spawn: CGPoint        // the 's' tile (spawn/start)
+    let width: Int
+    let height: Int
+    let tileSize: CGFloat     // In world units (pixels/points)
     
-    // MARK: - Parse from .txt file
-    static func parse(from text: String) -> LevelData? {
-        var wallRects: [CGRect] = []
+    /// Parse an ASCII grid level (.txt)
+    static func parse(from text: String, tileSize: CGFloat = 48) -> LevelData? {
+        var wallPositions: [CGPoint] = []
         var checkpointPositions: [CGPoint] = []
         var vortexPositions: [CGPoint] = []
         var oilPositions: [CGPoint] = []
         var grassPositions: [CGPoint] = []
-        var start = CGPoint.zero
-        var finish = CGPoint.zero
+        var spikePositions: [CGPoint] = []
+        var finishPositions: [CGPoint] = []
+        var spawn: CGPoint?
         
-        let lines = text.components(separatedBy: .newlines)
-        for line in lines {
-            let trimmed = line.trimmingCharacters(in: .whitespaces)
-            if trimmed.hasPrefix("WALLS") {
-                // WALLS x1,y1,w1,h1;x2,y2,w2,h2;...
-                let rects = trimmed.dropFirst(5).split(separator: ";")
-                for r in rects {
-                    let nums = r.split(separator: ",").compactMap { Double($0) }
-                    if nums.count == 4 {
-                        let rect = CGRect(x: nums[0], y: nums[1], width: nums[2], height: nums[3])
-                        wallRects.append(rect)
-                    }
-                }
-            } else if trimmed.hasPrefix("CHECKPOINTS") {
-                // CHECKPOINTS x1,y1;x2,y2;...
-                let pts = trimmed.dropFirst(11).split(separator: ";")
-                for pt in pts {
-                    let nums = pt.split(separator: ",").compactMap { Double($0) }
-                    if nums.count == 2 {
-                        checkpointPositions.append(CGPoint(x: nums[0], y: nums[1]))
-                    }
-                }
-            } else if trimmed.hasPrefix("VORTEX") {
-                // VORTEX x1,y1;x2,y2;...
-                let pts = trimmed.dropFirst(6).split(separator: ";")
-                for pt in pts {
-                    let nums = pt.split(separator: ",").compactMap { Double($0) }
-                    if nums.count == 2 {
-                        vortexPositions.append(CGPoint(x: nums[0], y: nums[1]))
-                    }
-                }
-            } else if trimmed.hasPrefix("OIL") {
-                // OIL x1,y1;x2,y2;...
-                let pts = trimmed.dropFirst(3).split(separator: ";")
-                for pt in pts {
-                    let nums = pt.split(separator: ",").compactMap { Double($0) }
-                    if nums.count == 2 {
-                        oilPositions.append(CGPoint(x: nums[0], y: nums[1]))
-                    }
-                }
-            } else if trimmed.hasPrefix("GRASS") {
-                // GRASS x1,y1;x2,y2;...
-                let pts = trimmed.dropFirst(5).split(separator: ";")
-                for pt in pts {
-                    let nums = pt.split(separator: ",").compactMap { Double($0) }
-                    if nums.count == 2 {
-                        grassPositions.append(CGPoint(x: nums[0], y: nums[1]))
-                    }
-                }
-            } else if trimmed.hasPrefix("START") {
-                // START x,y
-                let comps = trimmed.components(separatedBy: " ")
-                if comps.count == 2, let xy = comps.last?.split(separator: ","),
-                   xy.count == 2, let x = Double(xy[0]), let y = Double(xy[1]) {
-                    start = CGPoint(x: x, y: y)
-                }
-            } else if trimmed.hasPrefix("FINISH") {
-                // FINISH x,y
-                let comps = trimmed.components(separatedBy: " ")
-                if comps.count == 2, let xy = comps.last?.split(separator: ","),
-                   xy.count == 2, let x = Double(xy[0]), let y = Double(xy[1]) {
-                    finish = CGPoint(x: x, y: y)
+        let lines = text.components(separatedBy: .newlines).filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+        let height = lines.count
+        let width = lines.first?.count ?? 0
+        
+        for (row, line) in lines.enumerated() {
+            for (col, char) in line.enumerated() {
+                let x = CGFloat(col) * tileSize + tileSize/2
+                let y = CGFloat(height - row - 1) * tileSize + tileSize/2 // (0,0) bottom left
+                let pos = CGPoint(x: x, y: y)
+                switch char {
+                case "x":
+                    wallPositions.append(pos)
+                case "c":
+                    checkpointPositions.append(pos)
+                case "v":
+                    vortexPositions.append(pos)
+                case "o":
+                    oilPositions.append(pos)
+                case "g":
+                    grassPositions.append(pos)
+                case "#":
+                    spikePositions.append(pos)
+                case "f":
+                    finishPositions.append(pos)
+                case "s":
+                    spawn = pos
+                default:
+                    continue // walkable/empty
                 }
             }
         }
         
+        guard let spawnPoint = spawn else { return nil }
+        
         return LevelData(
-            wallRects: wallRects,
+            wallPositions: wallPositions,
             checkpointPositions: checkpointPositions,
             vortexPositions: vortexPositions,
             oilPositions: oilPositions,
             grassPositions: grassPositions,
-            start: start,
-            finish: finish
+            spikePositions: spikePositions,
+            finishPositions: finishPositions,
+            spawn: spawnPoint,
+            width: width,
+            height: height,
+            tileSize: tileSize
         )
     }
 }

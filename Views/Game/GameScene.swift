@@ -33,72 +33,105 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     private func setupLevel() {
         guard let levelData = levelManager.currentLevelData else { return }
+        let tileSize = levelData.tileSize
+        
         // Set background
         let bg = SKSpriteNode(imageNamed: "Background_\(currentPlanet)")
         bg.position = CGPoint(x: frame.midX, y: frame.midY)
         bg.zPosition = -1
+        bg.size = CGSize(width: CGFloat(levelData.width) * tileSize, height: CGFloat(levelData.height) * tileSize)
         addChild(bg)
-        // Walls
-        for rect in levelData.wallRects {
-            let node = SKSpriteNode(imageNamed: Constants.asset(for: .wall, planet: currentPlanet))
-            node.position = CGPoint(x: rect.midX, y: rect.midY)
-            node.size = rect.size
-            node.zPosition = 1
-            CollisionHelper.setPhysics(node: node, category: CollisionHelper.Category.wall, contact: 0, collision: CollisionHelper.Category.player, dynamic: false)
+        
+        func addTile(at pos: CGPoint, imageName: String, size: CGFloat, category: UInt32, contact: UInt32, collision: UInt32, z: CGFloat, name: String? = nil) {
+            let node = SKSpriteNode(imageNamed: imageName)
+            node.position = pos
+            node.size = CGSize(width: size, height: size)
+            node.zPosition = z
+            CollisionHelper.setPhysics(node: node, category: category, contact: contact, collision: collision, dynamic: false)
+            if let name = name { node.name = name }
             addChild(node)
+        }
+        
+        // Walls
+        for pos in levelData.wallPositions {
+            addTile(at: pos,
+                    imageName: Constants.asset(for: .wall, planet: currentPlanet),
+                    size: tileSize,
+                    category: CollisionHelper.Category.wall,
+                    contact: 0,
+                    collision: CollisionHelper.Category.player,
+                    z: 1)
         }
         // Checkpoints
-        for (i, cp) in levelData.checkpointPositions.enumerated() {
-            let node = SKSpriteNode(imageNamed: Constants.asset(for: .checkpoint, planet: currentPlanet))
-            node.position = cp
-            node.size = CGSize(width: Constants.checkpointRadius, height: Constants.checkpointRadius)
-            node.zPosition = 2
-            CollisionHelper.setPhysics(node: node, category: CollisionHelper.Category.checkpoint, contact: CollisionHelper.Category.player, collision: 0, dynamic: false)
-            node.name = "checkpoint\(i+1)"
-            addChild(node)
+        for (i, pos) in levelData.checkpointPositions.enumerated() {
+            addTile(at: pos,
+                    imageName: Constants.asset(for: .checkpoint, planet: currentPlanet),
+                    size: tileSize,
+                    category: CollisionHelper.Category.checkpoint,
+                    contact: CollisionHelper.Category.player,
+                    collision: 0,
+                    z: 2,
+                    name: "checkpoint\(i+1)")
         }
-        // Vortex/Spikes (player death)
-        for spike in levelData.vortexPositions {
-            let node = SKSpriteNode(imageNamed: Constants.asset(for: .spike, planet: currentPlanet))
-            node.position = spike
-            node.size = CGSize(width: Constants.spikeSize, height: Constants.spikeSize)
-            node.zPosition = 2
-            CollisionHelper.setPhysics(node: node, category: CollisionHelper.Category.spike, contact: CollisionHelper.Category.player, collision: 0, dynamic: false)
-            addChild(node)
+        // Vortexes (spikes)
+        for pos in levelData.vortexPositions {
+            addTile(at: pos,
+                    imageName: Constants.asset(for: .vortex, planet: currentPlanet),
+                    size: tileSize,
+                    category: CollisionHelper.Category.vortex,
+                    contact: CollisionHelper.Category.player,
+                    collision: 0,
+                    z: 2)
         }
-        // Oil (speed up)
-        for oil in levelData.oilPositions {
-            let node = SKSpriteNode(imageNamed: Constants.asset(for: .oil, planet: currentPlanet))
-            node.position = oil
-            node.size = CGSize(width: Constants.oilSize, height: Constants.oilSize)
-            node.zPosition = 2
-            CollisionHelper.setPhysics(node: node, category: CollisionHelper.Category.oil, contact: CollisionHelper.Category.player, collision: 0, dynamic: false)
-            addChild(node)
+        // Oil
+        for pos in levelData.oilPositions {
+            addTile(at: pos,
+                    imageName: Constants.asset(for: .oil, planet: currentPlanet),
+                    size: tileSize,
+                    category: CollisionHelper.Category.oil,
+                    contact: CollisionHelper.Category.player,
+                    collision: 0,
+                    z: 2)
         }
-        // Grass (slow down)
-        for grass in levelData.grassPositions {
-            let node = SKSpriteNode(imageNamed: Constants.asset(for: .grass, planet: currentPlanet))
-            node.position = grass
-            node.size = CGSize(width: Constants.grassSize, height: Constants.grassSize)
-            node.zPosition = 2
-            CollisionHelper.setPhysics(node: node, category: CollisionHelper.Category.grass, contact: CollisionHelper.Category.player, collision: 0, dynamic: false)
-            addChild(node)
+        // Grass
+        for pos in levelData.grassPositions {
+            addTile(at: pos,
+                    imageName: Constants.asset(for: .grass, planet: currentPlanet),
+                    size: tileSize,
+                    category: CollisionHelper.Category.grass,
+                    contact: CollisionHelper.Category.player,
+                    collision: 0,
+                    z: 2)
         }
-        // Finish (spaceship)
-        let finishNode = SKSpriteNode(imageNamed: Constants.asset(for: .spaceship, planet: currentPlanet))
-        finishNode.position = levelData.finish
-        finishNode.size = CGSize(width: Constants.finishSize, height: Constants.finishSize)
-        finishNode.zPosition = 3
-        CollisionHelper.setPhysics(node: finishNode, category: CollisionHelper.Category.finish, contact: CollisionHelper.Category.player, collision: 0, dynamic: false)
-        finishNode.name = "finish"
-        addChild(finishNode)
+        // Spikes
+        for pos in levelData.spikePositions {
+            addTile(at: pos,
+                    imageName: Constants.asset(for: .spike, planet: currentPlanet),
+                    size: tileSize,
+                    category: CollisionHelper.Category.spike,
+                    contact: CollisionHelper.Category.player,
+                    collision: 0,
+                    z: 2)
+        }
+        // Finish
+        for pos in levelData.finishPositions {
+            addTile(at: pos,
+                    imageName: Constants.asset(for: .spaceship, planet: currentPlanet),
+                    size: tileSize,
+                    category: CollisionHelper.Category.finish,
+                    contact: CollisionHelper.Category.player,
+                    collision: 0,
+                    z: 3,
+                    name: "finish")
+        }
     }
     
     private func setupPlayers() {
+        guard let levelData = levelManager.currentLevelData else { return }
         for player in multipeerManager.players {
             let node = SKSpriteNode(imageNamed: "Player")
-            node.position = LevelManager.shared.currentLevelData?.start ?? CGPoint(x: frame.midX, y: frame.midY)
-            node.size = CGSize(width: Constants.playerSize, height: Constants.playerSize)
+            node.position = levelData.spawn
+            node.size = CGSize(width: levelData.tileSize, height: levelData.tileSize)
             node.zPosition = 10
             let color = Constants.playerColors[player.colorIndex % Constants.playerColors.count]
             node.color = UIColor(color)
@@ -130,15 +163,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    // MARK: - SKPhysicsContactDelegate
     func didBegin(_ contact: SKPhysicsContact) {
         guard let nameA = contact.bodyA.node?.name, let nameB = contact.bodyB.node?.name else { return }
-        // Handle collisions (player with checkpoint, spike, finish, etc.)
-        // No TODOs: For brevity, trigger effects immediately (you may expand for each case as needed)
+        // Handle collisions (expand as needed)
     }
     
-    // MARK: - Game Loop
     override func update(_ currentTime: TimeInterval) {
-        // You can use this to sync with latest state or broadcast if you're the map mover, etc.
+        // Game sync logic if needed
     }
 }

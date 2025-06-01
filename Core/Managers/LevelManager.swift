@@ -9,7 +9,6 @@
 import Foundation
 import SwiftUI
 
-/// Handles level loading, map data, and per-planet asset logic.
 final class LevelManager: ObservableObject {
     static let shared = LevelManager()
     
@@ -19,7 +18,6 @@ final class LevelManager: ObservableObject {
     
     private init() {}
     
-    /// Loads level data from file (e.g., "level1.txt").
     func loadLevel(_ level: Int) {
         let fileName = "level\(level)"
         guard let data = LevelManager.readLevelFile(named: fileName) else {
