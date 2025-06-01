@@ -95,10 +95,14 @@ final class MultipeerManager: NSObject, ObservableObject {
 
 // MARK: - MCSessionDelegate, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate
 extension MultipeerManager: MCSessionDelegate, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate {
-    // Implement all required delegate methods (no TODOs, see Apple docs for details)
+    // Implement all required delegate methods
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
         DispatchQueue.main.async {
             self.connected = (state == .connected)
+            if state == .notConnected {
+                // Pause game for all players
+                PlayerSyncManager.shared.broadcastPause(by: self.localPeerID.displayName)
+            }
         }
     }
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {

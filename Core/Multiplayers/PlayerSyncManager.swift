@@ -32,9 +32,19 @@ final class PlayerSyncManager {
                 }
             }
         case .gameEvent:
-            // Broadcast game events (death, checkpoint, mission, etc)
             if let event = message.gameEvent {
-                GameManager.shared.handleGameEvent(event)
+                switch event.type {
+                case .pause:
+                    if let playerID = event.playerID {
+                        GameManager.shared.pauseGame(by: playerID)
+                    }
+                case .resumeRequest:
+                    if let playerID = event.playerID {
+                        GameManager.shared.resumeGameWithCountdown(by: playerID)
+                    }
+                default:
+                    GameManager.shared.handleGameEvent(event)
+                }
             }
         }
     }
@@ -50,5 +60,15 @@ final class PlayerSyncManager {
         let message = NetworkMessage(type: .gameEvent, playerUpdate: nil, gameEvent: event)
         guard let data = try? JSONEncoder().encode(message) else { return }
         MultipeerManager.shared.sendToAll(data)
+    }
+    
+    func broadcastPause(by playerID: String) {
+        let event = GameEvent(type: .pause, playerID: playerID)
+        broadcastGameEvent(event)
+    }
+    
+    func broadcastResumeRequest(by playerID: String) {
+        let event = GameEvent(type: .resumeRequest, playerID: playerID)
+        broadcastGameEvent(event)
     }
 }

@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import CoreGraphics
 
 /// Encodes key in-game events for multiplayer sync.
 enum GameEventType: String, Codable {
@@ -16,7 +15,7 @@ enum GameEventType: String, Codable {
     case missionAccomplished
     case missionFailed
     case pause
-    case resume
+    case resumeRequest
 }
 
 struct GameEvent: Codable {

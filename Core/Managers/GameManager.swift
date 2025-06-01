@@ -25,6 +25,9 @@ final class GameManager: ObservableObject {
     @Published var isGameOver: Bool = false
     @Published var isMissionAccomplished: Bool = false
     @Published var isPaused: Bool = false
+    @Published var pausedByPlayerID: String? = nil
+    @Published var resumeCountdownActive: Bool = false
+    @Published var resumeCountdownValue: Int = 3
     @Published var missionClue: String = ""
     @Published var lastCheckpoint: CGPoint? = nil
     @Published var mapMoverPlayerID: String? = nil // player id of mapMover
@@ -98,5 +101,32 @@ final class GameManager: ObservableObject {
     
     func updateScoreText() {
         scoreText = "Planet \(currentPlanet) Section \(section)/\(totalSections)"
+    }
+    
+    func pauseGame(by playerID: String) {
+        isPaused = true
+        pausedByPlayerID = playerID
+        resumeCountdownActive = false
+    }
+    
+    func resumeGameWithCountdown(by playerID: String) {
+        guard pausedByPlayerID == playerID else { return }
+        resumeCountdownActive = true
+        resumeCountdownValue = 3
+        countdownResume()
+    }
+    
+    private func countdownResume() {
+        if resumeCountdownValue > 0 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                guard let self = self else { return }
+                self.resumeCountdownValue -= 1
+                self.countdownResume()
+            }
+        } else {
+            isPaused = false
+            pausedByPlayerID = nil
+            resumeCountdownActive = false
+        }
     }
 }
