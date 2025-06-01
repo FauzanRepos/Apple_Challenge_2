@@ -129,4 +129,19 @@ final class GameManager: ObservableObject {
             resumeCountdownActive = false
         }
     }
+    
+    func handleGameEvent(_ event: GameEvent) {
+        switch event.type {
+        case .checkpointReached:
+            if let section = event.section {
+                reachCheckpoint(section)
+            }
+        case .missionAccomplished:
+            missionAccomplished()
+        case .missionFailed:
+            isGameOver = true
+        default:
+            break // already handled pause/resume in PlayerSyncManager
+        }
+    }
 }

@@ -15,7 +15,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private let levelManager = LevelManager.shared
     private let multipeerManager = MultipeerManager.shared
     private let motionManager = CMMotionManager()
-    private var playerNodes: [String: SKSpriteNode] = [:] // playerID:node
+    private var playerNodes: [String: SKSpriteNode] = [:]
     private var mapMoverPlayerID: String? { gameManager.mapMoverPlayerID }
     private var localPlayerID: String { multipeerManager.localPeerID.displayName }
     private var currentPlanet: Int { gameManager.currentPlanet }
@@ -38,7 +38,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         bg.position = CGPoint(x: frame.midX, y: frame.midY)
         bg.zPosition = -1
         addChild(bg)
-        // Walls, checkpoints, spikes, oils, grass, vortex, finish, etc.
+        // Walls
         for rect in levelData.wallRects {
             let node = SKSpriteNode(imageNamed: Constants.asset(for: .wall, planet: currentPlanet))
             node.position = CGPoint(x: rect.midX, y: rect.midY)
@@ -47,6 +47,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             CollisionHelper.setPhysics(node: node, category: CollisionHelper.Category.wall, contact: 0, collision: CollisionHelper.Category.player, dynamic: false)
             addChild(node)
         }
+        // Checkpoints
         for (i, cp) in levelData.checkpointPositions.enumerated() {
             let node = SKSpriteNode(imageNamed: Constants.asset(for: .checkpoint, planet: currentPlanet))
             node.position = cp
@@ -56,6 +57,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             node.name = "checkpoint\(i+1)"
             addChild(node)
         }
+        // Vortex/Spikes (player death)
         for spike in levelData.vortexPositions {
             let node = SKSpriteNode(imageNamed: Constants.asset(for: .spike, planet: currentPlanet))
             node.position = spike
@@ -64,7 +66,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             CollisionHelper.setPhysics(node: node, category: CollisionHelper.Category.spike, contact: CollisionHelper.Category.player, collision: 0, dynamic: false)
             addChild(node)
         }
-        // ... similarly for oil, grass, vortex, finish, etc.
+        // Oil (speed up)
+        for oil in levelData.oilPositions {
+            let node = SKSpriteNode(imageNamed: Constants.asset(for: .oil, planet: currentPlanet))
+            node.position = oil
+            node.size = CGSize(width: Constants.oilSize, height: Constants.oilSize)
+            node.zPosition = 2
+            CollisionHelper.setPhysics(node: node, category: CollisionHelper.Category.oil, contact: CollisionHelper.Category.player, collision: 0, dynamic: false)
+            addChild(node)
+        }
+        // Grass (slow down)
+        for grass in levelData.grassPositions {
+            let node = SKSpriteNode(imageNamed: Constants.asset(for: .grass, planet: currentPlanet))
+            node.position = grass
+            node.size = CGSize(width: Constants.grassSize, height: Constants.grassSize)
+            node.zPosition = 2
+            CollisionHelper.setPhysics(node: node, category: CollisionHelper.Category.grass, contact: CollisionHelper.Category.player, collision: 0, dynamic: false)
+            addChild(node)
+        }
+        // Finish (spaceship)
         let finishNode = SKSpriteNode(imageNamed: Constants.asset(for: .spaceship, planet: currentPlanet))
         finishNode.position = levelData.finish
         finishNode.size = CGSize(width: Constants.finishSize, height: Constants.finishSize)
