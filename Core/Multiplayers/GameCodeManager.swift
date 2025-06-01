@@ -16,11 +16,11 @@ final class GameCodeManager {
     // 6-character uppercase session code
     func generateCode() -> String {
         let chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-        return String((0..<6).map { _ in chars.randomElement()! })
+        return String((0..<4).map { _ in chars.randomElement()! })
     }
     
     func validate(_ code: String) -> Bool {
         let allowed = CharacterSet(charactersIn: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789")
-        return code.count == 6 && code.uppercased().rangeOfCharacter(from: allowed.inverted) == nil
+        return code.count == 4 && code.uppercased().rangeOfCharacter(from: allowed.inverted) == nil
     }
 }

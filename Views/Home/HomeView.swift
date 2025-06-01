@@ -10,6 +10,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var gameManager: GameManager
+    @EnvironmentObject var gameCodeManager: GameCodeManager
     @EnvironmentObject var multipeerManager: MultipeerManager
     @EnvironmentObject var storageManager: StorageManager
     
@@ -19,12 +20,6 @@ struct HomeView: View {
     
     @State private var roomCode: String = ""
     @State private var showCodeInput = false
-    
-    // Helper to generate a random 6-character alphanumeric code
-    private func generateRoomCode() -> String {
-        let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        return String((0..<4).map { _ in chars.randomElement()! })
-    }
     
     var body: some View {
         ZStack {
@@ -47,7 +42,7 @@ struct HomeView: View {
                 
                 // CREATE ROOM BUTTON
                 Button(action: {
-                    roomCode = generateRoomCode()
+                    roomCode = gameCodeManager.generateCode()
                     multipeerManager.hostGame(sessionCode: roomCode)
                     showLobby = true
                 }) {
@@ -117,11 +112,11 @@ struct HomeView: View {
                         .frame(width: 120)
                         .textFieldStyle(.roundedBorder)
                     Button("Join") {
-                        multipeerManager.joinGame(sessionCode: roomCode)
+                        multipeerManager.joinGame(sessionCode: roomCode.uppercased())
                         showCodeInput = false
                         showLobby = true
                     }
-                    .disabled(roomCode.count != 4)
+                    .disabled(!gameCodeManager.validate(roomCode))
                     Button("Cancel") {
                         showCodeInput = false
                         roomCode = ""
