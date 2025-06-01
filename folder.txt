@@ -122,3 +122,114 @@ SpaceMaze/
 │   └── LaunchScreen.storyboard         // ✅ Existing - Launch screen
 │
 └── Info.plist                          // ✅ Existing - App configuration
+
+
+
+
+Here’s your fully updated project structure with best-practice for scalable, asset-driven level design:
+
+
+App/
+  ├── AppDelegate.swift
+  └── GameViewWrapper.swift
+Core/
+  Game/
+    ├── GameManager.swift
+    ├── LevelManager.swift
+    ├── AudioManager.swift
+    ├── SettingsManager.swift
+    └── StorageManager.swift
+  Multiplayer/
+    ├── MultipeerManager.swift
+    ├── PlayerSyncManager.swift
+    ├── GameSession.swift
+    ├── GameCodeManager.swift
+    └── LANPermissionManager.swift
+  Utils/
+    ├── CollisionHelper.swift
+    ├── ValidationHelper.swift
+    ├── Constants.swift
+    ├── CGPoint+Extensions.swift
+    ├── SKScene+Extensions.swift
+    └── String+Extension.swift
+Models/
+  Game/
+    ├── Player.swift
+    ├── Level.swift
+    ├── Checkpoint.swift
+    ├── PowerUp.swift
+    └── GameRecord.swift
+  Multiplayer/
+    ├── NetworkPlayer.swift
+    ├── Room.swift
+    ├── SessionState.swift
+    └── GameEvent.swift
+Views/
+  Home/
+    ├── HomeView.swift
+    ├── HighScoreView.swift
+    ├── CodeInputView.swift
+    └── SettingsView.swift
+  Lobby/
+    ├── LobbyView.swift
+    ├── StartGameSliderView.swift
+    ├── PlayerListView.swift
+    ├── ReadyButtonView.swift
+    ├── RoomRowView.swift
+    └── ConnectionStatusView.swift
+  Game/
+    ├── GameScene.swift
+    ├── GameViewController.swift
+    ├── LivesIndicatorView.swift
+    ├── ScoreDisplayView.swift
+    ├── MultiplayerHUDView.swift
+    └── DirectionIndicatorView.swift
+  Shared/
+    ├── ErrorView.swift
+    ├── LoadingView.swift
+    ├── ScaleButtonView.swift
+    └── WarningView.swift
+Resources/
+  Levels/
+    ├── level1.txt         // Planet 1
+    ├── level2.txt         // Planet 2
+    └── LevelConfig.json
+  Assets.xcassets/
+    UI/
+      └── [all shared UI images]
+    Sprites/
+      └── [all shared sprites]
+    Planets/
+      Planet1/
+        ├── wall.imageset/
+        ├── floor.imageset/
+        ├── checkpoint.imageset/
+        ├── spike.imageset/
+        ├── oil.imageset/
+        ├── grass.imageset/
+        ├── vortex.imageset/
+        └── spaceship.imageset/
+      Planet2/
+        ├── wall.imageset/
+        ├── floor.imageset/
+        ├── checkpoint.imageset/
+        ├── spike.imageset/
+        ├── oil.imageset/
+        ├── grass.imageset/
+        ├── vortex.imageset/
+        └── spaceship.imageset/
+    Backgrounds/
+      ├── Background_1.png    // Planet 1 background
+      └── Background_2.png    // Planet 2 background
+    Player.png
+    [other shared icons]
+  Sounds/
+    └── [all SFX/music files as needed]
+  Config/
+    ├── GameConfig.plist
+    └── NetworkConfig.plist
+Storyboards/
+  ├── Main.storyboard
+  └── LaunchScreen.storyboard
+Info.plist
+README.md
