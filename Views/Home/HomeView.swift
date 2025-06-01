@@ -9,8 +9,8 @@
 import SwiftUI
 
 struct HomeView: View {
+    private let gameCodeManager = GameCodeManager.shared
     @EnvironmentObject var gameManager: GameManager
-    @EnvironmentObject var gameCodeManager: GameCodeManager
     @EnvironmentObject var multipeerManager: MultipeerManager
     @EnvironmentObject var storageManager: StorageManager
     
