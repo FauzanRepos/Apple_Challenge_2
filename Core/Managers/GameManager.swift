@@ -9,6 +9,7 @@
 import Foundation
 import Combine
 import SwiftUI
+import SpriteKit
 
 /// Main game state manager. Handles global game status, level flow, lives, score, and checkpoint progression.
 final class GameManager: ObservableObject {
@@ -199,7 +200,10 @@ final class GameManager: ObservableObject {
     }
     
     /// Set camera location updated (for multiplayer sync)
-    func setCameraPosition(_ pos: CGPoint?) {
-        SKScene.centerCamera(on: pos)
+    func setCameraPosition(_ pos: CGPoint) {
+        if let skView = UIApplication.shared.windows.first?.rootViewController?.view as? SKView,
+           let scene = skView.scene as? GameScene {
+            scene.centerCamera(on: pos)
+        }
     }
 }
