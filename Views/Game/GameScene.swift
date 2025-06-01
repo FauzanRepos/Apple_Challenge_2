@@ -222,10 +222,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func handlePlayerDeath(_ playerID: String) {
-        // Example: show popup, decrease lives, respawn at last checkpoint, etc.
-        // You can expand this based on your full game logic
         print("Player \(playerID) died!")
-        // Play sound, show popup, decrement lives, etc.
+        // Only the "host" (or all, if no host) decrements and syncs team lives
+        GameManager.shared.loseLifeAndSync()
+        // Play sound, show popup, respawn, etc. as needed
     }
     
     func didBegin(_ contact: SKPhysicsContact) {

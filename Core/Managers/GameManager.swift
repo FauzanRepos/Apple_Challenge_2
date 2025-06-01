@@ -71,8 +71,18 @@ final class GameManager: ObservableObject {
         }
     }
     
-    func loseLife() {
+    /// Lose a team life and broadcast to all players
+    func loseLifeAndSync() {
         teamLives = max(0, teamLives - 1)
+        PlayerSyncManager.shared.broadcastTeamLives(teamLives)
+        if teamLives == 0 {
+            isGameOver = true
+        }
+    }
+    
+    /// Set team lives directly (for multiplayer sync)
+    func setTeamLives(_ lives: Int) {
+        teamLives = max(0, lives)
         if teamLives == 0 {
             isGameOver = true
         }
@@ -140,6 +150,10 @@ final class GameManager: ObservableObject {
             missionAccomplished()
         case .missionFailed:
             isGameOver = true
+        case .playerDeath:
+            if let lives = event.section {
+                setTeamLives(lives)
+            }
         default:
             break // already handled pause/resume in PlayerSyncManager
         }

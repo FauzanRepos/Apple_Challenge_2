@@ -42,6 +42,10 @@ final class PlayerSyncManager {
                     if let playerID = event.playerID {
                         GameManager.shared.resumeGameWithCountdown(by: playerID)
                     }
+                case .playerDeath:
+                    if let lives = event.section {
+                        GameManager.shared.setTeamLives(lives)
+                    }
                 default:
                     GameManager.shared.handleGameEvent(event)
                 }
@@ -90,6 +94,12 @@ final class PlayerSyncManager {
     // Broadcast camera position to all peers
     func broadcastCameraPosition(_ position: CGPoint) {
         let event = GameEvent(type: .cameraMoved, cameraPosition: position)
+        broadcastGameEvent(event)
+    }
+
+    // Broadcast team lives after a death
+    func broadcastTeamLives(_ lives: Int) {
+        let event = GameEvent(type: .playerDeath, section: lives)
         broadcastGameEvent(event)
     }
 }
