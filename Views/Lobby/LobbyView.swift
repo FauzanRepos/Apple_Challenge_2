@@ -12,28 +12,38 @@ struct LobbyView: View {
     @EnvironmentObject var multipeerManager: MultipeerManager
     @EnvironmentObject var gameManager: GameManager
     
-    @State private var roomCode: String = ""
-    @State private var joining = false
-    @State private var showSlider = false
+    @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
         VStack(spacing: 18) {
+            HStack {
+                Spacer()
+                Button(action: {
+                    multipeerManager.disconnect()
+                    presentationMode.wrappedValue.dismiss()
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.white)
+                        .font(.title)
+                        .padding()
+                }
+            }
+            
             Text("Ship Code: \(multipeerManager.sessionCode)")
                 .font(.title2)
                 .foregroundColor(.white)
-                .padding(.top, 32)
+                .padding(.top, 16)
             
             PlayerListView()
                 .environmentObject(multipeerManager)
             
             if multipeerManager.isHost {
                 StartGameSliderView(onSlide: {
-                    showSlider = false
                     gameManager.startGame()
                 })
                 .padding(.top, 30)
             } else {
-                Text("Waiting for host to start...")
+                Text("Waiting for host to start…")
                     .foregroundColor(.gray)
                     .padding(.top, 20)
             }
@@ -41,13 +51,15 @@ struct LobbyView: View {
             Spacer()
         }
         .background(
-            Image("LobbyPage")
+            Image("background")
                 .resizable()
                 .scaledToFill()
                 .edgesIgnoringSafeArea(.all)
         )
-        .onAppear {
-            roomCode = multipeerManager.sessionCode
+        .onDisappear {
+            // Clean up if view is dismissed
+            multipeerManager.stopHosting()
+            multipeerManager.stopBrowsing()
         }
     }
 }
