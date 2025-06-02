@@ -12,6 +12,8 @@ import SwiftUI
 
 /// Handles LAN (local network) permission prompt required for MultipeerConnectivity
 final class LANPermissionManager: NSObject, ObservableObject, MCNearbyServiceAdvertiserDelegate {
+    static let shared = LANPermissionManager()
+    
     private var peerID: MCPeerID!
     private var advertiser: MCNearbyServiceAdvertiser?
     @Published var isAdvertising = false

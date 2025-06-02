@@ -37,6 +37,9 @@ final class GameManager: ObservableObject {
     // For checkpoint tracking
     @Published var reachedCheckpoints: Set<Int> = []
     
+    // GameCode Generator
+    public let gameCode = GameCodeManager.shared
+    
     private init() {}
     
     // MARK: - Level/Section Management

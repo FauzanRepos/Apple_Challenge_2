@@ -14,15 +14,17 @@ struct GameViewWrapper: View {
     @StateObject private var audioManager = AudioManager.shared
     @StateObject private var settingsManager = SettingsManager.shared
     @StateObject private var storageManager = StorageManager.shared
+    @StateObject private var permissionManager = LANPermissionManager.shared
     
     var body: some View {
         NavigationStack {
-            HomeView()
+            WarningView()
                 .environmentObject(gameManager)
                 .environmentObject(multipeerManager)
                 .environmentObject(audioManager)
                 .environmentObject(settingsManager)
                 .environmentObject(storageManager)
+                .environmentObject(permissionManager)
         }
         .navigationViewStyle(.stack)
     }

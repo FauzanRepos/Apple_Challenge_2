@@ -9,7 +9,6 @@
 import SwiftUI
 
 struct HomeView: View {
-    private let gameCodeManager = GameCodeManager.shared
     @EnvironmentObject var gameManager: GameManager
     @EnvironmentObject var multipeerManager: MultipeerManager
     @EnvironmentObject var storageManager: StorageManager
@@ -42,7 +41,7 @@ struct HomeView: View {
                 
                 // CREATE ROOM BUTTON
                 Button(action: {
-                    roomCode = gameCodeManager.generateCode()
+                    roomCode = gameManager.gameCode.generateCode()
                     multipeerManager.hostGame(sessionCode: roomCode)
                     showLobby = true
                 }) {
@@ -98,9 +97,6 @@ struct HomeView: View {
                     .environmentObject(gameManager)
                     .environmentObject(storageManager)
             }
-            .sheet(isPresented: $showAbout) {
-                WarningView(message: "This is about the game")
-            }
             .sheet(isPresented: $showCodeInput) {
                 VStack(spacing: 16) {
                     Text("Enter Room Code to Join")
@@ -116,7 +112,7 @@ struct HomeView: View {
                         showCodeInput = false
                         showLobby = true
                     }
-                    .disabled(!gameCodeManager.validate(roomCode))
+                    .disabled(!gameManager.gameCode.validate(roomCode))
                     Button("Cancel") {
                         showCodeInput = false
                         roomCode = ""
@@ -124,6 +120,7 @@ struct HomeView: View {
                 }
                 .padding()
             }
+            .navigationBarBackButtonHidden(true)
         }
     }
 }
