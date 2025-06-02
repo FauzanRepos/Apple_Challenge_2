@@ -34,11 +34,16 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
-    <key>NSLocalNetworkUsageDescription</key>
-    <string>This app needs access to your local network to connect with other players nearby.</string>
-    <key>NSBonjourServices</key>
-    <array>
-        <string>_space-maze._tcp</string>
-    </array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app needs access to your local network to connect with other players nearby.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>VCR_OSD_MONO_1.001.ttf</string>
+	</array>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_space-maze._tcp</string>
+		<string>_space-maze._udp</string>
+	</array>
 </dict>
 </plist>

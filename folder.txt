@@ -1,0 +1,139 @@
+//
+//  folder.txt
+//  Space Maze
+//
+//  Created by Apple Dev on 27/05/25.
+//  Copyright © 2025 ADA Team. All rights reserved.
+//
+
+COMPLETE PROJECT STRUCTURE WITH ASSETS
+
+SpaceMaze/
+├── App/
+│   ├── AppDelegate.swift
+│   └── GameViewWrapper.swift
+├── Core/
+│   ├── Game/
+│   │   ├── GameManager.swift
+│   │   ├── LevelManager.swift
+│   │   ├── AudioManager.swift
+│   │   ├── SettingsManager.swift
+│   │   ├── StorageManager.swift
+│   │   ├── + CameraManager.swift
+│   │   └── + CollisionManager.swift
+│   ├── Multiplayer/
+│   │   ├── MultipeerManager.swift
+│   │   ├── PlayerSyncManager.swift
+│   │   ├── GameSession.swift
+│   │   ├── GameCodeManager.swift
+│   │   ├── LANPermissionManager.swift
+│   │   └── MultiplayerMessage.swift
+│   └── Utils/
+│       ├── CollisionHelper.swift
+│       ├── ValidationHelper.swift
+│       ├── Constants.swift
+│       ├── CGPoint+Extensions.swift
+│       ├── SKScene+Extensions.swift
+│       └── String+Extension.swift
+├── Models/
+│   ├── Game/
+│   │   ├── Player.swift
+│   │   ├── Level.swift
+│   │   ├── Checkpoint.swift
+│   │   ├── PowerUp.swift
+│   │   ├── GameRecord.swift
+│   │   └── + PlayerState.swift
+│   └── Multiplayer/
+│       ├── NetworkPlayer.swift
+│       ├── Room.swift
+│       ├── SessionState.swift
+│       ├── GameEvent.swift
+│       └── EdgeRole.swift
+├── Views/
+│   ├── Home/
+│   │   ├── HomeView.swift
+│   │   ├── HighScoreView.swift
+│   │   ├── CodeInputView.swift
+│   │   └── SettingsView.swift
+│   ├── Lobby/
+│   │   ├── LobbyView.swift
+│   │   ├── StartGameSliderView.swift
+│   │   ├── PlayerListView.swift
+│   │   ├── ReadyButtonView.swift
+│   │   ├── RoomRowView.swift
+│   │   └── ConnectionStatusView.swift
+│   ├── Game/
+│   │   ├── GameScene.swift
+│   │   ├── + GameScene+Physics.swift
+│   │   ├── + GameScene+Input.swift
+│   │   ├── GameViewController.swift
+│   │   ├── LivesIndicatorView.swift
+│   │   ├── ScoreDisplayView.swift
+│   │   ├── MultiplayerHUDView.swift
+│   │   ├── DirectionIndicatorView.swift
+│   │   └── ResumeCountdownOverlay.swift
+│   └── Shared/
+│       ├── ErrorView.swift
+│       ├── LoadingView.swift
+│       ├── ScaleButtonView.swift
+│       └── WarningView.swift
+├── Resources/
+│   ├── Levels/
+│   │   ├── level1.txt                   // Planet 1 ASCII map
+│   │   ├── level2.txt                   // Planet 2 ASCII map
+│   │   └── LevelConfig.json             // Level metadata
+│   ├── Assets.xcassets/
+│   │   ├── UI/
+│   │   │   ├── Button.imageset/
+│   │   │   ├── LongButton.imageset/
+│   │   │   ├── Q_Button.imageset/
+│   │   │   ├── HearthBar_On.imageset/
+│   │   │   ├── HearthBar_Off.imageset/
+│   │   │   ├── HighScoreBoard_Mock.imageset/
+│   │   │   ├── HighScoreC_GreenLight.imageset/
+│   │   │   ├── AlertPage_Red.imageset/
+│   │   │   ├── Compass.imageset/
+│   │   │   └── HomePage.imageset/
+│   │   ├── Sprites/
+│   │   │   └── Player.imageset/         // Base player marble sprite
+│   │   ├── Planets/
+│   │   │   ├── Planet1/
+│   │   │   │   ├── wall.imageset/
+│   │   │   │   ├── floor.imageset/
+│   │   │   │   ├── checkpoint.imageset/
+│   │   │   │   ├── spike.imageset/
+│   │   │   │   ├── oil.imageset/
+│   │   │   │   ├── grass.imageset/
+│   │   │   │   ├── vortex.imageset/
+│   │   │   │   └── spaceship.imageset/
+│   │   │   └── Planet2/
+│   │   │       ├── wall.imageset/
+│   │   │       ├── floor.imageset/
+│   │   │       ├── checkpoint.imageset/
+│   │   │       ├── spike.imageset/
+│   │   │       ├── oil.imageset/
+│   │   │       ├── grass.imageset/
+│   │   │       ├── vortex.imageset/
+│   │   │       └── spaceship.imageset/
+│   │   ├── Backgrounds/
+│   │   │   ├── Background_1.imageset/   // Planet 1 background
+│   │   │   ├── Background_2.imageset/   // Planet 2 background
+│   │   │   ├── spaceMazeBG.colorset/    // App background color
+│   │   │   ├── text.colorset/           // Text color
+│   │   │   └── yellowHighlightText.colorset/ // Highlight color
+│   │   └── AppIcon.appiconset/
+│   ├── Sounds/
+│   │   ├── bgm_space.mp3               // Background music
+│   │   ├── sfx_checkpoint.wav          // Checkpoint collected
+│   │   ├── sfx_death.wav               // Player death
+│   │   ├── sfx_powerup.wav             // Oil/grass pickup
+│   │   ├── sfx_finish.wav              // Level complete
+│   │   └── sfx_collision.wav           // Ball collision
+│   └── Config/
+│       ├── GameConfig.plist            // Game settings/constants
+│       └── NetworkConfig.plist         // Multiplayer settings
+├── Storyboards/
+│   ├── Main.storyboard
+│   └── LaunchScreen.storyboard
+├── Info.plist
+└── README.md
