@@ -13,61 +13,111 @@ import MultipeerConnectivity
 final class PlayerSyncManager {
     static let shared = PlayerSyncManager()
     
+    private init() {}
+    
     // MARK: - Incoming Data Handler
     func handleIncomingData(_ data: Data, from peerID: MCPeerID) {
-        guard let message = try? JSONDecoder().decode(NetworkMessage.self, from: data) else { return }
+        guard let message = try? JSONDecoder().decode(MultiplayerMessage.self, from: data) else {
+            print("[PlayerSyncManager] Failed to decode message from \(peerID.displayName)")
+            return
+        }
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.processMessage(message, from: peerID)
+        }
+    }
+    
+    private func processMessage(_ message: MultiplayerMessage, from peerID: MCPeerID) {
         switch message.type {
         case .playerUpdate:
-            if let update = message.playerUpdate {
-                MultipeerManager.shared.players = MultipeerManager.shared.players.map { player in
-                    if player.id == update.id {
-                        player.position = update.position
-                        player.velocity = update.velocity
-                        player.lives = update.lives
-                        player.score = update.score
-                        player.isReady = update.isReady
-                        player.lastSeen = Date()
-                    }
-                    return player
-                }
-            }
+            handlePlayerUpdate(message)
+            
         case .gameEvent:
-            if let event = message.gameEvent {
-                switch event.type {
-                case .pause:
-                    if let playerID = event.playerID {
-                        GameManager.shared.pauseGame(by: playerID)
-                    }
-                case .resumeRequest:
-                    if let playerID = event.playerID {
-                        GameManager.shared.resumeGameWithCountdown(by: playerID)
-                    }
-                case .playerDeath:
-                    if let lives = event.section {
-                        GameManager.shared.setTeamLives(lives)
-                    }
-                case .cameraMoved:
-                    if let camPos = event.cameraPosition {
-                        GameManager.shared.setCameraPosition(camPos)
-                    }
-                default:
-                    GameManager.shared.handleGameEvent(event)
-                }
-            }
+            handleGameEvent(message)
+            
+        case .playerListUpdate:
+            handlePlayerListUpdate(message)
+            
+        case .teamLivesUpdate:
+            handleTeamLivesUpdate(message)
+            
+        case .cameraUpdate:
+            handleCameraUpdate(message)
         }
+    }
+    
+    private func handlePlayerUpdate(_ message: MultiplayerMessage) {
+        guard let playerState = message.playerState else { return }
+        
+        // Find and update the corresponding NetworkPlayer
+        if let playerIndex = MultipeerManager.shared.players.firstIndex(where: { $0.id == playerState.id }) {
+            MultipeerManager.shared.players[playerIndex].update(from: playerState)
+        } else {
+            // Player not found, add them
+            let newPlayer = NetworkPlayer(from: playerState)
+            MultipeerManager.shared.players.append(newPlayer)
+        }
+    }
+    
+    private func handleGameEvent(_ message: MultiplayerMessage) {
+        guard let event = message.gameEvent else { return }
+        
+        switch event.type {
+        case .pause:
+            if let playerID = event.playerID {
+                GameManager.shared.pauseGame(by: playerID)
+            }
+            
+        case .resumeRequest:
+            if let playerID = event.playerID {
+                GameManager.shared.resumeGameWithCountdown(by: playerID)
+            }
+            
+        case .cameraMoved:
+            if let camPos = event.cameraPosition {
+                GameManager.shared.setCameraPosition(camPos)
+            }
+            
+        default:
+            GameManager.shared.handleGameEvent(event)
+        }
+    }
+    
+    private func handlePlayerListUpdate(_ message: MultiplayerMessage) {
+        guard let playerList = message.playerList else { return }
+        
+        // Update entire player list
+        MultipeerManager.shared.players = playerList.map { NetworkPlayer(from: $0) }
+    }
+    
+    private func handleTeamLivesUpdate(_ message: MultiplayerMessage) {
+        guard let lives = message.teamLives else { return }
+        GameManager.shared.setTeamLives(lives)
+    }
+    
+    private func handleCameraUpdate(_ message: MultiplayerMessage) {
+        guard let position = message.cameraPosition else { return }
+        GameManager.shared.setCameraPosition(position)
     }
     
     // MARK: - Outgoing Sync
     func broadcastPlayerUpdate(_ player: NetworkPlayer) {
-        let message = NetworkMessage(type: .playerUpdate, playerUpdate: player, gameEvent: nil)
-        guard let data = try? JSONEncoder().encode(message) else { return }
-        MultipeerManager.shared.sendToAll(data)
+        let playerState = player.toPlayerState()
+        let message = MultiplayerMessage(
+            type: .playerUpdate,
+            senderID: MultipeerManager.shared.localPeerID.displayName,
+            playerState: playerState
+        )
+        sendMessage(message)
     }
     
     func broadcastGameEvent(_ event: GameEvent) {
-        let message = NetworkMessage(type: .gameEvent, playerUpdate: nil, gameEvent: event)
-        guard let data = try? JSONEncoder().encode(message) else { return }
-        MultipeerManager.shared.sendToAll(data)
+        let message = MultiplayerMessage(
+            type: .gameEvent,
+            senderID: MultipeerManager.shared.localPeerID.displayName,
+            gameEvent: event
+        )
+        sendMessage(message)
     }
     
     func broadcastPause(by playerID: String) {
@@ -81,20 +131,40 @@ final class PlayerSyncManager {
     }
     
     func broadcastAllPlayerUpdates(_ players: [NetworkPlayer]) {
-        for player in players {
-            broadcastPlayerUpdate(player)
-        }
+        let playerStates = players.map { $0.toPlayerState() }
+        let message = MultiplayerMessage(
+            type: .playerListUpdate,
+            senderID: MultipeerManager.shared.localPeerID.displayName,
+            playerList: playerStates
+        )
+        sendMessage(message)
     }
     
-    // Broadcast camera position to all peers
     func broadcastCameraPosition(_ position: CGPoint) {
-        let event = GameEvent(type: .cameraMoved, cameraPosition: position)
-        broadcastGameEvent(event)
+        let message = MultiplayerMessage(
+            type: .cameraUpdate,
+            senderID: MultipeerManager.shared.localPeerID.displayName,
+            cameraPosition: position
+        )
+        sendMessage(message)
     }
     
-    // Broadcast team lives after a death
     func broadcastTeamLives(_ lives: Int) {
-        let event = GameEvent(type: .playerDeath, section: lives)
-        broadcastGameEvent(event)
+        let message = MultiplayerMessage(
+            type: .teamLivesUpdate,
+            senderID: MultipeerManager.shared.localPeerID.displayName,
+            teamLives: lives
+        )
+        sendMessage(message)
+    }
+    
+    // MARK: - Message Sending
+    private func sendMessage(_ message: MultiplayerMessage) {
+        guard let data = try? JSONEncoder().encode(message) else {
+            print("[PlayerSyncManager] Failed to encode message")
+            return
+        }
+        
+        MultipeerManager.shared.sendToAll(data)
     }
 }

@@ -43,11 +43,21 @@ final class MultipeerManager: NSObject, ObservableObject {
     func hostGame(sessionCode: String) {
         self.sessionCode = sessionCode
         isHost = true
-        players = [NetworkPlayerFactory.createLocalPlayer(name: displayName)]
+        
+        // Create local player with color index 0 (host is always first)
+        let localPlayer = NetworkPlayerFactory.createLocalPlayer(name: displayName, colorIndex: 0)
+        players = [localPlayer]
+        
         state = .hosting
-        advertiser = MCNearbyServiceAdvertiser(peer: localPeerID, discoveryInfo: ["code": sessionCode], serviceType: serviceType)
+        advertiser = MCNearbyServiceAdvertiser(
+            peer: localPeerID,
+            discoveryInfo: ["code": sessionCode],
+            serviceType: serviceType
+        )
         advertiser?.delegate = self
         advertiser?.startAdvertisingPeer()
+        
+        print("[MultipeerManager] Hosting game with code: \(sessionCode)")
     }
     
     func stopHosting() {
@@ -55,31 +65,93 @@ final class MultipeerManager: NSObject, ObservableObject {
         advertiser = nil
         state = .idle
         isHost = false
-        players.removeAll()
+        clearPlayers()
+        
+        print("[MultipeerManager] Stopped hosting")
     }
     
     // MARK: - Join Game
     func joinGame(sessionCode: String) {
         self.sessionCode = sessionCode
         isHost = false
-        players = [NetworkPlayerFactory.createLocalPlayer(name: displayName)]
+        
+        // Create local player (color will be assigned by host)
+        let localPlayer = NetworkPlayerFactory.createLocalPlayer(name: displayName)
+        players = [localPlayer]
+        
         state = .browsing
         browser = MCNearbyServiceBrowser(peer: localPeerID, serviceType: serviceType)
         browser?.delegate = self
         browser?.startBrowsingForPeers()
+        
+        print("[MultipeerManager] Joining game with code: \(sessionCode)")
     }
     
     func stopBrowsing() {
         browser?.stopBrowsingForPeers()
         browser = nil
         state = .idle
+        clearPlayers()
+        
+        print("[MultipeerManager] Stopped browsing")
+    }
+    
+    // MARK: - Player Management
+    private func clearPlayers() {
         players.removeAll()
     }
     
-    // MARK: - Send Data (sync, state, moves, etc)
+    func addPlayer(_ peerID: MCPeerID) {
+        // Assign next available color index
+        let colorIndex = players.count % Constants.playerColors.count
+        let newPlayer = NetworkPlayer(
+            id: UUID().uuidString,
+            peerID: peerID.displayName,
+            colorIndex: colorIndex
+        )
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.players.append(newPlayer)
+            print("[MultipeerManager] Added player: \(peerID.displayName) (color: \(colorIndex))")
+        }
+    }
+    
+    func removePlayer(with peerID: MCPeerID) {
+        DispatchQueue.main.async { [weak self] in
+            self?.players.removeAll { $0.peerID == peerID.displayName }
+            print("[MultipeerManager] Removed player: \(peerID.displayName)")
+        }
+    }
+    
+    // MARK: - Send Data
     func sendToAll(_ data: Data) {
-        if session.connectedPeers.count > 0 {
-            try? session.send(data, toPeers: session.connectedPeers, with: .reliable)
+        guard !session.connectedPeers.isEmpty else {
+            print("[MultipeerManager] No connected peers to send data to")
+            return
+        }
+        
+        do {
+            try session.send(data, toPeers: session.connectedPeers, with: .reliable)
+        } catch {
+            print("[MultipeerManager] Failed to send data: \(error)")
+        }
+    }
+    
+    func sendToPeer(_ data: Data, peer: MCPeerID) {
+        do {
+            try session.send(data, toPeers: [peer], with: .reliable)
+        } catch {
+            print("[MultipeerManager] Failed to send data to \(peer.displayName): \(error)")
+        }
+    }
+    
+    // MARK: - Connection Status
+    private func updateConnectionStatus() {
+        let wasConnected = connected
+        connected = !session.connectedPeers.isEmpty
+        
+        if connected != wasConnected {
+            print("[MultipeerManager] Connection status changed: \(connected)")
         }
     }
     
@@ -89,42 +161,103 @@ final class MultipeerManager: NSObject, ObservableObject {
         stopHosting()
         stopBrowsing()
         state = .idle
-        players.removeAll()
+        clearPlayers()
+        connected = false
+        
+        print("[MultipeerManager] Disconnected from session")
     }
 }
 
-// MARK: - MCSessionDelegate, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate
-extension MultipeerManager: MCSessionDelegate, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate {
-    // Implement all required delegate methods
+// MARK: - MCSessionDelegate
+extension MultipeerManager: MCSessionDelegate {
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
-        DispatchQueue.main.async {
-            self.connected = (state == .connected)
-            if state == .notConnected {
-                // Pause game for all players
-                PlayerSyncManager.shared.broadcastPause(by: self.localPeerID.displayName)
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            switch state {
+            case .connecting:
+                print("[MultipeerManager] Connecting to: \(peerID.displayName)")
+                
+            case .connected:
+                print("[MultipeerManager] Connected to: \(peerID.displayName)")
+                self.addPlayer(peerID)
+                self.updateConnectionStatus()
+                
+            case .notConnected:
+                print("[MultipeerManager] Disconnected from: \(peerID.displayName)")
+                self.removePlayer(with: peerID)
+                self.updateConnectionStatus()
+                
+                // Pause game if someone disconnects during gameplay
+                if GameManager.shared.currentLevel > 0 {
+                    PlayerSyncManager.shared.broadcastPause(by: self.localPeerID.displayName)
+                }
+                
+            @unknown default:
+                print("[MultipeerManager] Unknown session state: \(state)")
             }
         }
     }
+    
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
-        // Pass to PlayerSyncManager or handle directly
         PlayerSyncManager.shared.handleIncomingData(data, from: peerID)
     }
-    func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {}
-    func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {}
-    func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {}
-    func session(_ session: MCSession, didReceiveCertificate certificate: [Any]?, fromPeer peerID: MCPeerID, certificateHandler: @escaping (Bool) -> Void) { certificateHandler(true) }
     
-    func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: Error) {}
-    func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
-        invitationHandler(true, session)
+    func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
+        // Not implemented for this game
     }
-    func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: Error) {}
+    
+    func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {
+        // Not implemented for this game
+    }
+    
+    func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {
+        // Not implemented for this game
+    }
+    
+    func session(_ session: MCSession, didReceiveCertificate certificate: [Any]?, fromPeer peerID: MCPeerID, certificateHandler: @escaping (Bool) -> Void) {
+        // Accept all certificates for local network gaming
+        certificateHandler(true)
+    }
+}
+
+// MARK: - MCNearbyServiceAdvertiserDelegate
+extension MultipeerManager: MCNearbyServiceAdvertiserDelegate {
+    func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: Error) {
+        print("[MultipeerManager] Failed to start advertising: \(error)")
+    }
+    
+    func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
+        print("[MultipeerManager] Received invitation from: \(peerID.displayName)")
+        
+        // Auto-accept invitations when hosting
+        if isHost && players.count < Constants.maxPlayers {
+            invitationHandler(true, session)
+        } else {
+            invitationHandler(false, nil)
+        }
+    }
+}
+
+// MARK: - MCNearbyServiceBrowserDelegate
+extension MultipeerManager: MCNearbyServiceBrowserDelegate {
+    func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: Error) {
+        print("[MultipeerManager] Failed to start browsing: \(error)")
+    }
+    
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
+        print("[MultipeerManager] Found peer: \(peerID.displayName)")
+        
+        // Check if this peer has the correct session code
         if let code = info?["code"], code == self.sessionCode {
+            print("[MultipeerManager] Session code matches, inviting peer")
             browser.invitePeer(peerID, to: session, withContext: nil, timeout: 10)
         }
     }
-    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {}
+    
+    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
+        print("[MultipeerManager] Lost peer: \(peerID.displayName)")
+    }
 }
 
 /// Multiplayer state for UI

@@ -9,11 +9,13 @@
 import Foundation
 import MultipeerConnectivity
 import CoreGraphics
+import Combine
 
-/// Represents a player in the multiplayer network (syncs between devices)
-final class NetworkPlayer: ObservableObject, Identifiable, Codable {
+/// Represents a player in the multiplayer network - UI observable but not directly Codable
+final class NetworkPlayer: ObservableObject, Identifiable {
     let id: String
     let peerID: String
+    
     @Published var colorIndex: Int
     @Published var position: CGPoint
     @Published var velocity: CGVector
@@ -21,13 +23,10 @@ final class NetworkPlayer: ObservableObject, Identifiable, Codable {
     @Published var score: Int
     @Published var isReady: Bool
     @Published var lastSeen: Date
-    
-    // MapMover/edge role logic
     @Published var assignedEdge: EdgeRole?
-    var isMapMover: Bool { assignedEdge != nil }
     
-    enum CodingKeys: String, CodingKey {
-        case id, peerID, colorIndex, position, velocity, lives, score, isReady, assignedEdge, lastSeen
+    var isMapMover: Bool {
+        assignedEdge != nil
     }
     
     init(id: String, peerID: String, colorIndex: Int, position: CGPoint = .zero, velocity: CGVector = .zero, lives: Int = Constants.defaultPlayerLives, score: Int = 0, isReady: Bool = false, assignedEdge: EdgeRole? = nil) {
@@ -43,33 +42,40 @@ final class NetworkPlayer: ObservableObject, Identifiable, Codable {
         self.lastSeen = Date()
     }
     
-    // Codable
-    required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(String.self, forKey: .id)
-        peerID = try container.decode(String.self, forKey: .peerID)
-        colorIndex = try container.decode(Int.self, forKey: .colorIndex)
-        position = try container.decode(CGPoint.self, forKey: .position)
-        velocity = try container.decode(CGVector.self, forKey: .velocity)
-        lives = try container.decode(Int.self, forKey: .lives)
-        score = try container.decode(Int.self, forKey: .score)
-        isReady = try container.decode(Bool.self, forKey: .isReady)
-        assignedEdge = try container.decodeIfPresent(EdgeRole.self, forKey: .assignedEdge)
-        lastSeen = try container.decode(Date.self, forKey: .lastSeen)
+    /// Create from PlayerState
+    convenience init(from playerState: PlayerState) {
+        self.init(
+            id: playerState.id,
+            peerID: playerState.peerID,
+            colorIndex: playerState.colorIndex,
+            position: playerState.position,
+            velocity: playerState.velocity,
+            lives: playerState.lives,
+            score: playerState.score,
+            isReady: playerState.isReady,
+            assignedEdge: playerState.assignedEdge
+        )
+        self.lastSeen = playerState.lastSeen
     }
     
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
-        try container.encode(peerID, forKey: .peerID)
-        try container.encode(colorIndex, forKey: .colorIndex)
-        try container.encode(position, forKey: .position)
-        try container.encode(velocity, forKey: .velocity)
-        try container.encode(lives, forKey: .lives)
-        try container.encode(score, forKey: .score)
-        try container.encode(isReady, forKey: .isReady)
-        try container.encodeIfPresent(assignedEdge, forKey: .assignedEdge)
-        try container.encode(lastSeen, forKey: .lastSeen)
+    /// Convert to PlayerState for network transmission
+    func toPlayerState() -> PlayerState {
+        return PlayerState(from: self)
+    }
+    
+    /// Update from received PlayerState
+    func update(from playerState: PlayerState) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.colorIndex = playerState.colorIndex
+            self.position = playerState.position
+            self.velocity = playerState.velocity
+            self.lives = playerState.lives
+            self.score = playerState.score
+            self.isReady = playerState.isReady
+            self.assignedEdge = playerState.assignedEdge
+            self.lastSeen = playerState.lastSeen
+        }
     }
 }
 

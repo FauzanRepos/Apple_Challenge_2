@@ -1,5 +1,5 @@
 //
-//  CodeInputVIew.swift
+//  CodeInputView.swift
 //  Space Maze
 //
 //  Created by Apple Dev on 27/05/25.
@@ -25,13 +25,20 @@ struct CodeInputView: View {
                 .onSubmit {
                     submitCode()
                 }
+                .onChange(of: code) { newValue in
+                    // Limit to 4 characters and uppercase
+                    let filtered = String(newValue.uppercased().prefix(4))
+                    if filtered != newValue {
+                        code = filtered
+                    }
+                }
             
             Button(action: submitCode) {
                 Text("Join Room")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .disabled(code.count != 6)
+            .disabled(code.count != 4) // Fixed: Now matches 4-character generation
             
             if showInvalid {
                 Text("Invalid code. Please try again.")

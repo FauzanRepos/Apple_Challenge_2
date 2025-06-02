@@ -13,12 +13,13 @@ final class GameCodeManager {
     static let shared = GameCodeManager()
     private init() {}
     
-    // 6-character uppercase session code
+    // Generate 4-character uppercase session code
     func generateCode() -> String {
         let chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
         return String((0..<4).map { _ in chars.randomElement()! })
     }
     
+    // Validate 4-character code (fixed length mismatch)
     func validate(_ code: String) -> Bool {
         let allowed = CharacterSet(charactersIn: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789")
         return code.count == 4 && code.uppercased().rangeOfCharacter(from: allowed.inverted) == nil

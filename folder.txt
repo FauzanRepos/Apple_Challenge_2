@@ -6,230 +6,134 @@
 //  Copyright © 2025 ADA Team. All rights reserved.
 //
 
-Provided new folder structures
+COMPLETE PROJECT STRUCTURE WITH ASSETS
 
 SpaceMaze/
 ├── App/
-│   ├── AppDelegate.swift               // ✅ Updated with manager initialization
-│   └── GameViewWrapper.swift           // ✅ Updated for multiplayer integration
-│
+│   ├── AppDelegate.swift
+│   └── GameViewWrapper.swift
 ├── Core/
-│   ├── Managers/
-│   │   ├── GameManager.swift           // ✅ Central game logic coordinator
-│   │   ├── LevelManager.swift          // ✅ Handles level progression (no selection)
-│   │   ├── AudioManager.swift          // ✅ Background music + SFX
-│   │   ├── StorageManager.swift        // ✅ High scores & settings persistence
-│   │   └── SettingsManager.swift       // ✅ Game preferences
-│   │
+│   ├── Game/
+│   │   ├── GameManager.swift
+│   │   ├── LevelManager.swift
+│   │   ├── AudioManager.swift
+│   │   ├── SettingsManager.swift
+│   │   ├── StorageManager.swift
+│   │   ├── + CameraManager.swift
+│   │   └── + CollisionManager.swift
 │   ├── Multiplayer/
-│   │   ├── MultipeerManager.swift      // ✅ Core multiplayer connectivity
-│   │   ├── GameSession.swift           // ✅ Manages game sessions
-│   │   ├── NetworkMessage.swift        // ✅ Message types for communication
-│   │   ├── PlayerSyncManager.swift     // ✅ Real-time player synchronization
-│   │   └── GameCodeManager.swift       // ✅ 6-character code generation/validation
-│   │
+│   │   ├── MultipeerManager.swift
+│   │   ├── PlayerSyncManager.swift
+│   │   ├── GameSession.swift
+│   │   ├── GameCodeManager.swift
+│   │   ├── LANPermissionManager.swift
+│   │   └── MultiplayerMessage.swift
 │   └── Utils/
-│       ├── Constants.swift             // ✅ Game constants & configurations
-│       ├── Extensions/
-│       │   ├── CGPoint+Extensions.swift     // ✅ Game-specific point operations
-│       │   ├── SKScene+Extensions.swift     // ✅ SpriteKit helper methods
-│       │   └── String+Extensions.swift      // ✅ Validation & formatting
-│       └── Helpers/
-│           ├── CollisionHelper.swift        // ✅ Physics collision utilities
-│           └── ValidationHelper.swift       // ✅ Input validation
-│
+│       ├── CollisionHelper.swift
+│       ├── ValidationHelper.swift
+│       ├── Constants.swift
+│       ├── CGPoint+Extensions.swift
+│       ├── SKScene+Extensions.swift
+│       └── String+Extension.swift
 ├── Models/
 │   ├── Game/
-│   │   ├── Player.swift                // 🔄 Player properties (with network ID)
-│   │   ├── GameState.swift             // 🔄 Overall game state (multiplayer-aware)
-│   │   ├── Level.swift                 // 🔄 Level structure and metadata
-│   │   ├── Checkpoint.swift            // 🔄 Checkpoint data model
-│   │   ├── PowerUp.swift               // 🔄 Power-up types and effects (oil/grass)
-│   │   └── GameRecord.swift            // 🔄 High scores and progress tracking
-│   │
+│   │   ├── Player.swift
+│   │   ├── Level.swift
+│   │   ├── Checkpoint.swift
+│   │   ├── PowerUp.swift
+│   │   ├── GameRecord.swift
+│   │   └── + PlayerState.swift
 │   └── Multiplayer/
-│       ├── Room.swift                  // ✅ Existing Room.swift (moved here)
-│       ├── NetworkPlayer.swift         // 🔄 Network-specific player data
-│       ├── SessionState.swift          // 🔄 Multiplayer session states
-│       └── GameEvent.swift             // 🔄 Network game events
-│
+│       ├── NetworkPlayer.swift
+│       ├── Room.swift
+│       ├── SessionState.swift
+│       ├── GameEvent.swift
+│       └── EdgeRole.swift
 ├── Views/
 │   ├── Home/
-│   │   ├── HomeView.swift              // ✅ Existing - add animations to green areas
-│   │   ├── HighScoreView.swift         // ✅ Existing - add pulse animations
-│   │   ├── StartGameSliderView.swift   // ✅ Existing - enhance animations
-│   │   ├── CodeInputView.swift         // 🆕 NEW - Enter 6-character game code
-│   │   └── SettingsView.swift          // 🆕 NEW - Audio/player settings
-│   │
+│   │   ├── HomeView.swift
+│   │   ├── HighScoreView.swift
+│   │   ├── CodeInputView.swift
+│   │   └── SettingsView.swift
 │   ├── Lobby/
-│   │   ├── LobbyView.swift             // ✅ Updated for multiplayer integration
-│   │   ├── RoomRowView.swift           // ✅ Updated for real player counts
-│   │   ├── PlayerListView.swift        // 🆕 NEW - Show connected players with ready status
-│   │   └── ReadyButtonView.swift       // 🆕 NEW - Ready state with animations
-│   │
+│   │   ├── LobbyView.swift
+│   │   ├── StartGameSliderView.swift
+│   │   ├── PlayerListView.swift
+│   │   ├── ReadyButtonView.swift
+│   │   ├── RoomRowView.swift
+│   │   └── ConnectionStatusView.swift
 │   ├── Game/
-│   │   ├── GameScene.swift             // 🔄 MAJOR UPDATE - Integration with new architecture
-│   │   ├── GameViewController.swift    // 🔄 Updated for multiplayer support
-│   │   └── Components/                 // 🆕 NEW - Reusable game UI components
-│   │       ├── LivesIndicatorView.swift     // Hearts display (top-right)
-│   │       ├── ScoreDisplayView.swift       // Score display (top-left)
-│   │       ├── DirectionIndicatorView.swift // Compass arrow (bottom-right)
-│   │       └── MultiplayerHUDView.swift     // Mission clue + multiplayer info
-│   │
+│   │   ├── GameScene.swift
+│   │   ├── + GameScene+Physics.swift
+│   │   ├── + GameScene+Input.swift
+│   │   ├── GameViewController.swift
+│   │   ├── LivesIndicatorView.swift
+│   │   ├── ScoreDisplayView.swift
+│   │   ├── MultiplayerHUDView.swift
+│   │   ├── DirectionIndicatorView.swift
+│   │   └── ResumeCountdownOverlay.swift
 │   └── Shared/
-│       ├── LoadingView.swift           // 🆕 NEW - Connection loading screens
-│       ├── ErrorView.swift             // 🆕 NEW - Error display with retry
-│       └── ConnectionStatusView.swift  // 🆕 NEW - Network status indicator
-│
+│       ├── ErrorView.swift
+│       ├── LoadingView.swift
+│       ├── ScaleButtonView.swift
+│       └── WarningView.swift
 ├── Resources/
-│   ├── Levels/                         // 🆕 NEW - Level files directory
-│   │   ├── level1.txt                  // ✅ Provided level file
-│   │   ├── level2.txt                  // 🆕 NEW - Generate additional levels
-│   │   ├── level3.txt                  // 🆕 NEW - Increasing difficulty
-│   │   └── LevelConfig.json            // 🆕 NEW - Level metadata & progression
-│   │
-│   ├── Assets.xcassets/                // 🔄 PLACEHOLDER ASSETS
-│   │   ├── Game/                       // Game sprites (colored placeholders)
-│   │   │   ├── player.imageset         // Blue circle placeholder
-│   │   │   ├── block.imageset          // Brown rectangle placeholder
-│   │   │   ├── vortex.imageset         // Red swirl placeholder
-│   │   │   ├── checkpoint.imageset     // Green star placeholder
-│   │   │   ├── finish.imageset         // Gold trophy placeholder
-│   │   │   ├── background.imageset     // Space texture placeholder
-│   │   │   └── Compass.imageset        // Green arrow placeholder
-│   │   │
-│   │   └── UI/                         // UI elements
-│   │       ├── heart.imageset          // Red heart for lives
-│   │       └── ready_indicator.imageset // Green checkmark
-│   │
-│   ├── Sounds/                         // 🆕 NEW - Audio files (future)
-│   │   ├── SFX/
-│   │   │   ├── checkpoint.wav          // Checkpoint reached sound
-│   │   │   ├── collision.wav           // Wall collision sound
-│   │   │   ├── death.wav              // Player death sound
-│   │   │   └── victory.wav            // Level complete sound
-│   │   │
-│   │   └── Music/
-│   │       ├── game_theme.mp3         // Background music
-│   │       └── menu_theme.mp3         // Menu background music
-│   │
-│   └── Configurations/                 // 🆕 NEW - Configuration files
-│       ├── GameConfig.plist           // Game balance settings
-│       └── NetworkConfig.plist        // Network configurations
-│
+│   ├── Levels/
+│   │   ├── level1.txt                   // Planet 1 ASCII map
+│   │   ├── level2.txt                   // Planet 2 ASCII map
+│   │   └── LevelConfig.json             // Level metadata
+│   ├── Assets.xcassets/
+│   │   ├── UI/
+│   │   │   ├── Button.imageset/
+│   │   │   ├── LongButton.imageset/
+│   │   │   ├── Q_Button.imageset/
+│   │   │   ├── HearthBar_On.imageset/
+│   │   │   ├── HearthBar_Off.imageset/
+│   │   │   ├── HighScoreBoard_Mock.imageset/
+│   │   │   ├── HighScoreC_GreenLight.imageset/
+│   │   │   ├── AlertPage_Red.imageset/
+│   │   │   ├── Compass.imageset/
+│   │   │   └── HomePage.imageset/
+│   │   ├── Sprites/
+│   │   │   └── Player.imageset/         // Base player marble sprite
+│   │   ├── Planets/
+│   │   │   ├── Planet1/
+│   │   │   │   ├── wall.imageset/
+│   │   │   │   ├── floor.imageset/
+│   │   │   │   ├── checkpoint.imageset/
+│   │   │   │   ├── spike.imageset/
+│   │   │   │   ├── oil.imageset/
+│   │   │   │   ├── grass.imageset/
+│   │   │   │   ├── vortex.imageset/
+│   │   │   │   └── spaceship.imageset/
+│   │   │   └── Planet2/
+│   │   │       ├── wall.imageset/
+│   │   │       ├── floor.imageset/
+│   │   │       ├── checkpoint.imageset/
+│   │   │       ├── spike.imageset/
+│   │   │       ├── oil.imageset/
+│   │   │       ├── grass.imageset/
+│   │   │       ├── vortex.imageset/
+│   │   │       └── spaceship.imageset/
+│   │   ├── Backgrounds/
+│   │   │   ├── Background_1.imageset/   // Planet 1 background
+│   │   │   ├── Background_2.imageset/   // Planet 2 background
+│   │   │   ├── spaceMazeBG.colorset/    // App background color
+│   │   │   ├── text.colorset/           // Text color
+│   │   │   └── yellowHighlightText.colorset/ // Highlight color
+│   │   └── AppIcon.appiconset/
+│   ├── Sounds/
+│   │   ├── bgm_space.mp3               // Background music
+│   │   ├── sfx_checkpoint.wav          // Checkpoint collected
+│   │   ├── sfx_death.wav               // Player death
+│   │   ├── sfx_powerup.wav             // Oil/grass pickup
+│   │   ├── sfx_finish.wav              // Level complete
+│   │   └── sfx_collision.wav           // Ball collision
+│   └── Config/
+│       ├── GameConfig.plist            // Game settings/constants
+│       └── NetworkConfig.plist         // Multiplayer settings
 ├── Storyboards/
-│   ├── Main.storyboard                 // ✅ Existing - GameViewController
-│   └── LaunchScreen.storyboard         // ✅ Existing - Launch screen
-│
-└── Info.plist                          // ✅ Existing - App configuration
-
-
-
-
-Here’s your fully updated project structure with best-practice for scalable, asset-driven level design:
-
-
-App/
-  ├── AppDelegate.swift
-  └── GameViewWrapper.swift
-Core/
-  Game/
-    ├── GameManager.swift
-    ├── LevelManager.swift
-    ├── AudioManager.swift
-    ├── SettingsManager.swift
-    └── StorageManager.swift
-  Multiplayer/
-    ├── MultipeerManager.swift
-    ├── PlayerSyncManager.swift
-    ├── GameSession.swift
-    ├── GameCodeManager.swift
-    └── LANPermissionManager.swift
-  Utils/
-    ├── CollisionHelper.swift
-    ├── ValidationHelper.swift
-    ├── Constants.swift
-    ├── CGPoint+Extensions.swift
-    ├── SKScene+Extensions.swift
-    └── String+Extension.swift
-Models/
-  Game/
-    ├── Player.swift
-    ├── Level.swift
-    ├── Checkpoint.swift
-    ├── PowerUp.swift
-    └── GameRecord.swift
-  Multiplayer/
-    ├── NetworkPlayer.swift
-    ├── Room.swift
-    ├── SessionState.swift
-    └── GameEvent.swift
-Views/
-  Home/
-    ├── HomeView.swift
-    ├── HighScoreView.swift
-    ├── CodeInputView.swift
-    └── SettingsView.swift
-  Lobby/
-    ├── LobbyView.swift
-    ├── StartGameSliderView.swift
-    ├── PlayerListView.swift
-    ├── ReadyButtonView.swift
-    ├── RoomRowView.swift
-    └── ConnectionStatusView.swift
-  Game/
-    ├── GameScene.swift
-    ├── GameViewController.swift
-    ├── LivesIndicatorView.swift
-    ├── ScoreDisplayView.swift
-    ├── MultiplayerHUDView.swift
-    └── DirectionIndicatorView.swift
-  Shared/
-    ├── ErrorView.swift
-    ├── LoadingView.swift
-    ├── ScaleButtonView.swift
-    └── WarningView.swift
-Resources/
-  Levels/
-    ├── level1.txt         // Planet 1
-    ├── level2.txt         // Planet 2
-    └── LevelConfig.json
-  Assets.xcassets/
-    UI/
-      └── [all shared UI images]
-    Sprites/
-      └── [all shared sprites]
-    Planets/
-      Planet1/
-        ├── wall.imageset/
-        ├── floor.imageset/
-        ├── checkpoint.imageset/
-        ├── spike.imageset/
-        ├── oil.imageset/
-        ├── grass.imageset/
-        ├── vortex.imageset/
-        └── spaceship.imageset/
-      Planet2/
-        ├── wall.imageset/
-        ├── floor.imageset/
-        ├── checkpoint.imageset/
-        ├── spike.imageset/
-        ├── oil.imageset/
-        ├── grass.imageset/
-        ├── vortex.imageset/
-        └── spaceship.imageset/
-    Backgrounds/
-      ├── Background_1.png    // Planet 1 background
-      └── Background_2.png    // Planet 2 background
-    Player.png
-    [other shared icons]
-  Sounds/
-    └── [all SFX/music files as needed]
-  Config/
-    ├── GameConfig.plist
-    └── NetworkConfig.plist
-Storyboards/
-  ├── Main.storyboard
-  └── LaunchScreen.storyboard
-Info.plist
-README.md
+│   ├── Main.storyboard
+│   └── LaunchScreen.storyboard
+├── Info.plist
+└── README.md
