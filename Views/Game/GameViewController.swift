@@ -49,27 +49,6 @@ struct GameViewController: UIViewControllerRepresentable {
             self.gameManager.loadLevel(1)
         }
         
-        // Create a hosting controller for SwiftUI overlays
-        let overlayView = GameOverlayView()
-        let hostingController = UIHostingController(rootView: overlayView)
-        
-        // Configure hosting controller
-        hostingController.view.backgroundColor = .clear
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Add as child view controller
-        controller.addChild(hostingController)
-        controller.view.addSubview(hostingController.view)
-        hostingController.didMove(toParent: controller)
-        
-        // Add constraints for overlay view
-        NSLayoutConstraint.activate([
-            hostingController.view.topAnchor.constraint(equalTo: controller.view.topAnchor),
-            hostingController.view.bottomAnchor.constraint(equalTo: controller.view.bottomAnchor),
-            hostingController.view.leadingAnchor.constraint(equalTo: controller.view.leadingAnchor),
-            hostingController.view.trailingAnchor.constraint(equalTo: controller.view.trailingAnchor)
-        ])
-        
         return controller
     }
     
@@ -119,42 +98,6 @@ struct GameViewController: UIViewControllerRepresentable {
             controller.view.subviews
                 .filter { $0.tag == overlayTag }
                 .forEach { $0.removeFromSuperview() }
-        }
-    }
-}
-
-// MARK: - Game Overlay View
-struct GameOverlayView: View {
-    @ObservedObject private var gameManager = GameManager.shared
-    
-    var body: some View {
-        VStack {
-            // Top overlay content
-            HStack {
-                Text(gameManager.scoreText)
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                
-                Spacer()
-                
-                Button(action: {
-                    gameManager.isPaused = true
-                }) {
-                    Image(systemName: "pause.circle.fill")
-                        .font(.title)
-                        .foregroundColor(.white)
-                }
-                .padding()
-            }
-            
-            Spacer()
-            
-            // Bottom overlay content
-            HStack {
-                // Add your bottom overlay content here
-            }
-            .padding()
         }
     }
 }

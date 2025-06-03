@@ -20,10 +20,6 @@ struct GameViewWrapper: View {
         ZStack {
             // Warning View Layer
             WarningView()
-            
-            // Game Scene Layer
-            GameViewController()
-                .ignoresSafeArea()
         }
         .environmentObject(gameManager)
         .environmentObject(multipeerManager)
