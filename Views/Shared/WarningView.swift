@@ -19,7 +19,6 @@ struct WarningView: View {
     @State private var navigateToHome = false
     
     var body: some View {
-        
         NavigationStack {
             ZStack {
                 // Background color
@@ -96,11 +95,6 @@ struct WarningView: View {
                                 .font(.custom("VCROSDMono", size: 36))
                                 .padding()
                                 .frame(maxWidth: .infinity)
-//                                .background(
-//                                    RoundedRectangle(cornerRadius: 10)
-//                                        .stroke(Color.green, lineWidth: 2)
-//                                        .background(Color.gray.opacity(0.3))
-//                                )
                                 .foregroundColor(Color("text"))
                                 .padding(.horizontal, 30)
                         }
@@ -123,4 +117,10 @@ struct WarningView: View {
 
 #Preview {
     WarningView()
+        .environmentObject(GameManager.shared)
+        .environmentObject(MultipeerManager.shared)
+        .environmentObject(AudioManager.shared)
+        .environmentObject(SettingsManager.shared)
+        .environmentObject(StorageManager.shared)
+        .environmentObject(LANPermissionManager.shared)
 }

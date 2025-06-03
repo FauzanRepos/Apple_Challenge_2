@@ -20,19 +20,39 @@ final class LevelManager: ObservableObject {
     
     func loadLevel(_ level: Int) {
         let fileName = "level\(level)"
+        print("[LevelManager] Attempting to load level file: \(fileName)")
         guard let data = LevelManager.readLevelFile(named: fileName) else {
             print("[LevelManager] Failed to load level file \(fileName)")
             currentLevelData = nil
             return
         }
+        print("[LevelManager] Successfully loaded level data")
         currentLevelData = data
-        backgroundImageName = "Background_\(level)"
-        planetAssetPrefix = "Planets/Planet\(level)/"
+        print("[LevelManager] Current level data set: \(String(describing: currentLevelData))")
     }
     
     static func readLevelFile(named fileName: String) -> LevelData? {
-        guard let url = Bundle.main.url(forResource: fileName, withExtension: "txt", subdirectory: "Resources/Levels") else { return nil }
-        guard let content = try? String(contentsOf: url) else { return nil }
-        return LevelData.parse(from: content)
+        print("[LevelManager] Looking for file: \(fileName).txt in Resources/Content")
+        
+        // First, check if the file exists in the bundle
+        let bundle = Bundle.main
+        print("[LevelManager] Bundle paths: \(bundle.paths(forResourcesOfType: "txt", inDirectory: nil))")
+        
+        guard let url = bundle.url(forResource: fileName, withExtension: "txt"/*, subdirectory: "Resources/Content"*/) else {
+            print("[LevelManager] ERROR: Could not find file \(fileName).txt in Resources/Content")
+            return nil
+        }
+        print("[LevelManager] Found file at: \(url.path)")
+        
+        do {
+            let content = try String(contentsOf: url)
+            print("[LevelManager] Successfully read file contents: \(content.prefix(100))...")
+            let levelData = LevelData.parse(from: content)
+            print("[LevelManager] Parse result: \(String(describing: levelData))")
+            return levelData
+        } catch {
+            print("[LevelManager] ERROR: Could not read file contents: \(error)")
+            return nil
+        }
     }
 }

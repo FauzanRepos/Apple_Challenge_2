@@ -16,15 +16,59 @@ struct GameViewController: UIViewControllerRepresentable {
         let controller = UIViewController()
         let skView = SKView()
         
+        // Configure SKView
+        skView.showsFPS = true
+        skView.showsNodeCount = true
+        skView.showsPhysics = true
+        skView.ignoresSiblingOrder = true
+        
+        // Configure view to ignore safe areas
+        skView.translatesAutoresizingMaskIntoConstraints = false
+        controller.view = skView
+        
+        // Add constraints to fill the entire view
+        NSLayoutConstraint.activate([
+            skView.topAnchor.constraint(equalTo: controller.view.topAnchor),
+            skView.bottomAnchor.constraint(equalTo: controller.view.bottomAnchor),
+            skView.leadingAnchor.constraint(equalTo: controller.view.leadingAnchor),
+            skView.trailingAnchor.constraint(equalTo: controller.view.trailingAnchor)
+        ])
+        
         // Create and configure the game scene
         let scene = GameScene(size: UIScreen.main.bounds.size)
-        scene.scaleMode = .resizeFill
+        scene.scaleMode = .aspectFill
         
         // Set the GameScene reference in GameManager for camera control
         gameManager.setCurrentGameScene(scene)
         
         skView.presentScene(scene)
-        controller.view = skView
+        
+        // Load level after scene is set up
+        DispatchQueue.main.async {
+            print("[GameViewController] Loading level before scene creation...")
+            self.gameManager.loadLevel(1)
+        }
+        
+        // Create a hosting controller for SwiftUI overlays
+        let overlayView = GameOverlayView()
+        let hostingController = UIHostingController(rootView: overlayView)
+        
+        // Configure hosting controller
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Add as child view controller
+        controller.addChild(hostingController)
+        controller.view.addSubview(hostingController.view)
+        hostingController.didMove(toParent: controller)
+        
+        // Add constraints for overlay view
+        NSLayoutConstraint.activate([
+            hostingController.view.topAnchor.constraint(equalTo: controller.view.topAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: controller.view.bottomAnchor),
+            hostingController.view.leadingAnchor.constraint(equalTo: controller.view.leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: controller.view.trailingAnchor)
+        ])
         
         return controller
     }
@@ -63,10 +107,8 @@ struct GameViewController: UIViewControllerRepresentable {
             controller.addChild(hostingController)
             controller.view.addSubview(hostingController.view)
             hostingController.didMove(toParent: controller)
-            
         } else {
             // Remove overlay when countdown is not active
-            // Find and remove the hosting controller properly
             if let childController = controller.children.first(where: { $0.view?.tag == overlayTag }) {
                 childController.willMove(toParent: nil)
                 childController.view.removeFromSuperview()
@@ -77,6 +119,42 @@ struct GameViewController: UIViewControllerRepresentable {
             controller.view.subviews
                 .filter { $0.tag == overlayTag }
                 .forEach { $0.removeFromSuperview() }
+        }
+    }
+}
+
+// MARK: - Game Overlay View
+struct GameOverlayView: View {
+    @ObservedObject private var gameManager = GameManager.shared
+    
+    var body: some View {
+        VStack {
+            // Top overlay content
+            HStack {
+                Text(gameManager.scoreText)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                
+                Spacer()
+                
+                Button(action: {
+                    gameManager.isPaused = true
+                }) {
+                    Image(systemName: "pause.circle.fill")
+                        .font(.title)
+                        .foregroundColor(.white)
+                }
+                .padding()
+            }
+            
+            Spacer()
+            
+            // Bottom overlay content
+            HStack {
+                // Add your bottom overlay content here
+            }
+            .padding()
         }
     }
 }

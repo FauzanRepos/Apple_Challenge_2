@@ -13,16 +13,14 @@ struct HomeView: View {
     @EnvironmentObject var multipeerManager: MultipeerManager
     @EnvironmentObject var storageManager: StorageManager
     
-    @State private var showLobby = false
     @State private var showSettings = false
     @State private var showAbout = false
-    
     @State private var roomCode: String = ""
     @State private var showCodeInput = false
+    @State private var navigateToLobby = false
     
     var body: some View {
         ZStack {
-            
             Color("spaceMazeBG")
                 .ignoresSafeArea()
             
@@ -34,17 +32,24 @@ struct HomeView: View {
             VStack() {
                 HighScoreView()
                     .environmentObject(storageManager)
-                    .padding(.top, 40)
+                    .padding(.top, UIScreen.main.bounds.height * 0.047)
                 
-//                ZStack {
-                    Spacer()
+                Spacer()
+                
+                ZStack(alignment: .top) {
+                    Image("Assistant")
+                        .resizable()
+                        .frame(width: UIScreen.main.bounds.width * 0.8, height: 120)
                     
-//                    Text("👩‍🚀 Captain says: Work together and get every marble home!")
-//                        .font(.custom("VCROSDMono", size: 30))
-//                        .foregroundColor(Color("text"))
-//                    
-//                }
-                
+                    Text("This is HQ!")
+                        .font(.custom("VCROSDMono", size: 16))
+                        .foregroundStyle(Color("text"))
+                        .frame(width: UIScreen.main.bounds.width * 0.8, alignment: .trailing)
+                        .padding(.trailing, UIScreen.main.bounds.width * 0.56)
+                        .padding(.top, UIScreen.main.bounds.height * 0.0493)
+                }
+                .frame(width: UIScreen.main.bounds.width * 0.8, height: 120)
+                .padding(.top, -UIScreen.main.bounds.height * 0.2)
                 
                 VStack (spacing: 25) {
                     HStack (spacing: 36) {
@@ -63,7 +68,7 @@ struct HomeView: View {
                         .onTapGesture {
                             roomCode = gameManager.gameCode.generateCode()
                             multipeerManager.hostGame(sessionCode: roomCode)
-                            showLobby = true
+                            navigateToLobby = true
                         }
                         
                         ZStack {
@@ -80,7 +85,6 @@ struct HomeView: View {
                         .onTapGesture {
                             showCodeInput = true
                         }
-                            
                     }
                     
                     HStack {
@@ -93,42 +97,13 @@ struct HomeView: View {
                         Image("About_Button")
                             .resizable()
                             .frame(width: 70, height: 30)
-                            .padding(.horizontal)
                             .onTapGesture {
                                 showAbout = true
                             }
                     }
+                    .frame(maxWidth: .infinity)
                     .padding(.horizontal)
                 }
-                
-//                // CREATE ROOM BUTTON
-//                Button(action: {
-//                    roomCode = gameManager.gameCode.generateCode()
-//                    multipeerManager.hostGame(sessionCode: roomCode)
-//                    showLobby = true
-//                }) {
-//                    Image("Button")
-//                        .resizable()
-//                        .frame(width: 220, height: 54)
-//                        .overlay(
-//                            Text("Create Room")
-//                                .font(.title2)
-//                                .foregroundColor(.white)
-//                                .bold()
-//                        )
-//                }
-//                // JOIN ROOM BUTTON
-//                Button(action: { showCodeInput = true }) {
-//                    Image("Button")
-//                        .resizable()
-//                        .frame(width: 220, height: 54)
-//                        .overlay(
-//                            Text("Join Room")
-//                                .font(.title2)
-//                                .foregroundColor(.white)
-//                                .bold()
-//                        )
-//                }
                 
                 Button(action: { showSettings = true }) {
                     Image("LongButton")
@@ -140,48 +115,44 @@ struct HomeView: View {
                                 .foregroundColor(.white)
                         )
                 }
-                
-//                Button(action: { showAbout = true }) {
-//                    Image("Q_Button")
-//                        .resizable()
-//                        .frame(width: 54, height: 54)
-//                }
             }
-            .padding(.vertical, 20)
-            .sheet(isPresented: $showLobby) {
-                LobbyView()
-                    .environmentObject(gameManager)
-                    .environmentObject(multipeerManager)
-            }
-            .sheet(isPresented: $showSettings) {
-                SettingsView()
-                    .environmentObject(gameManager)
-                    .environmentObject(storageManager)
-            }
-            .sheet(isPresented: $showCodeInput) {
-                VStack(spacing: 16) {
-                    Text("Enter Room Code to Join")
-                        .font(.title2)
-                    TextField("Room Code", text: $roomCode)
-                        .textCase(.uppercase)
-                        .keyboardType(.asciiCapable)
-                        .multilineTextAlignment(.center)
-                        .frame(width: 120)
-                        .textFieldStyle(.roundedBorder)
-                    Button("Join") {
-                        multipeerManager.joinGame(sessionCode: roomCode.uppercased())
-                        showCodeInput = false
-                        showLobby = true
-                    }
-                    .disabled(!gameManager.gameCode.validate(roomCode))
-                    Button("Cancel") {
-                        showCodeInput = false
-                        roomCode = ""
-                    }
-                }
-                .padding()
-            }
-            .navigationBarBackButtonHidden(true)
+            .padding(.top, UIScreen.main.bounds.height * 0.0235)
+            .padding(.bottom, UIScreen.main.bounds.height * 0.0235)
+//            .padding(.bottom, UIScreen.main.bounds.height * 0.067)
         }
+        .navigationDestination(isPresented: $navigateToLobby) {
+            LobbyView()
+                .environmentObject(gameManager)
+                .environmentObject(multipeerManager)
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
+                .environmentObject(gameManager)
+                .environmentObject(storageManager)
+        }
+        .sheet(isPresented: $showCodeInput) {
+            VStack(spacing: 16) {
+                Text("Enter Room Code to Join")
+                    .font(.title2)
+                TextField("Room Code", text: $roomCode)
+                    .textCase(.uppercase)
+                    .keyboardType(.asciiCapable)
+                    .multilineTextAlignment(.center)
+                    .frame(width: 120)
+                    .textFieldStyle(.roundedBorder)
+                Button("Join") {
+                    multipeerManager.joinGame(sessionCode: roomCode.uppercased())
+                    showCodeInput = false
+                    navigateToLobby = true
+                }
+                .disabled(!gameManager.gameCode.validate(roomCode))
+                Button("Cancel") {
+                    showCodeInput = false
+                    roomCode = ""
+                }
+            }
+            .padding()
+        }
+        .navigationBarBackButtonHidden(true)
     }
 }

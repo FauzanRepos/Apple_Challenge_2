@@ -17,15 +17,20 @@ struct GameViewWrapper: View {
     @StateObject private var permissionManager = LANPermissionManager.shared
     
     var body: some View {
-        NavigationStack {
+        ZStack {
+            // Warning View Layer
             WarningView()
-                .environmentObject(gameManager)
-                .environmentObject(multipeerManager)
-                .environmentObject(audioManager)
-                .environmentObject(settingsManager)
-                .environmentObject(storageManager)
-                .environmentObject(permissionManager)
+            
+            // Game Scene Layer
+            GameViewController()
+                .ignoresSafeArea()
         }
-        .navigationViewStyle(.stack)
+        .environmentObject(gameManager)
+        .environmentObject(multipeerManager)
+        .environmentObject(audioManager)
+        .environmentObject(settingsManager)
+        .environmentObject(storageManager)
+        .environmentObject(permissionManager)
+        .ignoresSafeArea(.all)
     }
 }

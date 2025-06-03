@@ -52,12 +52,16 @@ final class GameManager: ObservableObject {
     
     // MARK: - Level/Section Management
     func startGame() {
+        print("[GameManager] Starting game...")
         resetGame()
+        print("[GameManager] Loading level 1...")
         loadLevel(1)
         assignMapMoverRoles()
+        print("[GameManager] Game start complete")
     }
     
     func loadLevel(_ level: Int) {
+        print("[GameManager] Loading level \(level)...")
         currentLevel = level
         currentPlanet = level // 1-to-1 mapping for now
         section = 1
@@ -72,7 +76,15 @@ final class GameManager: ObservableObject {
         updateMissionClue()
         
         // Load level data
+        print("[GameManager] Calling LevelManager to load level data...")
         LevelManager.shared.loadLevel(level)
+        
+        // Verify level data was loaded
+        guard let levelData = LevelManager.shared.currentLevelData else {
+            print("[GameManager] ERROR: Failed to load level data")
+            return
+        }
+        print("[GameManager] Level data loaded successfully: \(String(describing: levelData))")
     }
     
     func reachCheckpoint(_ sectionIdx: Int) {
@@ -222,6 +234,10 @@ final class GameManager: ObservableObject {
         // Clear all assignments
         for player in players {
             player.assignedEdge = nil
+        }
+        
+        if playerCount == 1 {
+            players[0].assignedEdge = allEdges.randomElement()
         }
         
         if playerCount == 2 {

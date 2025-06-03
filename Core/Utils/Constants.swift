@@ -32,7 +32,24 @@ struct Constants {
     
     // Asset naming for planet-specific objects
     static func asset(for type: GameObjectType, planet: Int) -> String {
-        "Planets/Planet\(planet)/\(type.assetName)"
+        switch type {
+        case .wall:
+            return "block"
+        case .floor:
+            return "background"
+        case .checkpoint:
+            return "checkpoint"
+        case .spike:
+            return "block" // Using block for spikes
+        case .oil:
+            return "star" // Using star for oil
+        case .grass:
+            return "star" // Using star for grass
+        case .vortex:
+            return "vortex"
+        case .spaceship:
+            return "finish"
+        }
     }
 }
 

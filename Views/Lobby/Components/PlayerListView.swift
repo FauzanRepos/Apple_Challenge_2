@@ -12,43 +12,70 @@ struct PlayerListView: View {
     @EnvironmentObject var multipeerManager: MultipeerManager
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-//            Text("Players in Room (\(multipeerManager.players.count))")
-//                .font(.headline)
-//                .foregroundColor(.white)
-            ForEach(multipeerManager.players, id: \.id) { player in
-                HStack {
-                    Circle()
-                        .fill(Color("text"))
-                        .frame(width: 7.4, height: 7.4)
-                        .padding(.horizontal, 8)
-//                        .fill(Constants.playerColors[player.colorIndex % Constants.playerColors.count])
-//                        .frame(width: 24, height: 24)
-                    
-                    Text(player.peerID)
-                        .font(.custom("VCROSDMono", size: 16))
-                        .foregroundStyle(Color("text"))
-                        .fontWeight(.semibold)
-                    
-                    Spacer()
-                    
-                    Image(player.isReady ? "ReadyPlayerLight" : "NotReadyPlayerLight")
-                        .resizable()
-                        .frame(width: 21, height: 21)
-                    
-//                    Text(player.peerID)
-//                        .foregroundColor(.white)
-//                        .font(.body)
-                    
-                    if player.isMapMover {
-                        Text("🧭 Map Mover")
-                            .foregroundColor(.green)
-                            .font(.caption)
-                            .padding(.leading, 4)
+        VStack(spacing: 0) {
+            ForEach(0..<4) { index in
+                if index < multipeerManager.players.count {
+                    // Player row
+                    HStack {
+                        Circle()
+                            .fill(Color("text"))
+                            .frame(width: 7.4, height: 7.4)
+                            .padding(.trailing, 8)
+                        
+                        Text(multipeerManager.players[index].peerID)
+                            .font(.custom("VCROSDMono", size: 16))
+                            .foregroundStyle(Color("text"))
+                            .fontWeight(.semibold)
+                        
+                        Spacer()
+                        
+                        Image(multipeerManager.players[index].isReady ? "ReadyPlayerLight" : "NotReadyPlayerLight")
+                            .resizable()
+                            .frame(width: 21, height: 21)
+                        
+                        if multipeerManager.players[index].isMapMover {
+                            Text("🧭 Map Mover")
+                                .foregroundColor(.green)
+                                .font(.caption)
+                                .padding(.leading, 4)
+                        }
                     }
+                    .padding(.horizontal)
+                    .frame(height: 30)
+                    
+                } else {
+                    HStack {
+                        Circle()
+                            .fill(Color("text").opacity(0.3))
+                            .frame(width: 7.4, height: 7.4)
+                            .padding(.trailing, 8)
+                        
+                        Text("Waiting for player...")
+                            .font(.custom("VCROSDMono", size: 16))
+                            .foregroundStyle(Color("text").opacity(0.3))
+                            .fontWeight(.semibold)
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                    .frame(height: 30)
+                }
+                
+                if index < 3 {
+                    Rectangle()
+                        .fill(Color("text").opacity(0.3))
+                        .frame(height: 3)
+                        .padding(.horizontal)
                 }
             }
         }
+        .frame(width: UIScreen.main.bounds.width * 0.68, height: 144)
         .padding(.horizontal)
+        .padding(.vertical)
+        .overlay(
+            Rectangle()
+                .stroke(Color("text"), lineWidth: 3)
+                .frame(width: UIScreen.main.bounds.width * 0.68, height: 144)
+        )
     }
 }

@@ -44,18 +44,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     // MARK: - Camera
-    private var gameCamera: SKCameraNode!
+    public var gameCamera: SKCameraNode!
     
     // MARK: - Scene Lifecycle
     override func didMove(to view: SKView) {
+        print("[GameScene] Scene initialization started")
         setupPhysics()
         setupCamera()
         setupCollisionSystem()
+        print("[GameScene] Checking level data before setup: \(String(describing: levelManager.currentLevelData))")
         setupLevel()
         setupPlayers()
-        startAccelerometer()
         
-        print("[GameScene] Scene initialized with \(multipeerManager.players.count) players")
+        // Start accelerometer after a short delay to ensure everything is set up
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            print("[GameScene] Starting accelerometer after delay...")
+            self?.startAccelerometer()
+        }
+        
+        print("[GameScene] Scene initialization complete with \(multipeerManager.players.count) players")
     }
     
     deinit {
@@ -69,27 +76,49 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     private func setupCamera() {
+        print("[GameScene] Setting up camera...")
+        
+        // Create and configure camera
         gameCamera = SKCameraNode()
         camera = gameCamera
         addChild(gameCamera)
         
-        guard let levelData = levelManager.currentLevelData else { return }
+        print("[GameScene] Camera node created and added to scene")
+        
+        guard let levelData = levelManager.currentLevelData else {
+            print("[GameScene] ERROR: No level data available for camera setup")
+            return
+        }
         
         // Position camera at spawn point initially
         gameCamera.position = levelData.spawn
+        print("[GameScene] Initial camera position set to spawn: \(levelData.spawn)")
         
         // Setup CameraManager with this scene and camera
         cameraManager.setupCamera(scene: self, camera: gameCamera)
         
-        print("[GameScene] Camera setup at spawn: \(levelData.spawn)")
+        // Set camera constraints to keep it within level bounds
+        let xRange = SKRange(lowerLimit: 0, upperLimit: CGFloat(levelData.width) * levelData.tileSize)
+        let yRange = SKRange(lowerLimit: 0, upperLimit: CGFloat(levelData.height) * levelData.tileSize)
+        let constraint = SKConstraint.positionX(xRange, y: yRange)
+        gameCamera.constraints = [constraint]
+        
+        print("[GameScene] Camera setup complete with constraints: x(0-\(CGFloat(levelData.width) * levelData.tileSize)), y(0-\(CGFloat(levelData.height) * levelData.tileSize))")
+        
+        // Verify camera setup
+        print("[GameScene] Camera verification - Position: \(gameCamera.position), Parent: \(String(describing: gameCamera.parent))")
+        print("[GameScene] Scene size: \(size), Scale: \(scaleMode)")
     }
     
     private func setupLevel() {
+        print("[GameScene] Setting up level...")
         guard let levelData = levelManager.currentLevelData else {
             print("[GameScene] ERROR: No level data available")
+            print("[GameScene] LevelManager state: \(String(describing: levelManager))")
             return
         }
         
+        print("[GameScene] Level data found: \(String(describing: levelData))")
         let tileSize = levelData.tileSize
         
         // Background
@@ -106,7 +135,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     private func setupBackground(levelData: LevelData, tileSize: CGFloat) {
-        let bg = SKSpriteNode(imageNamed: "Background_\(currentPlanet)")
+        let bgName = "background"
+        print("[GameScene] Loading background: \(bgName)")
+        let bg = SKSpriteNode(imageNamed: bgName)
+        if bg.texture == nil {
+            print("[GameScene] WARNING: Failed to load background texture: \(bgName)")
+        }
         bg.position = CGPoint(
             x: CGFloat(levelData.width) * tileSize / 2,
             y: CGFloat(levelData.height) * tileSize / 2
@@ -120,33 +154,44 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     private func setupWalls(levelData: LevelData, tileSize: CGFloat) {
+        let wallAsset = Constants.asset(for: .wall, planet: currentPlanet)
+        print("[GameScene] Loading wall asset: \(wallAsset)")
+        
         for pos in levelData.wallPositions {
             let wall = createTileNode(
                 at: pos,
-                imageName: Constants.asset(for: .wall, planet: currentPlanet),
+                imageName: wallAsset,
                 size: tileSize,
                 category: CollisionHelper.Category.wall,
                 contact: 0,
                 collision: CollisionHelper.Category.player,
                 zPosition: 1
             )
+            if wall.texture == nil {
+                print("[GameScene] WARNING: Failed to load wall texture: \(wallAsset)")
+            }
             addChild(wall)
         }
     }
     
     private func setupCheckpoints(levelData: LevelData, tileSize: CGFloat) {
         checkpointNodes.removeAll()
+        let checkpointAsset = Constants.asset(for: .checkpoint, planet: currentPlanet)
+        print("[GameScene] Loading checkpoint asset: \(checkpointAsset)")
         
         for (index, pos) in levelData.checkpointPositions.enumerated() {
             let checkpoint = createTileNode(
                 at: pos,
-                imageName: Constants.asset(for: .checkpoint, planet: currentPlanet),
+                imageName: checkpointAsset,
                 size: Constants.checkpointRadius * 2,
                 category: CollisionHelper.Category.checkpoint,
                 contact: CollisionHelper.Category.player,
                 collision: 0,
                 zPosition: 2
             )
+            if checkpoint.texture == nil {
+                print("[GameScene] WARNING: Failed to load checkpoint texture: \(checkpointAsset)")
+            }
             checkpoint.name = "checkpoint_\(index + 1)"
             checkpointNodes.append(checkpoint)
             addChild(checkpoint)
@@ -155,31 +200,43 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     private func setupHazards(levelData: LevelData, tileSize: CGFloat) {
         // Vortexes
+        let vortexAsset = Constants.asset(for: .vortex, planet: currentPlanet)
+        print("[GameScene] Loading vortex asset: \(vortexAsset)")
+        
         for pos in levelData.vortexPositions {
             let vortex = createTileNode(
                 at: pos,
-                imageName: Constants.asset(for: .vortex, planet: currentPlanet),
+                imageName: vortexAsset,
                 size: Constants.vortexSize,
                 category: CollisionHelper.Category.vortex,
                 contact: CollisionHelper.Category.player,
                 collision: 0,
                 zPosition: 2
             )
+            if vortex.texture == nil {
+                print("[GameScene] WARNING: Failed to load vortex texture: \(vortexAsset)")
+            }
             vortex.name = "vortex"
             addChild(vortex)
         }
         
         // Spikes (border hazards)
+        let spikeAsset = Constants.asset(for: .spike, planet: currentPlanet)
+        print("[GameScene] Loading spike asset: \(spikeAsset)")
+        
         for pos in levelData.spikePositions {
             let spike = createTileNode(
                 at: pos,
-                imageName: Constants.asset(for: .spike, planet: currentPlanet),
+                imageName: spikeAsset,
                 size: Constants.spikeSize,
                 category: CollisionHelper.Category.spike,
                 contact: CollisionHelper.Category.player,
                 collision: 0,
                 zPosition: 2
             )
+            if spike.texture == nil {
+                print("[GameScene] WARNING: Failed to load spike texture: \(spikeAsset)")
+            }
             spike.name = "spike"
             addChild(spike)
         }
@@ -189,16 +246,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         powerUpNodes.removeAll()
         
         // Oil power-ups
+        let oilAsset = Constants.asset(for: .oil, planet: currentPlanet)
+        print("[GameScene] Loading oil asset: \(oilAsset)")
+        
         for (index, pos) in levelData.oilPositions.enumerated() {
             let oil = createTileNode(
                 at: pos,
-                imageName: Constants.asset(for: .oil, planet: currentPlanet),
+                imageName: oilAsset,
                 size: Constants.oilSize,
                 category: CollisionHelper.Category.oil,
                 contact: CollisionHelper.Category.player,
                 collision: 0,
                 zPosition: 2
             )
+            if oil.texture == nil {
+                print("[GameScene] WARNING: Failed to load oil texture: \(oilAsset)")
+            }
             let nodeID = "oil_\(index)"
             oil.name = nodeID
             powerUpNodes[nodeID] = oil
@@ -206,16 +269,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         // Grass power-ups
+        let grassAsset = Constants.asset(for: .grass, planet: currentPlanet)
+        print("[GameScene] Loading grass asset: \(grassAsset)")
+        
         for (index, pos) in levelData.grassPositions.enumerated() {
             let grass = createTileNode(
                 at: pos,
-                imageName: Constants.asset(for: .grass, planet: currentPlanet),
+                imageName: grassAsset,
                 size: Constants.grassSize,
                 category: CollisionHelper.Category.grass,
                 contact: CollisionHelper.Category.player,
                 collision: 0,
                 zPosition: 2
             )
+            if grass.texture == nil {
+                print("[GameScene] WARNING: Failed to load grass texture: \(grassAsset)")
+            }
             let nodeID = "grass_\(index)"
             grass.name = nodeID
             powerUpNodes[nodeID] = grass
@@ -224,16 +293,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     private func setupFinish(levelData: LevelData, tileSize: CGFloat) {
+        let finishAsset = Constants.asset(for: .spaceship, planet: currentPlanet)
+        print("[GameScene] Loading finish asset: \(finishAsset)")
+        
         for pos in levelData.finishPositions {
             let finish = createTileNode(
                 at: pos,
-                imageName: Constants.asset(for: .spaceship, planet: currentPlanet),
+                imageName: finishAsset,
                 size: Constants.finishSize,
                 category: CollisionHelper.Category.finish,
                 contact: CollisionHelper.Category.player,
                 collision: 0,
                 zPosition: 3
             )
+            if finish.texture == nil {
+                print("[GameScene] WARNING: Failed to load finish texture: \(finishAsset)")
+            }
             finish.name = "finish"
             addChild(finish)
         }
@@ -243,15 +318,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         guard let levelData = levelManager.currentLevelData else { return }
         
         playerNodes.removeAll()
+        print("[GameScene] Loading player asset: player")
+        print("[GameScene] Current players in multipeerManager: \(multipeerManager.players.count)")
+        print("[GameScene] Local player ID: \(localPlayerID)")
         
         for (index, player) in multipeerManager.players.enumerated() {
-            let playerNode = SKSpriteNode(imageNamed: "Player")
+            print("[GameScene] Creating player node for: \(player.id)")
+            let playerNode = SKSpriteNode(imageNamed: "player")
+            if playerNode.texture == nil {
+                print("[GameScene] WARNING: Failed to load player texture: player")
+            }
             playerNode.position = levelData.spawn
-            playerNode.size = CGSize(width: Constants.playerSize, height: Constants.playerSize)
+            playerNode.size = CGSize(width: Constants.playerSize / 2, height: Constants.playerSize / 2)
             playerNode.zPosition = 10
             
             // Apply player color
-            let colorIndex = index % Constants.playerColors.count
+            let colorIndex = player.colorIndex % Constants.playerColors.count
             let color = Constants.playerColors[colorIndex]
             playerNode.color = UIColor(color)
             playerNode.colorBlendFactor = 0.65
@@ -276,6 +358,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         print("[GameScene] \(multipeerManager.players.count) players created")
+        print("[GameScene] Player nodes created: \(playerNodes.keys.joined(separator: ", "))")
     }
     
     private func createTileNode(

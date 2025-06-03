@@ -11,20 +11,21 @@ import CoreGraphics
 
 /// Parsed tile-based level structure for Space Maze
 struct LevelData: Codable {
-    let wallPositions: [CGPoint]
-    let checkpointPositions: [CGPoint]
-    let vortexPositions: [CGPoint]
-    let oilPositions: [CGPoint]
-    let grassPositions: [CGPoint]
-    let spikePositions: [CGPoint]
-    let finishPositions: [CGPoint]
-    let spawn: CGPoint        // the 's' tile (spawn/start)
-    let width: Int
-    let height: Int
-    let tileSize: CGFloat     // In world units (pixels/points)
+    var wallPositions: [CGPoint]
+    var checkpointPositions: [CGPoint]
+    var vortexPositions: [CGPoint]
+    var oilPositions: [CGPoint]
+    var grassPositions: [CGPoint]
+    var spikePositions: [CGPoint]
+    var finishPositions: [CGPoint]
+    var spawn: CGPoint        // the 's' tile (spawn/start)
+    var width: Int
+    var height: Int
+    var tileSize: CGFloat     // In world units (pixels/points)
     
     /// Parse an ASCII grid level (.txt)
     static func parse(from text: String, tileSize: CGFloat = 48) -> LevelData? {
+        print("[LevelData] Starting to parse level data")
         var wallPositions: [CGPoint] = []
         var checkpointPositions: [CGPoint] = []
         var vortexPositions: [CGPoint] = []
@@ -37,6 +38,8 @@ struct LevelData: Codable {
         let lines = text.components(separatedBy: .newlines).filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
         let height = lines.count
         let width = lines.first?.count ?? 0
+        
+        print("[LevelData] Level dimensions: \(width)x\(height)")
         
         for (row, line) in lines.enumerated() {
             for (col, char) in line.enumerated() {
@@ -66,7 +69,20 @@ struct LevelData: Codable {
             }
         }
         
-        guard let spawnPoint = spawn else { return nil }
+        guard let spawnPoint = spawn else {
+            print("[LevelData] ERROR: No spawn point found in level")
+            return nil
+        }
+        
+        print("[LevelData] Parsed level elements:")
+        print("- Walls: \(wallPositions.count)")
+        print("- Checkpoints: \(checkpointPositions.count)")
+        print("- Vortexes: \(vortexPositions.count)")
+        print("- Oil: \(oilPositions.count)")
+        print("- Grass: \(grassPositions.count)")
+        print("- Spikes: \(spikePositions.count)")
+        print("- Finish: \(finishPositions.count)")
+        print("- Spawn: \(spawnPoint)")
         
         return LevelData(
             wallPositions: wallPositions,

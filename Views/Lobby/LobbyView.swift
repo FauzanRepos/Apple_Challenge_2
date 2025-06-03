@@ -12,8 +12,10 @@ struct LobbyView: View {
     @EnvironmentObject var multipeerManager: MultipeerManager
     @EnvironmentObject var gameManager: GameManager
     
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     @State private var isLocalPlayerReady: Bool = false
+    @State private var showAbout = false
+    @State private var navigateToGame = false
     
     private var localPlayer: NetworkPlayer? {
         multipeerManager.players.first { $0.peerID == multipeerManager.localPeerID.displayName }
@@ -25,118 +27,162 @@ struct LobbyView: View {
     }
     
     var body: some View {
-        ZStack {
-            
-            // Background color
-            Color("spaceMazeBG")
-                .ignoresSafeArea()
-
-            Image("LobbyPage")
-                .resizable()
-                .ignoresSafeArea(.all)
-            
-            VStack(spacing: 18) {
-                // Close button
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        multipeerManager.disconnect()
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.white)
-                            .font(.title)
-                            .padding()
-                    }
-                }
+        VStack {
+            ZStack {
+                // Background color
+                Color("spaceMazeBG")
+                    .ignoresSafeArea()
                 
-                // Ship code display
-                VStack(spacing: 8) {
-                    Text("Ship Code")
-                        .font(.custom("VCROSDMono", size: 32))
-                        .foregroundStyle(Color("text"))
-                        .multilineTextAlignment(.center)
-                    
-                    Text(multipeerManager.sessionCode)
-                        .font(.custom("VCROSDMono", size: 32))
-                        .foregroundStyle(Color("text"))
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 8)
-                        .background(Color.black.opacity(0.3))
-                        .cornerRadius(8)
-                        .tracking(16)
-                        .multilineTextAlignment(.center)
-                    
-                    
-                    Text("Share this code with\nfellow space crew")
-                        .font(.custom("VCROSDMono", size: 16))
-                        .foregroundStyle(Color("text"))
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.top, 64)
+                Image("LobbyPage")
+                    .resizable()
+                    .ignoresSafeArea(.all)
                 
-                // Player list
-                PlayerListView()
-                    .environmentObject(multipeerManager)
-                
-                Spacer()
-                
-                // Host controls
-                if multipeerManager.isHost {
-                    VStack(spacing: 16) {
-                        if multipeerManager.players.count >= Constants.minPlayers {
-                            if allPlayersReady {
-                                StartGameSliderView(onComplete: {
-                                    gameManager.startGame()
-                                })
-                            } else {
-                                Text("Waiting for all players to be ready...")
-                                    .foregroundColor(.orange)
-                                    .font(.headline)
+                VStack(spacing: 18) {
+                    ZStack {
+                        HStack {
+                            Button(action: {
+                                multipeerManager.disconnect()
+                                dismiss()
+                            }) {
+                                Image("Back_Button")
+                                    .resizable()
+                                    .frame(width: 40, height: 32)
                             }
-                        } else {
-                            Text("Need at least \(Constants.minPlayers) players to start")
-                                .foregroundColor(.red)
-                                .font(.headline)
+                            .padding(.top, UIScreen.main.bounds.height * 0.085)
+                            .padding(.leading, 16)
+                            
+                            Spacer()
                         }
-                    }
-                    .padding(.top, 30)
-                } else {
-                    // Non-host player controls
-                    VStack(spacing: 16) {
-                        ReadyButtonView(
-                            isReady: $isLocalPlayerReady,
-                            onReady: {
-                                updateLocalPlayerReadyStatus()
-                            }
-                        )
                         
-                        if isLocalPlayerReady {
-                            Text("Waiting for host to start the game...")
-                                .foregroundColor(.gray)
-                                .font(.subheadline)
-                        } else {
-                            Text("Tap ready when you're prepared to play!")
-                                .foregroundColor(.white)
-                                .font(.subheadline)
-                        }
+                        Text("SwiftFun")
+                            .font(.custom("VCROSDMono", size: 36))
+                            .foregroundColor(Color("text"))
+                            .padding(.top, UIScreen.main.bounds.height * 0.075)
                     }
-                    .padding(.top, 20)
+                    .frame(maxWidth: .infinity)
+                    
+                    // Ship code display
+                    VStack(spacing: 8) {
+                        Text("Ship Code")
+                            .font(.custom("VCROSDMono", size: 32))
+                            .foregroundStyle(Color("text"))
+                            .multilineTextAlignment(.center)
+                        
+                        Text(multipeerManager.sessionCode)
+                            .font(.custom("VCROSDMono", size: 32))
+                            .foregroundStyle(Color("text"))
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 8)
+                            .background(Color.black.opacity(0.3))
+                            .cornerRadius(8)
+                            .tracking(16)
+                            .multilineTextAlignment(.center)
+                        
+                        Text("Share this code with\nfellow space crew")
+                            .font(.custom("VCROSDMono", size: 16))
+                            .foregroundStyle(Color("text"))
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.top, 56)
+                    
+                    // Player list
+                    PlayerListView()
+                        .environmentObject(multipeerManager)
+                    
+                    Spacer(minLength: UIScreen.main.bounds.height * 0.0235)
+                    
+                    ZStack(alignment: .top) {
+                        Image("Assistant")
+                            .resizable()
+                            .frame(width: UIScreen.main.bounds.width * 0.8, height: 120)
+                        
+                        Text("Get ready and wait for\nyour commander to start\nthe game")
+                            .font(.custom("VCROSDMono", size: 14))
+                            .foregroundStyle(Color("text"))
+                            .frame(width: UIScreen.main.bounds.width * 0.8, alignment: .trailing)
+                            .padding(.trailing, UIScreen.main.bounds.width * 0.12)
+                            .padding(.top, UIScreen.main.bounds.height * 0.0375)
+                    }
+                    .frame(width: UIScreen.main.bounds.width * 0.8, height: 120)
+                    .padding(.top, -UIScreen.main.bounds.height * 0.195)
+                    
+                    // Host controls
+                    VStack(spacing: 32) {
+                        StartGameSliderView(onComplete: {
+                            gameManager.startGame()
+                            navigateToGame = true
+                        })
+//                        if multipeerManager.isHost {
+//                            if multipeerManager.players.count >= Constants.minPlayers {
+//                                if allPlayersReady {
+//                                    StartGameSliderView(onComplete: {
+//                                        gameManager.startGame()
+//                                    })
+//                                } else {
+//                                    Text("Waiting for all players to be ready...")
+//                                        .foregroundColor(Color("text"))
+//                                }
+//                            } else {
+//                                Text("Need at least \(Constants.minPlayers) players to start")
+//                                    .foregroundColor(Color("text"))
+//                            }
+//                        } else {
+//                            // Non-host player controls
+//                            ReadyButtonView(
+//                                isReady: $isLocalPlayerReady,
+//                                onReady: {
+//                                    updateLocalPlayerReadyStatus()
+//                                }
+//                            )
+//                            
+//                            if isLocalPlayerReady {
+//                                Text("Waiting for host to start the game...")
+//                                    .foregroundColor(Color("text"))
+//                            } else {
+//                                Text("Tap ready when you're prepared to play!")
+//                                    .foregroundColor(Color("text"))
+//                            }
+//                        }
+                        
+                        HStack {
+                            Text("ver. 1.0")
+                                .font(.custom("VCROSDMono", size: 16))
+                                .foregroundStyle(Color("text"))
+                            
+                            Spacer()
+                            
+                            Image("About_Button")
+                                .resizable()
+                                .frame(width: 70, height: 30)
+                                .onTapGesture {
+                                    showAbout = true
+                                }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal)
+                    }
+                    .padding(.bottom, UIScreen.main.bounds.height * 0.067)
                 }
-                
-                Spacer()
             }
-            .onAppear {
-                // Initialize local player ready status
-                if let player = localPlayer {
-                    isLocalPlayerReady = player.isReady
-                }
+        }
+        .ignoresSafeArea(.all)
+        .navigationBarBackButtonHidden(true)
+        .navigationDestination(isPresented: $navigateToGame) {
+            GameViewController()
+                .navigationBarBackButtonHidden(true)
+                .environmentObject(gameManager)
+                .environmentObject(multipeerManager)
+        }
+        .onAppear {
+            // Initialize local player ready status
+            if let player = localPlayer {
+                isLocalPlayerReady = player.isReady
             }
-            .onDisappear {
-                // Clean up if view is dismissed
-                multipeerManager.stopHosting()
-                multipeerManager.stopBrowsing()
-            }
+        }
+        .onDisappear {
+            // Clean up if view is dismissed
+            multipeerManager.stopHosting()
+            multipeerManager.stopBrowsing()
         }
     }
     
