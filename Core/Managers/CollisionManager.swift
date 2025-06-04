@@ -29,6 +29,11 @@ final class CollisionManager {
     func handleCollision(between bodyA: SKPhysicsBody, and bodyB: SKPhysicsBody) {
         guard let nodeA = bodyA.node, let nodeB = bodyB.node else { return }
         
+        // Debug print for collision
+//        print("[CollisionManager] Collision detected between:")
+//        print("- Node A: \(nodeA.name ?? "unknown"), Category: \(bodyA.categoryBitMask)")
+//        print("- Node B: \(nodeB.name ?? "unknown"), Category: \(bodyB.categoryBitMask)")
+        
         // Determine collision participants
         let collision = identifyCollision(bodyA: bodyA, bodyB: bodyB, nodeA: nodeA, nodeB: nodeB)
         
@@ -42,6 +47,8 @@ final class CollisionManager {
             handleCheckpointCollision(playerID: playerID, playerNode: playerNode, checkpointNode: otherNode)
             
         case CollisionHelper.Category.vortex:
+            print("[CollisionManager] Vortex collision detected for player: \(playerID)")
+            print("[CollisionManager] Vortex node: \(otherNode.name ?? "unknown")")
             handleVortexCollision(playerID: playerID, playerNode: playerNode)
             
         case CollisionHelper.Category.spike:
@@ -76,11 +83,13 @@ final class CollisionManager {
             otherNode = nodeB as? SKSpriteNode
             playerID = nodeA.name
             category = bodyB.categoryBitMask
+//            print("[CollisionManager] Player collision identified - Player: \(playerID ?? "unknown"), Other category: \(category), Other node: \(nodeB.name ?? "unknown")")
         } else if bodyB.categoryBitMask == CollisionHelper.Category.player {
             playerNode = nodeB as? SKSpriteNode
             otherNode = nodeA as? SKSpriteNode
             playerID = nodeB.name
             category = bodyA.categoryBitMask
+//            print("[CollisionManager] Player collision identified - Player: \(playerID ?? "unknown"), Other category: \(category), Other node: \(nodeA.name ?? "unknown")")
         }
         
         return CollisionInfo(
@@ -96,14 +105,21 @@ final class CollisionManager {
         guard let checkpointName = checkpointNode.name,
               checkpointName.hasPrefix("checkpoint_"),
               let sectionString = checkpointName.components(separatedBy: "_").last,
-              let sectionIndex = Int(sectionString) else { return }
+              let sectionIndex = Int(sectionString) else {
+            print("[CollisionManager] Invalid checkpoint node configuration")
+            return
+        }
         
         // Check if already collected
         guard !gameManager.reachedCheckpoints.contains(sectionIndex) else { return }
         
         // Update game state
         gameManager.reachCheckpoint(sectionIndex)
-        gameManager.lastCheckpoint = checkpointNode.position
+        
+        // Set checkpoint position
+        let checkpointPosition = checkpointNode.position
+        gameManager.lastCheckpoint = checkpointPosition
+        print("[CollisionManager] Setting checkpoint \(sectionIndex) position: \(checkpointPosition)")
         
         // Visual and audio feedback
         animateCheckpointCollection(checkpointNode)
@@ -125,15 +141,21 @@ final class CollisionManager {
     }
     
     private func handleVortexCollision(playerID: String, playerNode: SKSpriteNode) {
+        print("[CollisionManager] Vortex collision detected for player: \(playerID)")
+        
+        // Play death sound and shake camera
         audioManager.playSFX("sfx_death", xtension: "mp3")
         CameraManager.shared.shakeCamera(intensity: 15.0, duration: 0.6)
-        handlePlayerDeath(playerID: playerID, cause: "vortex")
         
-        print("[CollisionManager] Player \(playerID) died in vortex")
+        // Handle player death
+        handlePlayerDeath(playerID: playerID, cause: "vortex")
     }
     
     private func handleSpikeCollision(playerID: String, playerNode: SKSpriteNode) {
-        guard let player = MultipeerManager.shared.players.first(where: { $0.id == playerID }) else { return }
+        guard let player = MultipeerManager.shared.players.first(where: { $0.id == playerID }) else {
+            print("[CollisionManager] Player not found for ID: \(playerID)")
+            return
+        }
         
         // Check if player is at screen edge
         if isAtScreenEdge(playerNode.position) {
@@ -146,6 +168,14 @@ final class CollisionManager {
                 // Non-map mover hits border - death
                 audioManager.playSFX("sfx_death", xtension: "mp3")
                 handlePlayerDeath(playerID: playerID, cause: "border spike")
+                
+                // Show respawn alert if lives remain, game over if no lives
+                if gameManager.teamLives > 0 {
+                    gameManager.showRespawnAlert()
+                } else {
+                    gameManager.showGameOverAlert()
+                }
+                
                 print("[CollisionManager] Player \(playerID) died at border")
             }
         }
@@ -208,40 +238,43 @@ final class CollisionManager {
     
     // MARK: - Death Handling
     private func handlePlayerDeath(playerID: String, cause: String) {
+        print("💀 [CollisionManager] Player death: \(playerID), cause: \(cause)")
+        
         // Reduce team lives
         gameManager.loseLifeAndSync()
         
-        // Respawn all players
-        respawnAllPlayers()
+        // Show appropriate alert for both local and remote players
+        if gameManager.teamLives > 0 {
+            print("⚠️ [CollisionManager] Showing respawn alert - Lives remaining: \(gameManager.teamLives)")
+            gameManager.showRespawnAlert()
+        } else {
+            print("⚠️ [CollisionManager] Showing game over alert - No lives remaining")
+            gameManager.showGameOverAlert()
+        }
         
         // Broadcast death event
         let event = GameEvent(type: .playerDeath, playerID: playerID)
         syncManager.broadcastGameEvent(event)
-        
-        print("[CollisionManager] Player \(playerID) died from \(cause)")
     }
     
-    private func respawnAllPlayers() {
+    func respawnAllPlayers() {
         guard let scene = gameScene,
-              let levelData = LevelManager.shared.currentLevelData else { return }
-        
-        let respawnPoint = gameManager.lastCheckpoint ?? levelData.spawn
-        
-        // Move all player nodes to respawn point
-        for (_, playerNode) in scene.playerNodes {
-            playerNode.position = respawnPoint
-            playerNode.physicsBody?.velocity = .zero
-            
-            // Clear any active power-up effects
-            if let playerID = playerNode.name {
-                scene.activeEffects.removeValue(forKey: playerID)
-            }
+              let levelData = LevelManager.shared.currentLevelData else {
+            print("❌ [CollisionManager] Cannot respawn: Missing scene or level data")
+            return
         }
         
-        // Center camera on respawn point
-        CameraManager.shared.moveCamera(to: respawnPoint, animated: true)
+        // Get the last checkpoint or initial spawn point
+        let respawnPoint = gameManager.lastCheckpoint ?? levelData.spawn
+        print("📍 [CollisionManager] Respawn point: \(respawnPoint)")
         
-        print("[CollisionManager] All players respawned at \(respawnPoint)")
+        // Move all player nodes to the respawn point
+        for (playerId, playerNode) in scene.playerNodes {
+            print("🔄 [CollisionManager] Respawn player: \(playerId)")
+            playerNode.position = respawnPoint
+            playerNode.physicsBody?.velocity = .zero
+            playerNode.physicsBody?.angularVelocity = 0
+        }
     }
     
     // MARK: - Power-Up System

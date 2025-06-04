@@ -18,15 +18,15 @@ struct GameViewWrapper: View {
     
     var body: some View {
         WarningView()
-        .environmentObject(gameManager)
-        .environmentObject(multipeerManager)
-        .environmentObject(audioManager)
-        .environmentObject(settingsManager)
-        .environmentObject(storageManager)
-        .environmentObject(permissionManager)
-        .ignoresSafeArea(.all)
-        .onAppear {
-            audioManager.playBGM("bgm_space")
-        }
+            .environmentObject(gameManager)
+            .environmentObject(multipeerManager)
+            .environmentObject(audioManager)
+            .environmentObject(settingsManager)
+            .environmentObject(storageManager)
+            .environmentObject(permissionManager)
+            .ignoresSafeArea(.all)
+            .onAppear {
+                audioManager.playBGM("bgm_space")
+            }
     }
 }

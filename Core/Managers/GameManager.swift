@@ -11,11 +11,17 @@ import Combine
 import SwiftUI
 import SpriteKit
 
+enum GameAlert {
+    case none
+    case gameOver
+    case respawn
+}
+
 /// Main game state manager. Handles global game status, level flow, lives, score, and checkpoint progression.
 final class GameManager: ObservableObject {
     static let shared = GameManager()
     
-    // MARK: - Published State
+    // MARK: - Published Properties
     @Published var currentLevel: Int = 1
     @Published var maxLevel: Int = 2
     @Published var currentPlanet: Int = 1
@@ -33,6 +39,9 @@ final class GameManager: ObservableObject {
     @Published var lastCheckpoint: CGPoint? = nil
     @Published var mapMoverPlayerID: String? = nil // player id of mapMover
     @Published var playersFinished: Set<String> = [] // ids of players in spaceship
+    @Published var currentAlert: GameAlert = .none
+    @Published var showSettings = false
+    @Published private(set) var scene: GameScene?
     
     // For checkpoint tracking
     @Published var reachedCheckpoints: Set<Int> = []
@@ -43,11 +52,28 @@ final class GameManager: ObservableObject {
     // Reference to current GameScene for camera control
     private weak var currentGameScene: GameScene?
     
-    private init() {}
+    private init() {
+        // Initialize with basic properties only
+        updateScoreText()
+        updateMissionClue()
+    }
     
     // MARK: - Scene Management
+    func setupScene() {
+        // Only create scene if it doesn't exist
+        guard scene == nil else { return }
+        
+        // Create scene with safe screen size
+        let screenSize = UIScreen.main.bounds.size
+        let scene = GameScene(size: screenSize)
+        scene.scaleMode = .aspectFill
+        self.scene = scene
+        self.currentGameScene = scene
+    }
+    
     func setCurrentGameScene(_ scene: GameScene) {
         currentGameScene = scene
+        self.scene = scene
     }
     
     // MARK: - Level/Section Management
@@ -71,9 +97,11 @@ final class GameManager: ObservableObject {
         isGameOver = false
         isMissionAccomplished = false
         isPaused = false
-        lastCheckpoint = nil
         updateScoreText()
         updateMissionClue()
+        
+        // Reset scene
+        setupScene()
         
         // Load level data
         print("[GameManager] Calling LevelManager to load level data...")
@@ -85,6 +113,10 @@ final class GameManager: ObservableObject {
             return
         }
         print("[GameManager] Level data loaded successfully: \(String(describing: levelData))")
+        
+        // Initialize lastCheckpoint with spawn point
+        lastCheckpoint = levelData.spawn
+        print("[GameManager] Initialized lastCheckpoint with spawn point: \(levelData.spawn)")
     }
     
     func reachCheckpoint(_ sectionIdx: Int) {
@@ -155,6 +187,8 @@ final class GameManager: ObservableObject {
         lastCheckpoint = nil
         updateScoreText()
         updateMissionClue()
+        currentAlert = .none
+        showSettings = false
     }
     
     func updateScoreText() {
@@ -277,5 +311,67 @@ final class GameManager: ObservableObject {
     func setCameraPosition(_ position: CGPoint) {
         // Use the GameScene reference instead of deprecated UIApplication.shared.windows
         currentGameScene?.setCameraPosition(position)
+    }
+    
+    // Alert handling
+    func showRespawnAlert() {
+        print("⚠️ [GameManager] Showing respawn alert")
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            print("🎯 [GameManager] Setting alert to respawn")
+            withAnimation {
+                self.currentAlert = .respawn
+            }
+            self.objectWillChange.send()
+            print("🎯 [GameManager] Alert state updated to: \(self.currentAlert)")
+        }
+    }
+    
+    func showGameOverAlert() {
+        print("⚠️ [GameManager] Showing game over alert")
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            print("🎯 [GameManager] Setting alert to game over")
+            withAnimation {
+                self.currentAlert = .gameOver
+            }
+            self.objectWillChange.send()
+            print("🎯 [GameManager] Alert state updated to: \(self.currentAlert)")
+        }
+    }
+    
+    func dismissAlert() {
+        print("✅ [GameManager] Dismissing alert")
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            print("🎯 [GameManager] Setting alert to none")
+            withAnimation {
+                self.currentAlert = .none
+            }
+            self.objectWillChange.send()
+            print("🎯 [GameManager] Alert state updated to: \(self.currentAlert)")
+        }
+    }
+    
+    func quitToHome() {
+        // Clean up game state
+        teamLives = Constants.defaultPlayerLives
+        reachedCheckpoints.removeAll()
+        playersFinished.removeAll()
+        currentLevel = 1
+        scoreText = "Planet 1 Section 1/4"
+        dismissAlert()
+        // Additional cleanup as needed
+    }
+    
+    func respawnPlayer() {
+        print("🔄 [GameManager] Respawning player")
+        CollisionManager.shared.respawnAllPlayers()
+        dismissAlert()
+    }
+    
+    // MARK: - Settings Methods
+    func toggleSettings() {
+        showSettings.toggle()
     }
 }

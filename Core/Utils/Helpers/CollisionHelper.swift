@@ -49,18 +49,13 @@ struct CollisionHelper {
         body.angularDamping = 0.5
         body.restitution = 0.2
         
-        // Debug logging for player physics
-        if category == Category.player {
-            print("[CollisionHelper] Setting up player physics body:")
-            print("- Mass: \(body.mass)")
-            print("- Linear damping: \(body.linearDamping)")
-            print("- Angular damping: \(body.angularDamping)")
-            print("- Restitution: \(body.restitution)")
-            print("- Dynamic: \(body.isDynamic)")
-            print("- Affected by gravity: \(body.affectedByGravity)")
-            print("- Allows rotation: \(body.allowsRotation)")
-            print("- Radius: \((node.frame.size.width + node.frame.size.height) / 8)")
-        }
+        // Debug logging for physics setup
+        print("[CollisionHelper] Setting up physics for node: \(node.name ?? "unknown")")
+        print("- Category: \(category)")
+        print("- Contact: \(contact)")
+        print("- Collision: \(collision)")
+        print("- Dynamic: \(dynamic)")
+        print("- Size: \(node.frame.size)")
         
         node.physicsBody = body
     }

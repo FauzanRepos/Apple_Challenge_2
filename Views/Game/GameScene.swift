@@ -205,7 +205,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let vortexAsset = Constants.asset(for: .vortex, planet: currentPlanet)
         print("[GameScene] Loading vortex asset: \(vortexAsset)")
         
-        for pos in levelData.vortexPositions {
+        for (index, pos) in levelData.vortexPositions.enumerated() {
             let vortex = createTileNode(
                 at: pos,
                 imageName: vortexAsset,
@@ -218,7 +218,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             if vortex.texture == nil {
                 print("[GameScene] WARNING: Failed to load vortex texture: \(vortexAsset)")
             }
-            vortex.name = "vortex"
+            vortex.name = "vortex_\(index)"
+            
+            // Debug print for vortex physics
+            print("[GameScene] Setting up vortex physics:")
+            print("- Name: \(vortex.name ?? "unknown")")
+            print("- Position: \(pos)")
+            print("- Size: \(Constants.vortexSize)")
+            print("- Category: \(CollisionHelper.Category.vortex)")
+            print("- Contact: \(CollisionHelper.Category.player)")
+            
             addChild(vortex)
         }
         
@@ -226,7 +235,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let spikeAsset = Constants.asset(for: .spike, planet: currentPlanet)
         print("[GameScene] Loading spike asset: \(spikeAsset)")
         
-        for pos in levelData.spikePositions {
+        for (index, pos) in levelData.spikePositions.enumerated() {
             let spike = createTileNode(
                 at: pos,
                 imageName: spikeAsset,
@@ -239,7 +248,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             if spike.texture == nil {
                 print("[GameScene] WARNING: Failed to load spike texture: \(spikeAsset)")
             }
-            spike.name = "spike"
+            spike.name = "spike_\(index)"
             addChild(spike)
         }
     }
@@ -354,6 +363,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 collision: CollisionHelper.Category.wall | CollisionHelper.Category.player
             )
             
+            // Debug print for player physics
+            print("[GameScene] Setting up player physics for \(player.id):")
+            print("- Position: \(levelData.spawn)")
+            print("- Size: \(playerNode.size)")
+            print("- Category: \(CollisionHelper.Category.player)")
+            print("- Contact: \(CollisionHelper.Category.vortex)")
+            
             playerNode.name = player.id
             playerNodes[player.id] = playerNode
             addChild(playerNode)
@@ -377,6 +393,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         node.size = CGSize(width: size, height: size)
         node.zPosition = zPosition
         
+        // Set a default name if none is provided
+        if node.name == nil {
+            node.name = "tile_\(imageName)_\(position.x)_\(position.y)"
+        }
+        
+        print("[GameScene] Creating tile node:")
+        print("- Name: \(node.name ?? "unknown")")
+        print("- Position: \(position)")
+        print("- Size: \(size)")
+        print("- Category: \(category)")
+        
         CollisionHelper.setPhysics(
             node: node,
             category: category,
@@ -399,6 +426,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             playerNode.position = newPos
             playerNode.physicsBody?.velocity = velocity
         }
+    }
+    
+    // MARK: - Physics Contact Delegate
+//    func didBegin(_ contact: SKPhysicsContact) {
+//        print("[GameScene] Physics contact began:")
+//        print("- Body A: \(contact.bodyA.categoryBitMask)")
+//        print("- Body B: \(contact.bodyB.categoryBitMask)")
+//        
+//        collisionManager.handleCollision(between: contact.bodyA, and: contact.bodyB)
+//    }
+    
+    func didEnd(_ contact: SKPhysicsContact) {
+        // Handle contact end if needed
     }
 }
 

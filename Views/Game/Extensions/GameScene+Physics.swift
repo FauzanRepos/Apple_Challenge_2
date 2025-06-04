@@ -18,6 +18,11 @@ extension GameScene {
     
     // MARK: - SKPhysicsContactDelegate
     func didBegin(_ contact: SKPhysicsContact) {
+        // Debug print for collision
+//        print("[GameScene] Physics contact began:")
+//        print("- Body A: \(contact.bodyA.categoryBitMask)")
+//        print("- Body B: \(contact.bodyB.categoryBitMask)")
+        
         // Delegate all collision handling to CollisionManager
         CollisionManager.shared.handleCollision(between: contact.bodyA, and: contact.bodyB)
     }

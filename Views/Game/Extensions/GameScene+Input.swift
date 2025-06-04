@@ -9,12 +9,25 @@
 import SpriteKit
 import CoreMotion
 
+// MARK: - Associated Keys for extension properties
+private struct AssociatedKeys {
+    static var lastSyncTime = "lastSyncTime"
+}
+
 // MARK: - Input Handling (Updated to use CameraManager)
 extension GameScene {
+    
+    // Rate limiting for network sync
+    private var lastSyncTime: TimeInterval {
+        get { return objc_getAssociatedObject(self, &AssociatedKeys.lastSyncTime) as? TimeInterval ?? 0 }
+        set { objc_setAssociatedObject(self, &AssociatedKeys.lastSyncTime, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    }
     
     // MARK: - Accelerometer Setup
     func startAccelerometer() {
         print("[GameScene] Starting accelerometer setup...")
+        print("[GameScene] Device: \(UIDevice.current.name)")
+        print("[GameScene] Local Player ID: \(localPlayerID)")
         print("[GameScene] Accelerometer available: \(motionManager.isAccelerometerAvailable)")
         print("[GameScene] Accelerometer active: \(motionManager.isAccelerometerActive)")
         
@@ -25,10 +38,11 @@ extension GameScene {
         
         guard let localPlayer = multipeerManager.players.first(where: { $0.peerID == localPlayerID }) else {
             print("[GameScene] ERROR: Local player not found!")
+            print("[GameScene] Available players: \(multipeerManager.players.map { "\($0.peerID) (ID: \($0.id))" })")
             return
         }
         
-        print("[GameScene] Found local player: \(localPlayer.id)")
+        print("[GameScene] ✅ Found local player: \(localPlayer.id) for device: \(localPlayer.peerID)")
         print("[GameScene] Current sensitivity: \(SettingsManager.shared.controlSensitivity)")
         print("[GameScene] Accelerometer inverted: \(SettingsManager.shared.accelerometerInverted)")
         
@@ -51,7 +65,12 @@ extension GameScene {
             }
             
             guard let playerNode = self.playerNodes[localPlayer.id] else {
-                print("[GameScene] ERROR: Player node not found for ID: \(localPlayer.id)")
+                // Only log this error occasionally to avoid spam
+                let currentTime = CACurrentMediaTime()
+                if currentTime.truncatingRemainder(dividingBy: 5.0) < 0.1 {
+                    print("[GameScene] ERROR: Player node not found for ID: \(localPlayer.id)")
+                    print("[GameScene] Available player nodes: \(self.playerNodes.keys.joined(separator: ", "))")
+                }
                 return
             }
             
@@ -59,7 +78,7 @@ extension GameScene {
             self.handleAccelerometerInput(data: data, playerNode: playerNode, playerID: localPlayer.id)
         }
         
-        print("[GameScene] Accelerometer started successfully")
+        print("[GameScene] ✅ Accelerometer started successfully for \(localPlayer.peerID)")
     }
     
     private func handleAccelerometerInput(data: CMAccelerometerData, playerNode: SKSpriteNode, playerID: String) {
@@ -70,24 +89,21 @@ extension GameScene {
         let dx = CGFloat(data.acceleration.x) * accelerometerFactor * baseForce * speedMultiplier
         let dy = CGFloat(data.acceleration.y) * accelerometerFactor * baseForce * speedMultiplier
         
-        // Debug logging
-        print("[GameScene] Accelerometer values - x: \(data.acceleration.x), y: \(data.acceleration.y)")
-        print("[GameScene] Applied force - dx: \(dx), dy: \(dy)")
-        print("[GameScene] Factors - sensitivity: \(SettingsManager.shared.controlSensitivity), multiplier: \(speedMultiplier)")
-        
         // Apply force to player
         playerNode.physicsBody?.applyForce(CGVector(dx: dx, dy: dy))
         
-        // Log current velocity
-        if let velocity = playerNode.physicsBody?.velocity {
-            print("[GameScene] Current velocity - dx: \(velocity.dx), dy: \(velocity.dy)")
+        // Only sync player state occasionally to reduce network traffic and conflicts
+        let currentTime = CACurrentMediaTime()
+        if currentTime - lastSyncTime > 0.1 { // Sync only every 100ms
+            syncPlayerState(playerID: playerID, position: playerNode.position, velocity: playerNode.physicsBody?.velocity ?? .zero)
+            lastSyncTime = currentTime
         }
-        
-        // Sync player state
-        syncPlayerState(playerID: playerID, position: playerNode.position, velocity: playerNode.physicsBody?.velocity ?? .zero)
     }
     
     private func syncPlayerState(playerID: String, position: CGPoint, velocity: CGVector) {
+        // Only sync if this is the local player
+        guard playerID == localPlayerID else { return }
+        
         // Find the NetworkPlayer and update it
         if let player = multipeerManager.players.first(where: { $0.id == playerID }) {
             // Update the player state
@@ -97,7 +113,7 @@ extension GameScene {
                 player.lastSeen = Date()
             }
             
-            // Broadcast the update
+            // Broadcast the update with reduced frequency
             PlayerSyncManager.shared.broadcastPlayerUpdate(player)
         }
     }
@@ -135,11 +151,6 @@ extension GameScene {
     
     // MARK: - Update Loop
     override func update(_ currentTime: TimeInterval) {
-        // Debug logging for update loop
-        print("[GameScene] Update loop called")
-        print("[GameScene] Number of players: \(multipeerManager.players.count)")
-        print("[GameScene] Players: \(multipeerManager.players.map { $0.id })")
-        
         // Clean up expired power-up effects
         cleanupExpiredEffects()
         
@@ -148,13 +159,24 @@ extension GameScene {
         
         // Handle camera movement based on game mode
         if multipeerManager.players.count <= 1 {
-            print("[GameScene] Single player mode detected")
             // Single player mode - camera follows player
             handleSinglePlayerCamera()
         } else {
-            print("[GameScene] Multiplayer mode detected - Player count: \(multipeerManager.players.count)")
             // Multiplayer mode - check for edge-based camera movement
             checkLocalPlayerEdgeMovement()
+        }
+        
+        // Debug player status occasionally
+        if currentTime.truncatingRemainder(dividingBy: 10.0) < 0.1 { // Every 10 seconds
+            print("[GameScene] 🎮 Player Status:")
+            print("- Connected players: \(multipeerManager.players.count)")
+            print("- Player nodes: \(playerNodes.count)")
+            print("- Local player ID: \(localPlayerID)")
+            for player in multipeerManager.players {
+                let hasNode = playerNodes[player.id] != nil
+                let isLocal = player.peerID == localPlayerID
+                print("  • \(player.peerID) (ID: \(player.id)) - Node: \(hasNode ? "✅" : "❌"), Local: \(isLocal ? "✅" : "❌")")
+            }
         }
     }
     
@@ -206,7 +228,7 @@ extension GameScene {
     }
     
     private func handleSinglePlayerCamera() {
-        print("[GameScene] Attempting to handle single player camera")
+//        print("[GameScene] Attempting to handle single player camera")
         
         // Get the first (and should be only) player node
         guard let playerNodeID = playerNodes.keys.first,
@@ -220,7 +242,7 @@ extension GameScene {
         let playerPos = playerNode.position
         let currentCameraPos = gameCamera.position
         
-        print("[GameScene] Current positions - Player: \(playerPos), Camera: \(currentCameraPos)")
+//        print("[GameScene] Current positions - Player: \(playerPos), Camera: \(currentCameraPos)")
         
         // Update camera position to match player position
         gameCamera.position = playerPos
@@ -229,9 +251,9 @@ extension GameScene {
         gameCamera.setScale(1.0)  // Ensure camera is at default scale
         
         // Verify the update
-        print("[GameScene] Camera position updated to: \(gameCamera.position)")
-        print("[GameScene] Camera parent: \(String(describing: gameCamera.parent))")
-        print("[GameScene] Camera constraints: \(String(describing: gameCamera.constraints))")
+//        print("[GameScene] Camera position updated to: \(gameCamera.position)")
+//        print("[GameScene] Camera parent: \(String(describing: gameCamera.parent))")
+//        print("[GameScene] Camera constraints: \(String(describing: gameCamera.constraints))")
     }
     
     // MARK: - Public Camera Control (Delegated to CameraManager)

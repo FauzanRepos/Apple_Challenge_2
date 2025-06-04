@@ -29,7 +29,7 @@ struct LobbyView: View {
     var body: some View {
         VStack {
             ZStack {
-                // Background color
+                
                 Color("spaceMazeBG")
                     .ignoresSafeArea()
                 
@@ -77,6 +77,10 @@ struct LobbyView: View {
                             .cornerRadius(8)
                             .tracking(16)
                             .multilineTextAlignment(.center)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color("text").opacity(0.5), lineWidth: 2)
+                            )
                         
                         Text("Share this code with\nfellow space crew")
                             .font(.custom("VCROSDMono", size: 16))
@@ -85,7 +89,6 @@ struct LobbyView: View {
                     }
                     .padding(.top, 56)
                     
-                    // Player list
                     PlayerListView()
                         .environmentObject(multipeerManager)
                     
@@ -168,7 +171,7 @@ struct LobbyView: View {
         .ignoresSafeArea(.all)
         .navigationBarBackButtonHidden(true)
         .navigationDestination(isPresented: $navigateToGame) {
-            GameViewController()
+            GameView()
                 .navigationBarBackButtonHidden(true)
                 .environmentObject(gameManager)
                 .environmentObject(multipeerManager)

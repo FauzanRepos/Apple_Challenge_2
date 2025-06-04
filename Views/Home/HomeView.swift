@@ -15,9 +15,8 @@ struct HomeView: View {
     
     @State private var showSettings = false
     @State private var showAbout = false
-    @State private var roomCode: String = ""
-    @State private var showCodeInput = false
     @State private var navigateToLobby = false
+    @State private var navigateToJoin = false
     
     var body: some View {
         ZStack {
@@ -66,7 +65,7 @@ struct HomeView: View {
                                 .multilineTextAlignment(.center)
                         }
                         .onTapGesture {
-                            roomCode = gameManager.gameCode.generateCode()
+                            var roomCode = gameManager.gameCode.generateCode()
                             multipeerManager.hostGame(sessionCode: roomCode)
                             navigateToLobby = true
                         }
@@ -83,7 +82,7 @@ struct HomeView: View {
                                 .multilineTextAlignment(.center)
                         }
                         .onTapGesture {
-                            showCodeInput = true
+                            navigateToJoin = true
                         }
                     }
                     
@@ -125,33 +124,15 @@ struct HomeView: View {
                 .environmentObject(gameManager)
                 .environmentObject(multipeerManager)
         }
+        .navigationDestination(isPresented: $navigateToJoin) {
+            JoinRoomView()
+                .environmentObject(gameManager)
+                .environmentObject(multipeerManager)
+        }
         .sheet(isPresented: $showSettings) {
             SettingsView()
                 .environmentObject(gameManager)
                 .environmentObject(storageManager)
-        }
-        .sheet(isPresented: $showCodeInput) {
-            VStack(spacing: 16) {
-                Text("Enter Room Code to Join")
-                    .font(.title2)
-                TextField("Room Code", text: $roomCode)
-                    .textCase(.uppercase)
-                    .keyboardType(.asciiCapable)
-                    .multilineTextAlignment(.center)
-                    .frame(width: 120)
-                    .textFieldStyle(.roundedBorder)
-                Button("Join") {
-                    multipeerManager.joinGame(sessionCode: roomCode.uppercased())
-                    showCodeInput = false
-                    navigateToLobby = true
-                }
-                .disabled(!gameManager.gameCode.validate(roomCode))
-                Button("Cancel") {
-                    showCodeInput = false
-                    roomCode = ""
-                }
-            }
-            .padding()
         }
         .navigationBarBackButtonHidden(true)
     }
