@@ -73,6 +73,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private func setupPhysics() {
         physicsWorld.gravity = .zero
         physicsWorld.contactDelegate = self
+        // Disable physics debug outlines
+        view?.showsPhysics = false
     }
     
     private func setupCamera() {

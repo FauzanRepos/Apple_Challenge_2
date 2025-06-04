@@ -17,7 +17,7 @@ struct Constants {
     static let numberOfSections = 4
     static let defaultSensitivity: Float = 1.0
     static let gameVersion = "1.0"
-    static let checkpointRadius: CGFloat = 36
+    static let checkpointRadius: CGFloat = 18
     static let playerSize: CGFloat = 48
     static let spikeSize: CGFloat = 44
     static let oilSize: CGFloat = 36

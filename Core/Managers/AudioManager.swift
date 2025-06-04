@@ -21,7 +21,7 @@ final class AudioManager: ObservableObject {
     
     // MARK: - Background Music
     func playBGM(_ name: String, loop: Bool = true) {
-        guard let url = Bundle.main.url(forResource: name, withExtension: nil, subdirectory: "Resources/Sounds") else { return }
+        guard let url = Bundle.main.url(forResource: name, withExtension: "mp3") else { return }
         do {
             bgmPlayer = try AVAudioPlayer(contentsOf: url)
             bgmPlayer?.volume = volume
@@ -38,8 +38,8 @@ final class AudioManager: ObservableObject {
     }
     
     // MARK: - Sound Effects
-    func playSFX(_ name: String) {
-        guard let url = Bundle.main.url(forResource: name, withExtension: nil, subdirectory: "Resources/Sounds") else { return }
+    func playSFX(_ name: String, xtension: String) {
+        guard let url = Bundle.main.url(forResource: name, withExtension: xtension) else { return }
         do {
             sfxPlayer = try AVAudioPlayer(contentsOf: url)
             sfxPlayer?.volume = volume

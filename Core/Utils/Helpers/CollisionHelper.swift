@@ -26,8 +26,8 @@ struct CollisionHelper {
     static func setPhysics(node: SKNode, category: UInt32, contact: UInt32, collision: UInt32, dynamic: Bool = true, allowsRotation: Bool = false) {
         let body: SKPhysicsBody
         
-        // Use rectangular physics body for walls, circular for other objects
-        if category == Category.wall {
+        // Use rectangular physics body for walls, checkpoints, and finish points
+        if category == Category.wall || category == Category.checkpoint || category == Category.finish {
             body = SKPhysicsBody(rectangleOf: node.frame.size)
         } else if category == Category.player {
             // Use half radius for player

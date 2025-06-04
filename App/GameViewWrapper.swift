@@ -17,10 +17,7 @@ struct GameViewWrapper: View {
     @StateObject private var permissionManager = LANPermissionManager.shared
     
     var body: some View {
-        ZStack {
-            // Warning View Layer
-            WarningView()
-        }
+        WarningView()
         .environmentObject(gameManager)
         .environmentObject(multipeerManager)
         .environmentObject(audioManager)
@@ -28,5 +25,8 @@ struct GameViewWrapper: View {
         .environmentObject(storageManager)
         .environmentObject(permissionManager)
         .ignoresSafeArea(.all)
+        .onAppear {
+            audioManager.playBGM("bgm_space")
+        }
     }
 }

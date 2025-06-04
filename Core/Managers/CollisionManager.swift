@@ -107,7 +107,15 @@ final class CollisionManager {
         
         // Visual and audio feedback
         animateCheckpointCollection(checkpointNode)
-        audioManager.playSFX("sfx_checkpoint.wav")
+        audioManager.playSFX("sfx_checkpoint", xtension: "mp3")
+        
+        // Remove checkpoint from scene
+        checkpointNode.removeFromParent()
+        
+        // Remove from checkpoint nodes array
+        if let scene = gameScene {
+            scene.checkpointNodes.removeAll { $0 == checkpointNode }
+        }
         
         // Network sync
         let event = GameEvent(type: .checkpointReached, section: sectionIndex)
@@ -117,7 +125,7 @@ final class CollisionManager {
     }
     
     private func handleVortexCollision(playerID: String, playerNode: SKSpriteNode) {
-        audioManager.playSFX("sfx_death.wav")
+        audioManager.playSFX("sfx_death", xtension: "mp3")
         CameraManager.shared.shakeCamera(intensity: 15.0, duration: 0.6)
         handlePlayerDeath(playerID: playerID, cause: "vortex")
         
@@ -136,7 +144,7 @@ final class CollisionManager {
                 print("[CollisionManager] Player \(playerID) scrolled map via \(assignedEdge)")
             } else {
                 // Non-map mover hits border - death
-                audioManager.playSFX("sfx_death.wav")
+                audioManager.playSFX("sfx_death", xtension: "mp3")
                 handlePlayerDeath(playerID: playerID, cause: "border spike")
                 print("[CollisionManager] Player \(playerID) died at border")
             }
@@ -151,7 +159,7 @@ final class CollisionManager {
         applyPowerUpEffect(playerID: playerID, type: .oil)
         
         // Feedback
-        audioManager.playSFX("sfx_powerup.wav")
+        audioManager.playSFX("sfx_powerup", xtension: "mp3")
         animatePowerUpCollection(powerUpNode, color: .blue)
         
         print("[CollisionManager] Player \(playerID) collected oil power-up")
@@ -165,7 +173,7 @@ final class CollisionManager {
         applyPowerUpEffect(playerID: playerID, type: .grass)
         
         // Feedback
-        audioManager.playSFX("sfx_powerup.wav")
+        audioManager.playSFX("sfx_powerup", xtension: "mp3")
         animatePowerUpCollection(powerUpNode, color: .green)
         
         print("[CollisionManager] Player \(playerID) collected grass power-up")
@@ -176,13 +184,14 @@ final class CollisionManager {
         
         // Visual feedback
         animatePlayerFinish(playerNode)
+        audioManager.playSFX("sfx_finish", xtension: "mp3")
         
         print("[CollisionManager] Player \(playerID) reached finish")
         
         // Check if all players finished
         let totalPlayers = MultipeerManager.shared.players.count
         if gameManager.playersFinished.count == totalPlayers {
-            audioManager.playSFX("sfx_finish.wav")
+            audioManager.playSFX("sfx_checkpoint", xtension: "mp3")
             
             let event = GameEvent(type: .missionAccomplished)
             syncManager.broadcastGameEvent(event)
@@ -192,7 +201,7 @@ final class CollisionManager {
     private func handlePlayerCollision(playerID: String, otherPlayerNode: SKSpriteNode) {
         // Simple physics collision - let SpriteKit handle the bounce
         // Add collision sound effect
-        audioManager.playSFX("sfx_collision.wav")
+        audioManager.playSFX("sfx_collision", xtension: "mp3")
         
         print("[CollisionManager] Player collision: \(playerID) <-> \(otherPlayerNode.name ?? "unknown")")
     }
