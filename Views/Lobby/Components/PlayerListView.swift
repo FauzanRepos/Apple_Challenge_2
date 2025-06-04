@@ -26,6 +26,7 @@ struct PlayerListView: View {
                             .font(.custom("VCROSDMono", size: 16))
                             .foregroundStyle(Color("text"))
                             .fontWeight(.semibold)
+                            .lineLimit(1)
                         
                         Spacer()
                         
@@ -54,6 +55,7 @@ struct PlayerListView: View {
                             .font(.custom("VCROSDMono", size: 16))
                             .foregroundStyle(Color("text").opacity(0.3))
                             .fontWeight(.semibold)
+                            .lineLimit(1)
                         
                         Spacer()
                     }

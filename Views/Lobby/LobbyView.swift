@@ -54,7 +54,7 @@ struct LobbyView: View {
                             Spacer()
                         }
                         
-                        Text("SwiftFun")
+                        Text("Space Maze")
                             .font(.custom("VCROSDMono", size: 36))
                             .foregroundColor(Color("text"))
                             .padding(.top, UIScreen.main.bounds.height * 0.075)
@@ -99,8 +99,8 @@ struct LobbyView: View {
                         Text("Get ready and wait for\nyour commander to start\nthe game")
                             .font(.custom("VCROSDMono", size: 14))
                             .foregroundStyle(Color("text"))
-                            .frame(width: UIScreen.main.bounds.width * 0.8, alignment: .trailing)
-                            .padding(.trailing, UIScreen.main.bounds.width * 0.12)
+                            .frame(width: UIScreen.main.bounds.width * 0.8, alignment: .leading)
+                            .padding(.leading, UIScreen.main.bounds.width * 0.53)
                             .padding(.top, UIScreen.main.bounds.height * 0.0375)
                     }
                     .frame(width: UIScreen.main.bounds.width * 0.8, height: 120)
