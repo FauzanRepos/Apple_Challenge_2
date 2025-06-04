@@ -12,6 +12,7 @@ struct HomeView: View {
     @EnvironmentObject var gameManager: GameManager
     @EnvironmentObject var multipeerManager: MultipeerManager
     @EnvironmentObject var storageManager: StorageManager
+    @EnvironmentObject var audioManager: AudioManager
     
     @State private var showSettings = false
     @State private var showAbout = false
@@ -65,6 +66,7 @@ struct HomeView: View {
                                 .multilineTextAlignment(.center)
                         }
                         .onTapGesture {
+                            audioManager.playSFX("sfx_buttonclick", xtension: "wav")
                             var roomCode = gameManager.gameCode.generateCode()
                             multipeerManager.hostGame(sessionCode: roomCode)
                             navigateToLobby = true
@@ -82,6 +84,7 @@ struct HomeView: View {
                                 .multilineTextAlignment(.center)
                         }
                         .onTapGesture {
+                            audioManager.playSFX("sfx_buttonclick", xtension: "wav")
                             navigateToJoin = true
                         }
                     }
@@ -97,6 +100,7 @@ struct HomeView: View {
                             .resizable()
                             .frame(width: 70, height: 30)
                             .onTapGesture {
+                                audioManager.playSFX("sfx_buttonclick", xtension: "wav")
                                 showAbout = true
                             }
                     }
@@ -104,7 +108,10 @@ struct HomeView: View {
                     .padding(.horizontal)
                 }
                 
-                Button(action: { showSettings = true }) {
+                Button(action: { 
+                    audioManager.playSFX("sfx_buttonclick", xtension: "wav")
+                    showSettings = true 
+                }) {
                     Image("LongButton")
                         .resizable()
                         .frame(width: 220, height: 44)
@@ -123,11 +130,13 @@ struct HomeView: View {
             LobbyView()
                 .environmentObject(gameManager)
                 .environmentObject(multipeerManager)
+                .environmentObject(audioManager)
         }
         .navigationDestination(isPresented: $navigateToJoin) {
             JoinRoomView()
                 .environmentObject(gameManager)
                 .environmentObject(multipeerManager)
+                .environmentObject(audioManager)
         }
         .sheet(isPresented: $showSettings) {
             SettingsView()

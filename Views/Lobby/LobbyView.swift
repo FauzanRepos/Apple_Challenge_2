@@ -11,6 +11,7 @@ import SwiftUI
 struct LobbyView: View {
     @EnvironmentObject var multipeerManager: MultipeerManager
     @EnvironmentObject var gameManager: GameManager
+    @EnvironmentObject var audioManager: AudioManager
     
     @Environment(\.dismiss) private var dismiss
     @State private var isLocalPlayerReady: Bool = false
@@ -41,6 +42,7 @@ struct LobbyView: View {
                     ZStack {
                         HStack {
                             Button(action: {
+                                audioManager.playSFX("sfx_buttonclick", xtension: "wav")
                                 multipeerManager.disconnect()
                                 dismiss()
                             }) {
@@ -158,6 +160,7 @@ struct LobbyView: View {
                                 .resizable()
                                 .frame(width: 70, height: 30)
                                 .onTapGesture {
+                                    audioManager.playSFX("sfx_buttonclick", xtension: "wav")
                                     showAbout = true
                                 }
                         }
@@ -175,6 +178,7 @@ struct LobbyView: View {
                 .navigationBarBackButtonHidden(true)
                 .environmentObject(gameManager)
                 .environmentObject(multipeerManager)
+                .environmentObject(audioManager)
         }
         .onAppear {
             // Initialize local player ready status

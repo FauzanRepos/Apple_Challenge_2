@@ -9,6 +9,7 @@
 import SwiftUI
 
 struct StartGameSliderView: View {
+    @EnvironmentObject var audioManager: AudioManager
     
     var onComplete: () -> Void
     
@@ -70,6 +71,9 @@ struct StartGameSliderView: View {
                                 }
                                 .onEnded { value in
                                     if offsetX > sliderWidth - circleSize * 1.5 {
+                                        
+                                        // Play sound effect for slider completion
+                                        audioManager.playSFX("sfx_buttonclick", xtension: "wav")
                                         
                                         // Trigger start
                                         dragComplete = true

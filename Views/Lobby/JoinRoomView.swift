@@ -11,6 +11,7 @@ import SwiftUI
 struct JoinRoomView: View {
     @EnvironmentObject var multipeerManager: MultipeerManager
     @EnvironmentObject var gameManager: GameManager
+    @EnvironmentObject var audioManager: AudioManager
     
     @Environment(\.dismiss) private var dismiss
     @State private var roomCode: String = ""
@@ -33,6 +34,7 @@ struct JoinRoomView: View {
                     ZStack {
                         HStack {
                             Button(action: {
+                                audioManager.playSFX("sfx_buttonclick", xtension: "wav")
                                 dismiss()
                             }) {
                                 Image("Back_Button")
@@ -60,6 +62,7 @@ struct JoinRoomView: View {
                         
                         // Clickable code area
                         Button(action: {
+                            audioManager.playSFX("sfx_buttonclick", xtension: "wav")
                             showCodeInput = true
                         }) {
                             ZStack {
@@ -129,6 +132,7 @@ struct JoinRoomView: View {
                         VStack {
                             if !roomCode.isEmpty && gameManager.gameCode.validate(roomCode) {
                                 Button(action: {
+                                    audioManager.playSFX("sfx_buttonclick", xtension: "wav")
                                     joinRoom()
                                 }) {
                                     ZStack {
@@ -157,6 +161,7 @@ struct JoinRoomView: View {
                                 .resizable()
                                 .frame(width: 70, height: 30)
                                 .onTapGesture {
+                                    audioManager.playSFX("sfx_buttonclick", xtension: "wav")
 //                                    showAbout = true
                                 }
                         }
@@ -174,6 +179,7 @@ struct JoinRoomView: View {
                 .navigationBarBackButtonHidden(true)
                 .environmentObject(gameManager)
                 .environmentObject(multipeerManager)
+                .environmentObject(audioManager)
         }
         .sheet(isPresented: $showCodeInput) {
             VStack(spacing: 24) {
@@ -198,6 +204,7 @@ struct JoinRoomView: View {
                 
                 HStack(spacing: 20) {
                     Button("Cancel") {
+                        audioManager.playSFX("sfx_buttonclick", xtension: "wav")
                         showCodeInput = false
                         roomCode = ""
                     }
@@ -208,6 +215,7 @@ struct JoinRoomView: View {
                     .cornerRadius(8)
                     
                     Button("Confirm") {
+                        audioManager.playSFX("sfx_buttonclick", xtension: "wav")
                         showCodeInput = false
                     }
                     .font(.custom("VCROSDMono", size: 18))

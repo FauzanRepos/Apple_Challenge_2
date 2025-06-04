@@ -76,6 +76,7 @@ struct WarningView: View {
                     
                     // Continue Button
                     Button(action: {
+                        audioManager.playSFX("sfx_buttonclick", xtension: "wav")
                         permissionManager.onPermissionStatusChanged = { hasPermission in
                             if hasPermission {
                                 navigateToHome = true

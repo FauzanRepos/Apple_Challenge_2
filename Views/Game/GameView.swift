@@ -4,6 +4,7 @@ import SpriteKit
 struct GameView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var gameManager: GameManager
+    @EnvironmentObject var audioManager: AudioManager
     
     var body: some View {
         ZStack {
@@ -73,6 +74,7 @@ struct GameView: View {
                         gameManager.dismissAlert()
                     }
                 )
+                .environmentObject(audioManager)
             }
         }
         .onAppear {
