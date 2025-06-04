@@ -4,6 +4,7 @@
 # IDEA local files
 /.idea
 /.vscode
+/.cursor
 
 # Xcode
 build/
@@ -11,6 +12,7 @@ DerivedData/
 *.xcworkspace
 xcuserdata/
 *.xcuserstate
+*.xcscheme
 *.mode1v3
 *.mode2v3
 *.pbxuser
