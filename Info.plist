@@ -30,20 +30,22 @@
 	<true/>
 	<key>UIStatusBarHidden</key>
 	<true/>
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleDarkContent</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>This app needs access to your local network to connect with other players nearby.</string>
-	<key>UIAppFonts</key>
+	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
-		<string>VCR_OSD_MONO_1.001.ttf</string>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
-	<key>NSBonjourServices</key>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs access to microphone to properly handle audio session.</string>
+	<key>UIBackgroundModes</key>
 	<array>
-		<string>_space-maze._tcp</string>
-		<string>_space-maze._udp</string>
+		<string>audio</string>
 	</array>
 </dict>
 </plist>

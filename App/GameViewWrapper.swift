@@ -9,24 +9,26 @@
 import SwiftUI
 
 struct GameViewWrapper: View {
-    @StateObject private var gameManager = GameManager.shared
-    @StateObject private var multipeerManager = MultipeerManager.shared
-    @StateObject private var audioManager = AudioManager.shared
-    @StateObject private var settingsManager = SettingsManager.shared
-    @StateObject private var storageManager = StorageManager.shared
-    @StateObject private var permissionManager = LANPermissionManager.shared
+    let isHost: Bool
+    @StateObject private var gameManager: GameManager
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.presentationMode) private var presentationMode
+    
+    init(isHost: Bool) {
+        self.isHost = isHost
+        // Initialize GameManager with appropriate PlayerType
+        _gameManager = StateObject(wrappedValue: GameManager(playerType: isHost ? .mapMover : .regular))
+    }
     
     var body: some View {
-        ZStack {
-            // Warning View Layer
-            WarningView()
-        }
-        .environmentObject(gameManager)
-        .environmentObject(multipeerManager)
-        .environmentObject(audioManager)
-        .environmentObject(settingsManager)
-        .environmentObject(storageManager)
-        .environmentObject(permissionManager)
-        .ignoresSafeArea(.all)
+        GameView(gameManager: gameManager)
+            .navigationBarBackButtonHidden(true)
+            .onChange(of: gameManager.shouldReturnToHome) { shouldReturn in
+                if shouldReturn {
+                    // Pop to root view
+                    presentationMode.wrappedValue.dismiss()
+                }
+            }
     }
 }
+

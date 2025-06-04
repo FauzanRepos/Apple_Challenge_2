@@ -7,23 +7,48 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F5D43ACD2DED7FED00B4C0FA /* folder.txt in Resources */ = {isa = PBXBuildFile; fileRef = F5D43ACC2DED7FED00B4C0FA /* folder.txt */; };
+		D74AD55B2DEEFD0C00B12D2D /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = D74AD54A2DEEFD0C00B12D2D /* README.md */; };
+		D74AD55C2DEEFD0C00B12D2D /* bgm_space.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D74AD54E2DEEFD0C00B12D2D /* bgm_space.mp3 */; };
+		D74AD55D2DEEFD0C00B12D2D /* sfx_powerup.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D74AD54F2DEEFD0C00B12D2D /* sfx_powerup.mp3 */; };
+		D74AD55E2DEEFD0C00B12D2D /* sfx_finish.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D74AD5502DEEFD0C00B12D2D /* sfx_finish.mp3 */; };
+		D74AD55F2DEEFD0C00B12D2D /* sfx_death.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D74AD5512DEEFD0C00B12D2D /* sfx_death.mp3 */; };
+		D74AD5602DEEFD0C00B12D2D /* sfx_collision.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D74AD5522DEEFD0C00B12D2D /* sfx_collision.mp3 */; };
+		D74AD5612DEEFD0C00B12D2D /* sfx_checkpoint.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D74AD5532DEEFD0C00B12D2D /* sfx_checkpoint.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		517347A61D67436F008DBF2B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D71CEC9E2DDB0914005815AC /* Space Maze.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Space Maze.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		F5D43ACC2DED7FED00B4C0FA /* folder.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = folder.txt; sourceTree = "<group>"; };
+		D74AD54A2DEEFD0C00B12D2D /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		D74AD54D2DEEFD0C00B12D2D /* Space Maze.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "Space Maze.xcodeproj"; sourceTree = "<group>"; };
+		D74AD54E2DEEFD0C00B12D2D /* bgm_space.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = bgm_space.mp3; path = Resources/Sounds/bgm_space.mp3; sourceTree = "<group>"; };
+		D74AD54F2DEEFD0C00B12D2D /* sfx_powerup.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = sfx_powerup.mp3; path = Resources/Sounds/sfx_powerup.mp3; sourceTree = "<group>"; };
+		D74AD5502DEEFD0C00B12D2D /* sfx_finish.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = sfx_finish.mp3; path = Resources/Sounds/sfx_finish.mp3; sourceTree = "<group>"; };
+		D74AD5512DEEFD0C00B12D2D /* sfx_death.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = sfx_death.mp3; path = Resources/Sounds/sfx_death.mp3; sourceTree = "<group>"; };
+		D74AD5522DEEFD0C00B12D2D /* sfx_collision.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = sfx_collision.mp3; path = Resources/Sounds/sfx_collision.mp3; sourceTree = "<group>"; };
+		D74AD5532DEEFD0C00B12D2D /* sfx_checkpoint.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = sfx_checkpoint.mp3; path = Resources/Sounds/sfx_checkpoint.mp3; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		F5D43A002DE6F68300B4C0FA /* Fonts */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Fonts; sourceTree = "<group>"; };
-		F5D43ACE2DED7FFD00B4C0FA /* App */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = App; sourceTree = "<group>"; };
-		F5D43AE72DED803F00B4C0FA /* Core */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Core; sourceTree = "<group>"; };
-		F5D43B082DED805200B4C0FA /* Models */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Models; sourceTree = "<group>"; };
-		F5D43B142DED806A00B4C0FA /* Views */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Views; sourceTree = "<group>"; };
-		F5D43B262DED80DC00B4C0FA /* Storyboards */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Storyboards; sourceTree = "<group>"; };
-		F5D43B292DED816A00B4C0FA /* Resources */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Resources; sourceTree = "<group>"; };
+		D74AD54C2DEEFD0C00B12D2D /* Resources */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {};
+			explicitFolders = ();
+			children = (
+				D74AD54E2DEEFD0C00B12D2D /* bgm_space.mp3 */,
+				D74AD54F2DEEFD0C00B12D2D /* sfx_powerup.mp3 */,
+				D74AD5502DEEFD0C00B12D2D /* sfx_finish.mp3 */,
+				D74AD5512DEEFD0C00B12D2D /* sfx_death.mp3 */,
+				D74AD5522DEEFD0C00B12D2D /* sfx_collision.mp3 */,
+				D74AD5532DEEFD0C00B12D2D /* sfx_checkpoint.mp3 */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		D7E7818F2DEF40450029C91B /* Storyboard */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Storyboard; sourceTree = "<group>"; };
+		D7E781902DEF405E0029C91B /* Screen */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Screen; sourceTree = "<group>"; };
+		D7E781932DEF40870029C91B /* Core */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Core; sourceTree = "<group>"; };
+		D7E781982DEF40AC0029C91B /* App */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = App; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -40,17 +65,21 @@
 		517347881D67436F008DBF2B = {
 			isa = PBXGroup;
 			children = (
-				D71CEC9E2DDB0914005815AC /* Space Maze.app */,
+				D7E781982DEF40AC0029C91B /* App */,
+				D7E781932DEF40870029C91B /* Core */,
+				D7E781902DEF405E0029C91B /* Screen */,
+				D74AD54C2DEEFD0C00B12D2D /* Resources */,
+				D7E7818F2DEF40450029C91B /* Storyboard */,
 				517347A61D67436F008DBF2B /* Info.plist */,
-				F5D43ACC2DED7FED00B4C0FA /* folder.txt */,
-				F5D43ACE2DED7FFD00B4C0FA /* App */,
-				F5D43AE72DED803F00B4C0FA /* Core */,
-				F5D43A002DE6F68300B4C0FA /* Fonts */,
-				F5D43B082DED805200B4C0FA /* Models */,
-				F5D43B292DED816A00B4C0FA /* Resources */,
-				F5D43B262DED80DC00B4C0FA /* Storyboards */,
-				F5D43B142DED806A00B4C0FA /* Views */,
+				D74AD54A2DEEFD0C00B12D2D /* README.md */,
+				D74AD54D2DEEFD0C00B12D2D /* Space Maze.xcodeproj */,
+				D71CEC9E2DDB0914005815AC /* Space Maze.app */,
 			);
+			sourceTree = "<group>";
+		};
+		D7E781F22DEF5DB60029C91B /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -69,13 +98,11 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				F5D43A002DE6F68300B4C0FA /* Fonts */,
-				F5D43ACE2DED7FFD00B4C0FA /* App */,
-				F5D43AE72DED803F00B4C0FA /* Core */,
-				F5D43B082DED805200B4C0FA /* Models */,
-				F5D43B142DED806A00B4C0FA /* Views */,
-				F5D43B262DED80DC00B4C0FA /* Storyboards */,
-				F5D43B292DED816A00B4C0FA /* Resources */,
+				D74AD54C2DEEFD0C00B12D2D /* Resources */,
+				D7E7818F2DEF40450029C91B /* Storyboard */,
+				D7E781902DEF405E0029C91B /* Screen */,
+				D7E781932DEF40870029C91B /* Core */,
+				D7E781982DEF40AC0029C91B /* App */,
 			);
 			name = "Space Maze";
 			productName = Project26;
@@ -90,7 +117,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 0800;
-				LastUpgradeCheck = 1630;
+				LastUpgradeCheck = 1640;
 				ORGANIZATIONNAME = "ADA Team";
 				TargetAttributes = {
 					517347901D67436F008DBF2B = {
@@ -111,6 +138,12 @@
 			mainGroup = 517347881D67436F008DBF2B;
 			productRefGroup = 517347881D67436F008DBF2B;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = D7E781F22DEF5DB60029C91B /* Products */;
+					ProjectRef = D74AD54D2DEEFD0C00B12D2D /* Space Maze.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				517347901D67436F008DBF2B /* Space Maze */,
@@ -123,7 +156,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F5D43ACD2DED7FED00B4C0FA /* folder.txt in Resources */,
+				D74AD55B2DEEFD0C00B12D2D /* README.md in Resources */,
+				D74AD55C2DEEFD0C00B12D2D /* bgm_space.mp3 in Resources */,
+				D74AD55D2DEEFD0C00B12D2D /* sfx_powerup.mp3 in Resources */,
+				D74AD55E2DEEFD0C00B12D2D /* sfx_finish.mp3 in Resources */,
+				D74AD55F2DEEFD0C00B12D2D /* sfx_death.mp3 in Resources */,
+				D74AD5602DEEFD0C00B12D2D /* sfx_collision.mp3 in Resources */,
+				D74AD5612DEEFD0C00B12D2D /* sfx_checkpoint.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -144,6 +183,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -206,6 +246,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -264,7 +305,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 2Q8C3D68K9;
+				DEVELOPMENT_TEAM = 3G4HRWR252;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Space Maze";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
@@ -287,7 +328,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 2Q8C3D68K9;
+				DEVELOPMENT_TEAM = 3G4HRWR252;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Space Maze";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
